@@ -254,7 +254,7 @@
         <div><label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
          <div class="relative"><input type="password" id="login-password" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="••••••••"> <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
          </div>
-        </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-sign-in-alt mr-2"></i> Log Masuk </button>
+        </div><button type="button" onclick="handleLoginSubmit()" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-sign-in-alt mr-2"></i> Log Masuk </button>
        </form>
        <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Belum ada akaun? <a href="#" onclick="navigateTo('register')" class="text-accent-orange hover:underline font-medium">Daftar sekarang</a></p>
       </div>
@@ -287,7 +287,7 @@
             <p class="font-medium">Seller</p>
            </div></label>
          </div>
-        </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-user-plus mr-2"></i> Daftar Sekarang </button>
+        </div><button type="button" onclick="handleRegisterSubmit()" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-user-plus mr-2"></i> Daftar Sekarang </button>
        </form>
        <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Sudah ada akaun? <a href="#" onclick="navigateTo('login')" class="text-accent-orange hover:underline font-medium">Log masuk</a></p>
       </div>
@@ -800,16 +800,84 @@
       }
     }
 
-    function setupFormEventListeners() {
-      // Prevent double-attaching event listeners
-      if (window.formListenersAttached) return;
-      window.formListenersAttached = true;
+    // Direct register handler as backup
+    window.handleRegisterSubmit = async function() {
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const roleInput = document.querySelector('input[name="role"]:checked');
+      const role = roleInput ? roleInput.value : 'buyer';
       
+      if (!name || !email || !password) {
+        showToast('Sila isi semua ruangan', 'warning');
+        return;
+      }
+      
+      console.log('Registering:', { name, email, role });
+      
+      const users = getUsers();
+      console.log('Current users:', users);
+      
+      if (users.find(u => u.email === email)) {
+        showToast('Email sudah didaftarkan', 'error');
+        return;
+      }
+      
+      try {
+        console.log('Saving user to database...');
+        const userId = await saveToFirebase('users', {
+          name,
+          email,
+          password,
+          role,
+          type: 'user',
+          createdAt: new Date().toISOString()
+        });
+        
+        console.log('User saved with ID:', userId);
+        
+        showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
+        navigateTo('login');
+      } catch (error) {
+        console.error('Registration error:', error);
+        showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
+      }
+    };
+
+    // Direct login handler as backup
+    window.handleLoginSubmit = function() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      if (!email || !password) {
+        showToast('Sila isi email dan kata laluan', 'warning');
+        return;
+      }
+      
+      console.log('Login attempt:', email);
+      const users = getUsers();
+      console.log('Available users:', users);
+      
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        currentUser = { name: user.name, email: user.email, role: user.role };
+        localStorage.setItem('sop_user', JSON.stringify(currentUser));
+        updateAuthNav();
+        showToast('Log masuk berjaya!', 'success');
+        navigateTo('home');
+      } else {
+        showToast('Email atau kata laluan tidak sah', 'error');
+      }
+    };
+
+    function setupFormEventListeners() {
       const loginForm = document.getElementById('login-form');
       const registerForm = document.getElementById('register-form');
       const checkoutForm = document.getElementById('checkout-form');
 
-      if (loginForm) {
+      if (loginForm && !loginForm.hasAttribute('data-listener-attached')) {
+        loginForm.setAttribute('data-listener-attached', 'true');
         loginForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const email = document.getElementById('login-email').value;
@@ -833,7 +901,8 @@
         });
       }
 
-      if (registerForm) {
+      if (registerForm && !registerForm.hasAttribute('data-listener-attached')) {
+        registerForm.setAttribute('data-listener-attached', 'true');
         console.log('Register form found, adding event listener');
         registerForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -878,7 +947,8 @@
         console.log('Register form NOT found');
       }
 
-      if (checkoutForm) {
+      if (checkoutForm && !checkoutForm.hasAttribute('data-listener-attached')) {
+        checkoutForm.setAttribute('data-listener-attached', 'true');
         checkoutForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           
