@@ -43,98 +43,6 @@
         }
       }
     }
-    
-    // ==================== FIREBASE SETUP ====================
-    // PENTING: Ganti dengan Firebase config anda sendiri
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    let storageRef = null;
-    let db = null;
-    let firebaseReady = false;
-
-    async function initFirebase() {
-      try {
-        firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
-        db = firebase.database();
-        storageRef = storage.ref();
-        firebaseReady = true;
-        console.log('Firebase initialized successfully');
-        // Load data from Firebase after initialization
-        loadDataFromFirebase();
-      } catch (error) {
-        console.error('Firebase initialization error:', error);
-        showToast('⚠️ Firebase belum dikonfig. Aplikasi terbatas.', 'warning');
-      }
-    }
-
-    // Load all data from Firebase Realtime Database
-    async function loadDataFromFirebase() {
-      try {
-        const snapshot = await db.ref('/').once('value');
-        if (snapshot.exists()) {
-          allData = [];
-          snapshot.forEach((childSnapshot) => {
-            const data = childSnapshot.val();
-            data.id = childSnapshot.key;
-            allData.push(data);
-          });
-          renderUI();
-        }
-      } catch (error) {
-        console.error('Error loading data from Firebase:', error);
-      }
-    }
-
-    // Save data to Firebase
-    async function saveToFirebase(collection, data) {
-      if (!firebaseReady || !db) {
-        throw new Error('Firebase belum siap');
-      }
-      try {
-        const key = db.ref(collection).push().key;
-        const updates = {};
-        updates[`/${collection}/${key}`] = data;
-        await db.ref().update(updates);
-        return key;
-      } catch (error) {
-        console.error('Error saving to Firebase:', error);
-        throw error;
-      }
-    }
-
-    // Update data in Firebase
-    async function updateInFirebase(collection, id, data) {
-      if (!firebaseReady || !db) {
-        throw new Error('Firebase belum siap');
-      }
-      try {
-        await db.ref(`/${collection}/${id}`).update(data);
-      } catch (error) {
-        console.error('Error updating Firebase:', error);
-        throw error;
-      }
-    }
-
-    // Delete data from Firebase
-    async function deleteFromFirebase(collection, id) {
-      if (!firebaseReady || !db) {
-        throw new Error('Firebase belum siap');
-      }
-      try {
-        await db.ref(`/${collection}/${id}`).remove();
-      } catch (error) {
-        console.error('Error deleting from Firebase:', error);
-        throw error;
-      }
-    }
   </script>
   <style>
     * { font-family: 'Poppins', sans-serif; }
@@ -158,48 +66,39 @@
   <style>body { box-sizing: border-box; }</style>
  </head>
  <body class="h-full bg-navy-50 dark:bg-navy-900 text-navy-900 dark:text-white overflow-auto">
-  <div id="app" class="h-full w-full flex flex-col">
-   <!-- Navigation -->
+  <div id="app" class="h-full w-full flex flex-col"><!-- Navigation -->
    <nav id="navbar" class="bg-white dark:bg-navy-800 shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4">
-     <div class="flex justify-between items-center h-16">
-      <!-- Logo -->
+     <div class="flex justify-between items-center h-16"><!-- Logo -->
       <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
-       <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center">
-        <i class="fas fa-store text-white text-lg"></i>
+       <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center"><i class="fas fa-store text-white text-lg"></i>
        </div><span id="nav-title" class="font-bold text-xl text-navy-800 dark:text-white">S.O.P</span>
       </div><!-- Desktop Nav -->
-      <div class="hidden md:flex items-center space-x-6">
-       <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-home mr-1"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-shopping-bag mr-1"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative"> <i class="fas fa-shopping-cart mr-1"></i> Cart <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span> </a> <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-comments mr-1"></i> Chat </a>
+      <div class="hidden md:flex items-center space-x-6"><a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-home mr-1"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-shopping-bag mr-1"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative"> <i class="fas fa-shopping-cart mr-1"></i> Cart <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span> </a> <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-comments mr-1"></i> Chat </a>
        <div id="auth-nav"></div><button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-navy-100 dark:bg-navy-700 text-navy-600 dark:text-yellow-400 hover:bg-navy-200 dark:hover:bg-navy-600 transition-colors"> <i class="fas fa-moon dark:hidden"></i> <i class="fas fa-sun hidden dark:block"></i> </button>
       </div><!-- Mobile Menu Button --> <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-navy-600 dark:text-white"> <i class="fas fa-bars text-xl"></i> </button>
      </div><!-- Mobile Nav -->
      <div id="mobile-menu" class="hidden md:hidden pb-4">
-      <div class="flex flex-col space-y-3">
-       <a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-home mr-2"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-bag mr-2"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-cart mr-2"></i> Cart </a> <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-comments mr-2"></i> Chat </a>
+      <div class="flex flex-col space-y-3"><a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-home mr-2"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-bag mr-2"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-cart mr-2"></i> Cart </a> <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-comments mr-2"></i> Chat </a>
        <div id="auth-nav-mobile"></div>
       </div>
      </div>
     </div>
    </nav><!-- Main Content -->
-   <main class="flex-1 overflow-auto">
-    <!-- HOME PAGE -->
-    <div id="page-home" class="page active">
-     <!-- Hero Banner -->
+   <main class="flex-1 overflow-auto"><!-- HOME PAGE -->
+    <div id="page-home" class="page active"><!-- Hero Banner -->
      <div class="bg-gradient-to-r from-navy-800 via-navy-700 to-navy-600 text-white">
       <div class="max-w-7xl mx-auto px-4 py-12 md:py-20">
        <div class="flex flex-col md:flex-row items-center justify-between">
         <div class="text-center md:text-left mb-8 md:mb-0">
          <h1 id="banner-title" class="text-3xl md:text-5xl font-bold mb-4">Selamat Datang ke S.O.P!</h1>
          <p id="banner-tagline" class="text-lg md:text-xl text-navy-200 mb-6">Platform Jual Beli Komuniti Politeknik Anda</p>
-         <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-          <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg"> <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli </button> <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100"> <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Seller </button>
+         <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"><button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg"> <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli </button> <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100"> <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Seller </button>
          </div>
         </div>
         <div class="w-64 h-64 relative">
          <div class="absolute inset-0 bg-accent-orange/20 rounded-full animate-pulse"></div>
-         <div class="absolute inset-4 bg-white/10 rounded-full flex items-center justify-center">
-          <i class="fas fa-store text-8xl text-white/80"></i>
+         <div class="absolute inset-4 bg-white/10 rounded-full flex items-center justify-center"><i class="fas fa-store text-8xl text-white/80"></i>
          </div>
         </div>
        </div>
@@ -208,22 +107,19 @@
      <div class="max-w-7xl mx-auto px-4 py-12">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
-        <div class="w-14 h-14 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4">
-         <i class="fas fa-hand-holding-dollar text-2xl text-green-600"></i>
+        <div class="w-14 h-14 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4"><i class="fas fa-hand-holding-dollar text-2xl text-green-600"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">COD Sahaja</h3>
         <p class="text-navy-500 dark:text-navy-300 text-sm">Pembayaran secara tunai semasa penyerahan. Selamat dan mudah!</p>
        </div>
        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
-        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4">
-         <i class="fas fa-users text-2xl text-blue-600"></i>
+        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4"><i class="fas fa-users text-2xl text-blue-600"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">Komuniti Politeknik</h3>
         <p class="text-navy-500 dark:text-navy-300 text-sm">Platform eksklusif untuk pelajar, pensyarah dan staf politeknik.</p>
        </div>
        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
-        <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4">
-         <i class="fas fa-comments text-2xl text-accent-orange"></i>
+        <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4"><i class="fas fa-comments text-2xl text-accent-orange"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">Chat Terus</h3>
         <p class="text-navy-500 dark:text-navy-300 text-sm">Berbincang terus dengan penjual untuk urusan yang lebih lancar.</p>
@@ -234,33 +130,27 @@
       <h2 class="text-2xl font-bold mb-6">Kategori Produk</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="categories-grid">
        <div onclick="filterByCategory('Akademik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2">
-         <i class="fas fa-book text-blue-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-book text-blue-600 text-xl"></i>
         </div><span class="text-sm font-medium">Akademik</span>
        </div>
        <div onclick="filterByCategory('Elektronik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-2">
-         <i class="fas fa-laptop text-purple-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-laptop text-purple-600 text-xl"></i>
         </div><span class="text-sm font-medium">Elektronik</span>
        </div>
        <div onclick="filterByCategory('Asrama')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-2">
-         <i class="fas fa-bed text-green-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-bed text-green-600 text-xl"></i>
         </div><span class="text-sm font-medium">Asrama</span>
        </div>
        <div onclick="filterByCategory('Peribadi')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mb-2">
-         <i class="fas fa-tshirt text-pink-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-tshirt text-pink-600 text-xl"></i>
         </div><span class="text-sm font-medium">Peribadi</span>
        </div>
        <div onclick="filterByCategory('Makanan')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-2">
-         <i class="fas fa-cookie-bite text-yellow-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-cookie-bite text-yellow-600 text-xl"></i>
         </div><span class="text-sm font-medium">Makanan</span>
        </div>
        <div onclick="filterByCategory('')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
-         <i class="fas fa-th text-gray-600 dark:text-gray-300 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2"><i class="fas fa-th text-gray-600 dark:text-gray-300 text-xl"></i>
         </div><span class="text-sm font-medium">Semua</span>
        </div>
       </div>
@@ -269,26 +159,21 @@
       <div class="flex justify-between items-center mb-6">
        <h2 class="text-2xl font-bold">Produk Trending</h2><button onclick="navigateTo('products')" class="text-accent-orange hover:text-accent-orangeHover font-medium"> Lihat Semua <i class="fas fa-arrow-right ml-1"></i> </button>
       </div>
-      <div id="trending-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-       <!-- Products loaded dynamically -->
+      <div id="trending-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"><!-- Products loaded dynamically -->
       </div>
      </div>
     </div><!-- PRODUCTS PAGE -->
     <div id="page-products" class="page">
-     <div class="max-w-7xl mx-auto px-4 py-8">
-      <!-- Search & Filter -->
+     <div class="max-w-7xl mx-auto px-4 py-8"><!-- Search & Filter -->
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-4 mb-6 shadow-lg">
        <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1 relative">
-         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400"></i> <input type="text" id="search-input" placeholder="Cari produk..." class="w-full pl-12 pr-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" onkeyup="searchProducts()">
+        <div class="flex-1 relative"><i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400"></i> <input type="text" id="search-input" placeholder="Cari produk..." class="w-full pl-12 pr-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" onkeyup="searchProducts()">
         </div><select id="category-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Semua Kategori</option> <option value="Akademik">📚 Akademik</option> <option value="Elektronik">💻 Elektronik</option> <option value="Asrama">🏠 Asrama</option> <option value="Peribadi">👕 Peribadi</option> <option value="Makanan">🍪 Makanan</option> </select> <select id="sort-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="newest">Terbaru</option> <option value="price-low">Harga: Rendah ke Tinggi</option> <option value="price-high">Harga: Tinggi ke Rendah</option> <option value="rating">Rating Tertinggi</option> </select>
        </div>
       </div><!-- Products Grid -->
-      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-       <!-- Products loaded dynamically -->
+      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"><!-- Products loaded dynamically -->
       </div>
-      <div id="no-products" class="hidden text-center py-12">
-       <i class="fas fa-box-open text-6xl text-navy-300 mb-4"></i>
+      <div id="no-products" class="hidden text-center py-12"><i class="fas fa-box-open text-6xl text-navy-300 mb-4"></i>
        <p class="text-navy-500 dark:text-navy-400">Tiada produk dijumpai</p>
       </div>
      </div>
@@ -296,16 +181,13 @@
     <div id="page-cart" class="page">
      <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-6"><i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya</h1>
-      <div id="cart-items" class="space-y-4 mb-6">
-       <!-- Cart items loaded dynamically -->
+      <div id="cart-items" class="space-y-4 mb-6"><!-- Cart items loaded dynamically -->
       </div>
-      <div id="cart-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg">
-       <i class="fas fa-shopping-cart text-6xl text-navy-300 mb-4"></i>
+      <div id="cart-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg"><i class="fas fa-shopping-cart text-6xl text-navy-300 mb-4"></i>
        <p class="text-navy-500 dark:text-navy-400 mb-4">Troli anda kosong</p><button onclick="navigateTo('products')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl"> Mula Membeli </button>
       </div>
       <div id="cart-summary" class="hidden bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg">
-       <div class="flex justify-between items-center mb-4">
-        <span class="text-lg">Jumlah:</span> <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
+       <div class="flex justify-between items-center mb-4"><span class="text-lg">Jumlah:</span> <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
        </div><button onclick="navigateTo('checkout')" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-truck mr-2"></i> Proceed COD Order </button>
       </div>
      </div>
@@ -314,24 +196,19 @@
      <div class="max-w-2xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Checkout COD</h1>
       <form id="checkout-form" class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg space-y-4">
-       <div>
-        <label class="block text-sm font-medium mb-2" for="cod-name">Nama Penuh</label> <input type="text" id="cod-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Masukkan nama penuh">
+       <div><label class="block text-sm font-medium mb-2" for="cod-name">Nama Penuh</label> <input type="text" id="cod-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Masukkan nama penuh">
        </div>
-       <div>
-        <label class="block text-sm font-medium mb-2" for="cod-phone">No Telefon</label> <input type="tel" id="cod-phone" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 012-3456789">
+       <div><label class="block text-sm font-medium mb-2" for="cod-phone">No Telefon</label> <input type="tel" id="cod-phone" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 012-3456789">
        </div>
-       <div>
-        <label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label> <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: DIT, DKM, DKA">
+       <div><label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label> <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: DIT, DKM, DKA">
        </div>
-       <div>
-        <label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label> <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Pilih lokasi</option> <option value="Cafeteria">☕ Cafeteria</option> <option value="Library">📚 Library</option> <option value="Kolej Kediaman">🏠 Kolej Kediaman</option> <option value="Parking Gate">🚗 Parking Gate</option> <option value="Main Lobby">🏛️ Main Lobby</option> </select>
+       <div><label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label> <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Pilih lokasi</option> <option value="Cafeteria">☕ Cafeteria</option> <option value="Library">📚 Library</option> <option value="Kolej Kediaman">🏠 Kolej Kediaman</option> <option value="Parking Gate">🚗 Parking Gate</option> <option value="Main Lobby">🏛️ Main Lobby</option> </select>
        </div>
        <div id="checkout-summary" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mt-4">
         <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
         <div id="checkout-items" class="text-sm space-y-1 mb-2"></div>
         <div class="border-t border-navy-200 dark:border-navy-600 pt-2 mt-2">
-         <div class="flex justify-between font-bold">
-          <span>Jumlah:</span> <span id="checkout-total" class="text-accent-orange">RM 0.00</span>
+         <div class="flex justify-between font-bold"><span>Jumlah:</span> <span id="checkout-total" class="text-accent-orange">RM 0.00</span>
          </div>
         </div>
        </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold mt-4"> <i class="fas fa-check-circle mr-2"></i> Confirm Order </button>
@@ -341,31 +218,26 @@
     <div id="page-chat" class="page">
      <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-6"><i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej</h1>
-      <div class="flex flex-col md:flex-row gap-4 h-96 md:h-[500px]">
-       <!-- Chat List -->
+      <div class="flex flex-col md:flex-row gap-4 h-96 md:h-[500px]"><!-- Chat List -->
        <div class="w-full md:w-1/3 bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
         <div class="p-4 bg-navy-100 dark:bg-navy-700">
          <h3 class="font-semibold">Perbualan</h3>
         </div>
-        <div id="chat-list" class="overflow-y-auto h-full max-h-80">
-         <!-- Chat contacts loaded dynamically -->
+        <div id="chat-list" class="overflow-y-auto h-full max-h-80"><!-- Chat contacts loaded dynamically -->
         </div>
        </div><!-- Chat Window -->
        <div class="flex-1 bg-white dark:bg-navy-800 rounded-2xl shadow-lg flex flex-col overflow-hidden">
         <div id="chat-header" class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center">
-         <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold mr-3">
-          <i class="fas fa-user"></i>
+         <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold mr-3"><i class="fas fa-user"></i>
          </div><span id="chat-with" class="font-semibold">Pilih perbualan</span>
         </div>
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-navy-50 dark:bg-navy-900">
-         <div class="text-center text-navy-400 py-8">
-          <i class="fas fa-comments text-4xl mb-2"></i>
+         <div class="text-center text-navy-400 py-8"><i class="fas fa-comments text-4xl mb-2"></i>
           <p>Pilih perbualan untuk mula chat</p>
          </div>
         </div>
         <div class="p-4 bg-white dark:bg-navy-800 border-t border-navy-100 dark:border-navy-700">
-         <div class="flex gap-2">
-          <input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-2 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange" onkeypress="if(event.key==='Enter')sendMessage()"> <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors"> <i class="fas fa-paper-plane"></i> </button>
+         <div class="flex gap-2"><input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-2 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange" onkeypress="if(event.key==='Enter')sendMessage()"> <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors"> <i class="fas fa-paper-plane"></i> </button>
          </div>
         </div>
        </div>
@@ -376,20 +248,16 @@
      <div class="max-w-md mx-auto px-4 py-12">
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
        <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
-         <i class="fas fa-user text-white text-2xl"></i>
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-user text-white text-2xl"></i>
         </div>
         <h1 class="text-2xl font-bold">Log Masuk</h1>
         <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Selamat kembali ke S.O.P!</p>
        </div>
        <form id="login-form" class="space-y-4">
-        <div>
-         <label class="block text-sm font-medium mb-2" for="login-email">Email</label> <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
+        <div><label class="block text-sm font-medium mb-2" for="login-email">Email</label> <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
         </div>
-        <div>
-         <label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
-         <div class="relative">
-          <input type="password" id="login-password" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="••••••••"> <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
+        <div><label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
+         <div class="relative"><input type="password" id="login-password" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="••••••••"> <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
          </div>
         </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-sign-in-alt mr-2"></i> Log Masuk </button>
        </form>
@@ -401,35 +269,26 @@
      <div class="max-w-md mx-auto px-4 py-8">
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
        <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
-         <i class="fas fa-user-plus text-white text-2xl"></i>
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-user-plus text-white text-2xl"></i>
         </div>
         <h1 class="text-2xl font-bold">Daftar Akaun</h1>
         <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Sertai komuniti S.O.P hari ini!</p>
        </div>
        <form id="register-form" class="space-y-4">
-        <div>
-         <label class="block text-sm font-medium mb-2" for="reg-name">Nama Penuh</label> <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda">
+        <div><label class="block text-sm font-medium mb-2" for="reg-name">Nama Penuh</label> <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda">
         </div>
-        <div>
-         <label class="block text-sm font-medium mb-2" for="reg-email">Email</label> <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
+        <div><label class="block text-sm font-medium mb-2" for="reg-email">Email</label> <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
         </div>
-        <div>
-         <label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
-         <div class="relative">
-          <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 aksara"> <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
+        <div><label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
+         <div class="relative"><input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 aksara"> <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
          </div>
         </div>
-        <div>
-         <label class="block text-sm font-medium mb-2">Daftar Sebagai</label>
-         <div class="grid grid-cols-2 gap-4">
-          <label class="cursor-pointer"> <input type="radio" name="role" value="buyer" class="hidden peer" checked>
-           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
-            <i class="fas fa-shopping-bag text-2xl mb-2"></i>
+        <div><label class="block text-sm font-medium mb-2">Daftar Sebagai</label>
+         <div class="grid grid-cols-2 gap-4"><label class="cursor-pointer"> <input type="radio" name="role" value="buyer" class="hidden peer" checked>
+           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange"><i class="fas fa-shopping-bag text-2xl mb-2"></i>
             <p class="font-medium">Buyer</p>
            </div></label> <label class="cursor-pointer"> <input type="radio" name="role" value="seller" class="hidden peer">
-           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
-            <i class="fas fa-store text-2xl mb-2"></i>
+           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange"><i class="fas fa-store text-2xl mb-2"></i>
             <p class="font-medium">Seller</p>
            </div></label>
          </div>
@@ -451,8 +310,7 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Jumlah Produk</p>
           <p id="seller-product-count" class="text-2xl font-bold">0</p>
          </div>
-         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-          <i class="fas fa-box text-blue-600"></i>
+         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center"><i class="fas fa-box text-blue-600"></i>
          </div>
         </div>
        </div>
@@ -462,8 +320,7 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Pesanan Aktif</p>
           <p id="seller-order-count" class="text-2xl font-bold">0</p>
          </div>
-         <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-          <i class="fas fa-clipboard-list text-green-600"></i>
+         <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center"><i class="fas fa-clipboard-list text-green-600"></i>
          </div>
         </div>
        </div>
@@ -473,8 +330,7 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Mesej Baru</p>
           <p id="seller-msg-count" class="text-2xl font-bold">0</p>
          </div>
-         <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
-          <i class="fas fa-envelope text-accent-orange"></i>
+         <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center"><i class="fas fa-envelope text-accent-orange"></i>
          </div>
         </div>
        </div>
@@ -484,8 +340,7 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Rating</p>
           <p class="text-2xl font-bold">⭐ 4.8</p>
          </div>
-         <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
-          <i class="fas fa-star text-yellow-600"></i>
+         <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center"><i class="fas fa-star text-yellow-600"></i>
          </div>
         </div>
        </div>
@@ -494,11 +349,9 @@
        <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
         <h2 class="font-semibold">Produk Saya</h2>
        </div>
-       <div id="seller-products" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Seller products loaded dynamically -->
+       <div id="seller-products" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><!-- Seller products loaded dynamically -->
        </div>
-       <div id="seller-no-products" class="hidden p-8 text-center">
-        <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
+       <div id="seller-no-products" class="hidden p-8 text-center"><i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
         <p class="text-navy-500 dark:text-navy-400">Anda belum ada produk. Tambah produk pertama anda!</p>
        </div>
       </div>
@@ -508,14 +361,12 @@
      <div class="max-w-2xl mx-auto px-4 py-8">
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
        <div class="text-center mb-8">
-        <div class="w-24 h-24 bg-gradient-to-br from-navy-600 to-accent-orange rounded-full flex items-center justify-center mx-auto mb-4">
-         <i class="fas fa-user text-white text-4xl"></i>
+        <div class="w-24 h-24 bg-gradient-to-br from-navy-600 to-accent-orange rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-user text-white text-4xl"></i>
         </div>
         <h1 id="profile-name" class="text-2xl font-bold">Nama Pengguna</h1>
         <p id="profile-email" class="text-navy-500 dark:text-navy-400">email@politeknik.edu.my</p><span id="profile-badge" class="inline-block mt-2 px-4 py-1 bg-accent-orange text-white text-sm rounded-full">Buyer</span>
        </div>
-       <div class="space-y-4">
-        <button id="seller-dashboard-btn" onclick="navigateTo('seller')" class="hidden w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard </button> <button onclick="navigateTo('cart')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya </button> <button onclick="navigateTo('chat')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej </button> <button onclick="logout()" class="w-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-300 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-sign-out-alt mr-2"></i> Log Keluar </button>
+       <div class="space-y-4"><button id="seller-dashboard-btn" onclick="navigateTo('seller')" class="hidden w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard </button> <button onclick="navigateTo('cart')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya </button> <button onclick="navigateTo('chat')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej </button> <button onclick="logout()" class="w-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-300 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-sign-out-alt mr-2"></i> Log Keluar </button>
        </div>
       </div>
      </div>
@@ -526,29 +377,103 @@
   </div>
   <script>
     // ==================== FIREBASE SETUP ====================
-    // PENTING: Ganti dengan Firebase config anda sendiri
+    // FIREBASE CONFIG - Replace dengan Firebase credentials anda
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_AUTH_DOMAIN",
       projectId: "YOUR_PROJECT_ID",
       storageBucket: "YOUR_STORAGE_BUCKET",
       messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      appId: "YOUR_APP_ID",
+      databaseURL: "YOUR_DATABASE_URL"
     };
 
     let storageRef = null;
+    let db = null;
     let firebaseReady = false;
 
     async function initFirebase() {
       try {
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
         const storage = firebase.storage();
+        db = firebase.database();
         storageRef = storage.ref();
         firebaseReady = true;
-        console.log('Firebase initialized successfully');
+        console.log('✅ Firebase initialized successfully');
+        // Load data from Firebase after initialization
+        loadDataFromFirebase();
       } catch (error) {
         console.error('Firebase initialization error:', error);
-        showToast('⚠️ Firebase belum dikonfig. Upload gambar tidak tersedia.', 'warning');
+        showToast('⚠️ Firebase belum dikonfig. Periksa konfigurasi Firebase.', 'warning');
+      }
+    }
+
+    // Load all data from Firebase Realtime Database
+    async function loadDataFromFirebase() {
+      if (!db) return;
+      try {
+        const snapshot = await db.ref('/').once('value');
+        allData = [];
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnapshot) => {
+            const collection = childSnapshot.key;
+            const items = childSnapshot.val();
+            if (items && typeof items === 'object') {
+              Object.keys(items).forEach(key => {
+                const item = items[key];
+                item.__firebaseId = key;
+                allData.push(item);
+              });
+            }
+          });
+        }
+        console.log('✅ Data loaded from Firebase:', allData.length, 'items');
+        renderUI();
+      } catch (error) {
+        console.error('Error loading data from Firebase:', error);
+      }
+    }
+
+    // Save data to Firebase
+    async function saveToFirebase(collection, data) {
+      if (!firebaseReady || !db) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const newRef = db.ref(`${collection}`).push();
+        await newRef.set(data);
+        return newRef.key;
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Update data in Firebase
+    async function updateInFirebase(collection, id, data) {
+      if (!firebaseReady || !db) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        await db.ref(`${collection}/${id}`).update(data);
+      } catch (error) {
+        console.error('Error updating Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Delete data from Firebase
+    async function deleteFromFirebase(collection, id) {
+      if (!firebaseReady || !db) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        await db.ref(`${collection}/${id}`).remove();
+      } catch (error) {
+        console.error('Error deleting from Firebase:', error);
+        throw error;
       }
     }
 
@@ -645,6 +570,11 @@
 
     function getOrders() {
       return allData.filter(d => d.type === 'order');
+    }
+
+    // Helper to find item by __firebaseId for updates/deletes
+    function findItemByFirebaseId(firebaseId) {
+      return allData.find(d => d.__firebaseId === firebaseId);
     }
 
     // ==================== NAVIGATION ====================
@@ -765,8 +695,8 @@
         });
         
         allData.push({
-          id: userId,
           type: 'user',
+          __firebaseId: userId,
           name,
           email,
           password,
@@ -953,9 +883,10 @@
       
       try {
         if (existingItem) {
-          await updateInFirebase('cart', existingItem.id, {
+          await updateInFirebase('cart', existingItem.__firebaseId, {
             quantity: (existingItem.quantity || 1) + 1
           });
+          existingItem.quantity = (existingItem.quantity || 1) + 1;
         } else {
           const cartId = await saveToFirebase('cart', {
             type: 'cart',
@@ -966,8 +897,8 @@
           });
           
           allData.push({
-            id: cartId,
             type: 'cart',
+            __firebaseId: cartId,
             cartUserId: currentUser.email,
             cartProductId: productId,
             quantity: 1,
@@ -1040,7 +971,7 @@
     }
 
     async function updateCartQty(cartId, change) {
-      const item = allData.find(d => d.id === cartId);
+      const item = allData.find(d => d.__firebaseId === cartId);
       if (!item) return;
       
       if (!firebaseReady) {
@@ -1052,10 +983,10 @@
         const newQty = (item.quantity || 1) + change;
         if (newQty <= 0) {
           await deleteFromFirebase('cart', cartId);
-          allData = allData.filter(d => d.id !== cartId);
+          allData = allData.filter(d => d.__firebaseId !== cartId);
         } else {
           await updateInFirebase('cart', cartId, { quantity: newQty });
-          const index = allData.findIndex(d => d.id === cartId);
+          const index = allData.findIndex(d => d.__firebaseId === cartId);
           if (index >= 0) {
             allData[index].quantity = newQty;
           }
@@ -1075,7 +1006,7 @@
       
       try {
         await deleteFromFirebase('cart', cartId);
-        allData = allData.filter(d => d.id !== cartId);
+        allData = allData.filter(d => d.__firebaseId !== cartId);
         showToast('Item dibuang dari troli', 'success');
         renderUI();
       } catch (error) {
@@ -1138,8 +1069,8 @@
         });
         
         allData.push({
-          id: orderId,
           type: 'order',
+          __firebaseId: orderId,
           orderId: 'ORD-' + Date.now(),
           orderUserId: currentUser.email,
           customerName: name,
@@ -1152,10 +1083,10 @@
         
         // Clear cart items
         for (const item of cartItems) {
-          await deleteFromFirebase('cart', item.id);
+          await deleteFromFirebase('cart', item.__firebaseId);
         }
         
-        allData = allData.filter(d => !cartItems.find(ci => ci.id === d.id));
+        allData = allData.filter(d => !cartItems.find(ci => ci.__firebaseId === d.__firebaseId));
         
         showModal('Pesanan Berjaya!', `
           <div class="text-center">
@@ -1295,8 +1226,8 @@
         });
         
         allData.push({
-          id: messageId,
           type: 'message',
+          __firebaseId: messageId,
           messageFrom: currentUser.email,
           messageTo: currentChatWith,
           messageText: text,
@@ -1510,7 +1441,7 @@
     // ==================== FIREBASE IMAGE UPLOAD ====================
     async function uploadImageToFirebase(imageData) {
       if (!firebaseReady || !storageRef) {
-        throw new Error('Firebase belum siap. Periksa konfigurasi.');
+        throw new Error('Firebase Storage belum siap. Periksa konfigurasi.');
       }
       
       // Validate file type before upload
@@ -1530,13 +1461,19 @@
       const filename = `${timestamp}_${randomId}.${ext}`;
       const filepath = `products/${filename}`;
       
-      // Upload to Firebase Storage
-      const fileRef = storageRef.child(filepath);
-      const snapshot = await fileRef.put(imageData.file);
-      
-      // Get download URL
-      const downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
+      try {
+        // Upload to Firebase Storage
+        const fileRef = storageRef.child(filepath);
+        const snapshot = await fileRef.put(imageData.file);
+        
+        // Get download URL
+        const downloadUrl = await snapshot.ref.getDownloadURL();
+        console.log('✅ Image uploaded:', downloadUrl);
+        return downloadUrl;
+      } catch (error) {
+        console.error('Firebase Storage upload error:', error);
+        throw new Error('Ralat memuat naik gambar ke Firebase Storage: ' + error.message);
+      }
     }
 
     function handleFiles(files) {
@@ -1633,8 +1570,11 @@
       }
       
       try {
+        const product = allData.find(d => d.__firebaseId === productId);
+        if (!product) return;
+        
         await deleteFromFirebase('products', productId);
-        allData = allData.filter(d => d.id !== productId);
+        allData = allData.filter(d => d.__firebaseId !== productId);
         closeModal();
         showToast('Produk telah dipadam', 'success');
         renderUI();
@@ -1715,5 +1655,5 @@
     initApp();
     updateAuthNav();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d7399b484d414eb',t:'MTc3MjY1NTgyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d73bc93265cb4dc',t:'MTc3MjY1NzI1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
