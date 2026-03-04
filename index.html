@@ -7,9 +7,30 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script><!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getBytes } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+    import { getDatabase, ref as dbRef, set, get, remove, push, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    // Make Firebase modules globally available
+    window.firebase = {
+      initializeApp,
+      getStorage,
+      ref,
+      uploadBytes,
+      getBytes,
+      getDatabase,
+      dbRef,
+      set,
+      get,
+      remove,
+      push,
+      update
+    };
+
+    // Signal when Firebase modules are loaded
+    window.firebaseModulesReady = true;
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -388,20 +409,35 @@
       databaseURL: "YOUR_DATABASE_URL"
     };
 
-    let storageRef = null;
-    let db = null;
+    let storage = null;
+    let database = null;
     let firebaseReady = false;
 
     async function initFirebase() {
       try {
-        if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
+        // Wait for Firebase modules to load
+        if (!window.firebaseModulesReady) {
+          console.warn('Waiting for Firebase modules...');
+          await new Promise(resolve => {
+            const check = setInterval(() => {
+              if (window.firebaseModulesReady) {
+                clearInterval(check);
+                resolve();
+              }
+            }, 100);
+          });
         }
-        const storage = firebase.storage();
-        db = firebase.database();
-        storageRef = storage.ref();
+
+        // Initialize Firebase app
+        const app = window.firebase.initializeApp(firebaseConfig);
+        
+        // Get references to Storage and Database
+        storage = window.firebase.getStorage(app);
+        database = window.firebase.getDatabase(app);
+        
         firebaseReady = true;
         console.log('✅ Firebase initialized successfully');
+        
         // Load data from Firebase after initialization
         loadDataFromFirebase();
       } catch (error) {
@@ -412,10 +448,12 @@
 
     // Load all data from Firebase Realtime Database
     async function loadDataFromFirebase() {
-      if (!db) return;
+      if (!database) return;
       try {
-        const snapshot = await db.ref('/').once('value');
+        const dbRootRef = window.firebase.dbRef(database, '/');
+        const snapshot = await window.firebase.get(dbRootRef);
         allData = [];
+        
         if (snapshot.exists()) {
           snapshot.forEach((childSnapshot) => {
             const collection = childSnapshot.key;
@@ -424,6 +462,7 @@
               Object.keys(items).forEach(key => {
                 const item = items[key];
                 item.__firebaseId = key;
+                item.id = key; // For compatibility
                 allData.push(item);
               });
             }
@@ -438,12 +477,13 @@
 
     // Save data to Firebase
     async function saveToFirebase(collection, data) {
-      if (!firebaseReady || !db) {
+      if (!firebaseReady || !database) {
         throw new Error('Firebase belum siap');
       }
       try {
-        const newRef = db.ref(`${collection}`).push();
-        await newRef.set(data);
+        const collectionRef = window.firebase.dbRef(database, collection);
+        const newRef = window.firebase.push(collectionRef);
+        await window.firebase.set(newRef, data);
         return newRef.key;
       } catch (error) {
         console.error('Error saving to Firebase:', error);
@@ -453,11 +493,12 @@
 
     // Update data in Firebase
     async function updateInFirebase(collection, id, data) {
-      if (!firebaseReady || !db) {
+      if (!firebaseReady || !database) {
         throw new Error('Firebase belum siap');
       }
       try {
-        await db.ref(`${collection}/${id}`).update(data);
+        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
+        await window.firebase.update(itemRef, data);
       } catch (error) {
         console.error('Error updating Firebase:', error);
         throw error;
@@ -466,14 +507,55 @@
 
     // Delete data from Firebase
     async function deleteFromFirebase(collection, id) {
-      if (!firebaseReady || !db) {
+      if (!firebaseReady || !database) {
         throw new Error('Firebase belum siap');
       }
       try {
-        await db.ref(`${collection}/${id}`).remove();
+        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
+        await window.firebase.remove(itemRef);
       } catch (error) {
         console.error('Error deleting from Firebase:', error);
         throw error;
+      }
+    }
+
+    // Upload image to Firebase Storage
+    async function uploadImageToFirebase(imageData) {
+      if (!firebaseReady || !storage) {
+        throw new Error('Firebase Storage belum siap. Periksa konfigurasi.');
+      }
+      
+      // Validate file type before upload
+      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
+        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      }
+      
+      // Validate file size (5MB)
+      if (imageData.file.size > 5 * 1024 * 1024) {
+        throw new Error('Gambar terlalu besar (> 5MB).');
+      }
+      
+      // Generate unique filename: timestamp + random ID
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const ext = imageData.file.name.split('.').pop();
+      const filename = `${timestamp}_${randomId}.${ext}`;
+      const filepath = `products/${filename}`;
+      
+      try {
+        // Upload to Firebase Storage
+        const fileRef = window.firebase.ref(storage, filepath);
+        const snapshot = await window.firebase.uploadBytes(fileRef, imageData.file);
+        
+        // Get download URL - use REST API as modular SDK doesn't have getDownloadURL
+        const projectId = firebaseConfig.projectId;
+        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(filepath)}?alt=media`;
+        
+        console.log('✅ Image uploaded:', downloadUrl);
+        return downloadUrl;
+      } catch (error) {
+        console.error('Firebase Storage upload error:', error);
+        throw new Error('Ralat memuat naik gambar ke Firebase Storage: ' + error.message);
       }
     }
 
@@ -1438,45 +1520,7 @@
       });
     }
 
-    // ==================== FIREBASE IMAGE UPLOAD ====================
-    async function uploadImageToFirebase(imageData) {
-      if (!firebaseReady || !storageRef) {
-        throw new Error('Firebase Storage belum siap. Periksa konfigurasi.');
-      }
-      
-      // Validate file type before upload
-      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
-        throw new Error('Format tidak sah. Hanya JPG/PNG.');
-      }
-      
-      // Validate file size (5MB)
-      if (imageData.file.size > 5 * 1024 * 1024) {
-        throw new Error('Gambar terlalu besar (> 5MB).');
-      }
-      
-      // Generate unique filename: timestamp + random ID
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 8);
-      const ext = imageData.file.name.split('.').pop();
-      const filename = `${timestamp}_${randomId}.${ext}`;
-      const filepath = `products/${filename}`;
-      
-      try {
-        // Upload to Firebase Storage
-        const fileRef = storageRef.child(filepath);
-        const snapshot = await fileRef.put(imageData.file);
-        
-        // Get download URL
-        const downloadUrl = await snapshot.ref.getDownloadURL();
-        console.log('✅ Image uploaded:', downloadUrl);
-        return downloadUrl;
-      } catch (error) {
-        console.error('Firebase Storage upload error:', error);
-        throw new Error('Ralat memuat naik gambar ke Firebase Storage: ' + error.message);
-      }
-    }
 
-    function handleFiles(files) {
       const statusEl = document.getElementById('upload-status');
       
       if (files.length === 0) return;
@@ -1655,5 +1699,5 @@
     initApp();
     updateAuthNav();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d73bc93265cb4dc',t:'MTc3MjY1NzI1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d73c46051dbb4dc',t:'MTc3MjY1NzU3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
