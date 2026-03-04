@@ -79,7 +79,8 @@
       </div>
      </div>
     </div>
-   </nav><!-- Main Content -->
+   </nav>
+   <div id="firebase-status" style="background: #ff9800; color: white; padding: 8px; text-align: center; font-size: 14px;">Loading Firebase...</div><!-- Main Content -->
    <main class="flex-1 overflow-auto"><!-- HOME PAGE -->
     <div id="page-home" class="page active"><!-- Hero Banner -->
      <div class="bg-gradient-to-r from-navy-800 via-navy-700 to-navy-600 text-white">
@@ -413,11 +414,25 @@
 
     // Initialize Firebase
     async function initFirebase() {
+      const statusEl = document.getElementById('firebase-status');
       try {
+        statusEl.textContent = 'Connecting to Firebase...';
+        statusEl.style.background = '#2196F3';
+        
         app = window.firebaseSDK.initializeApp(firebaseConfig);
+        statusEl.textContent = 'Loading data...';
+        statusEl.style.background = '#2196F3';
+        
         storage = window.firebaseSDK.getStorage(app);
         database = window.firebaseSDK.getDatabase(app);
+        
+        // Wait a bit for database to be ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         firebaseReady = true;
+        statusEl.textContent = '✓ Connected to Firebase';
+        statusEl.style.background = '#4CAF50';
+        statusEl.style.display = 'none';
         console.log('Firebase initialized successfully');
         
         // Load data from Firebase
@@ -427,7 +442,9 @@
         setupRealtimeListeners();
       } catch (error) {
         console.error('Firebase initialization error:', error);
-        showToast('Firebase error: ' + error.message, 'error');
+        statusEl.textContent = '✗ Firebase Error: ' + error.message;
+        statusEl.style.background = '#f44336';
+        alert('Firebase Error: ' + error.message + '\n\nMake sure Realtime Database is enabled in Firebase Console!');
       }
     }
 
@@ -697,6 +714,11 @@
 
     // Registration function
     window.handleRegisterSubmit = async function() {
+      if (!firebaseReady) {
+        alert('Sila tunggu... Firebase sedang initialize!');
+        return;
+      }
+      
       const name = document.getElementById('reg-name').value;
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
