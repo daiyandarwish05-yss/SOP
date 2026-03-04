@@ -370,205 +370,259 @@
    <div id="toast-container"></div><!-- Modal Container -->
    <div id="modal-container"></div>
   </div>
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+    import { getDatabase, ref as dbRef, set, get, remove, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    window.firebaseSDK = {
+      initializeApp,
+      getStorage,
+      ref,
+      uploadBytes,
+      getDatabase,
+      dbRef,
+      set,
+      get,
+      remove,
+      push,
+      update,
+      onValue
+    };
+  </script>
+  
   <script>
-    // ==================== LOCAL STORAGE DATABASE (GitHub Pages Compatible) ====================
-    const DB_KEY = 'sop_database';
-    const DEMO_MODE = true; // Works without Firebase
-    
-    let storage = null;
-    let database = null;
-    let firebaseReady = true; // Always true for localStorage mode
-    let dataStore = {
-      users: [],
-      products: [],
-      cart: [],
-      messages: [],
-      orders: []
+    // ==================== FIREBASE CONFIGURATION ====================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzlzxfNLpbmJOUglPbJbq4YRCz5ApvKwQ",
+      authDomain: "sop-shop-dabcd.firebaseapp.com",
+      projectId: "sop-shop-dabcd",
+      storageBucket: "sop-shop-dabcd.firebasestorage.app",
+      messagingSenderId: "1090060711905",
+      appId: "1:1090060711905:web:dd5677753caebece99c4a0",
+      databaseURL: "https://sop-shop-dabcd-default-rtdb.firebaseio.com"
     };
 
-    // Initialize localStorage database
-    function initDatabase() {
-      const stored = localStorage.getItem(DB_KEY);
-      if (stored) {
-        dataStore = JSON.parse(stored);
-      } else {
-        // Load demo data
-        loadDemoData();
-      }
-      console.log('Database initialized with', getProducts().length, 'products');
-      renderUI();
-    }
+    let app = null;
+    let storage = null;
+    let database = null;
+    let firebaseReady = false;
+    let allData = [];
 
-    // Save to localStorage
-    function saveToStorage() {
-      localStorage.setItem(DB_KEY, JSON.stringify(dataStore));
-    }
-
-    // Demo data
-    function loadDemoData() {
-      dataStore = {
-        users: [],
-        products: [
-          {
-            id: 'prod_1',
-            type: 'product',
-            productName: 'Buku Kalkulus Tingk 2',
-            price: 25.00,
-            category: 'Akademik',
-            description: 'Buku teks kalkulus untuk semester 2',
-            image_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-            sellerId: 'seller@demo.com',
-            sellerName: 'Ahmad Seller',
-            rating: 5,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'prod_2',
-            type: 'product',
-            productName: 'Laptop Dell Inspiron',
-            price: 1200.00,
-            category: 'Elektronik',
-            description: 'Laptop Condition 9/10, still good',
-            image_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
-            sellerId: 'seller@demo.com',
-            sellerName: 'Ahmad Seller',
-            rating: 4,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'prod_3',
-            type: 'product',
-            productName: 'Bantal + Selimut Asrama',
-            price: 45.00,
-            category: 'Asrama',
-            description: 'Set bantal dan selimut baru',
-            image_url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400',
-            sellerId: 'seller@demo.com',
-            sellerName: 'Ahmad Seller',
-            rating: 5,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'prod_4',
-            type: 'product',
-            productName: 'T-Shirt Politeknik',
-            price: 20.00,
-            category: 'Peribadi',
-            description: 'Baju jersi politeknik saiz M',
-            image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
-            sellerId: 'seller@demo.com',
-            sellerName: 'Ahmad Seller',
-            rating: 4,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'prod_5',
-            type: 'product',
-            productName: 'Nasi Lemak Pack',
-            price: 8.00,
-            category: 'Makanan',
-            description: 'Nasi lemak sedap dengan sambal',
-            image_url: 'https://images.unsplash.com/photo-1628288793946-3f76c3a8a4b7?w=400',
-            sellerId: 'seller@demo.com',
-            sellerName: 'Ahmad Seller',
-            rating: 5,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'prod_6',
-            type: 'product',
-            productName: 'Kalkulator Scientific',
-            price: 55.00,
-            category: 'Akademik',
-            description: 'Kalkulator Casio fx-570MS',
-            image_url: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=400',
-            sellerId: 'seller@demo.com',
-            sellerName: 'Ahmad Seller',
-            rating: 5,
-            createdAt: new Date().toISOString()
-          }
-        ],
-        cart: [],
-        messages: [],
-        orders: []
-      };
-      saveToStorage();
-      syncAllData();
-    }
-
-    // Simulated Firebase-like functions using localStorage
-    function saveToLocal(collection, data) {
-      const id = collection + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      data.__firebaseId = id;
-      data.id = id;
-      dataStore[collection].push(data);
-      saveToStorage();
-      syncAllData();
-      return id;
-    }
-
-    function updateInLocal(collection, id, data) {
-      const index = dataStore[collection].findIndex(item => item.id === id || item.__firebaseId === id);
-      if (index >= 0) {
-        dataStore[collection][index] = { ...dataStore[collection][index], ...data };
-        saveToStorage();
-        syncAllData();
-      }
-    }
-
-    function deleteFromLocal(collection, id) {
-      dataStore[collection] = dataStore[collection].filter(item => item.id !== id && item.__firebaseId !== id);
-      saveToStorage();
-      syncAllData();
-    }
-
-    // Backward compatibility functions
+    // Initialize Firebase
     async function initFirebase() {
-      initDatabase();
+      try {
+        app = window.firebaseSDK.initializeApp(firebaseConfig);
+        storage = window.firebaseSDK.getStorage(app);
+        database = window.firebaseSDK.getDatabase(app);
+        firebaseReady = true;
+        console.log('Firebase initialized successfully');
+        
+        // Load data from Firebase
+        await loadDataFromFirebase();
+        
+        // Set up real-time listeners
+        setupRealtimeListeners();
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showToast('Firebase error: ' + error.message, 'error');
+      }
     }
 
+    // Load all data from Firebase
     async function loadDataFromFirebase() {
-      // Already loaded in initDatabase
+      if (!database) return;
+      try {
+        allData = [];
+        
+        // Load users
+        const usersRef = window.firebaseSDK.dbRef(database, 'users');
+        const usersSnap = await window.firebaseSDK.get(usersRef);
+        if (usersSnap.exists()) {
+          usersSnap.forEach(child => {
+            const user = child.val();
+            user.__firebaseId = child.key;
+            user.id = child.key;
+            allData.push(user);
+          });
+        }
+        
+        // Load products
+        const productsRef = window.firebaseSDK.dbRef(database, 'products');
+        const productsSnap = await window.firebaseSDK.get(productsRef);
+        if (productsSnap.exists()) {
+          productsSnap.forEach(child => {
+            const product = child.val();
+            product.__firebaseId = child.key;
+            product.id = child.key;
+            allData.push(product);
+          });
+        }
+        
+        // Load cart
+        const cartRef = window.firebaseSDK.dbRef(database, 'cart');
+        const cartSnap = await window.firebaseSDK.get(cartRef);
+        if (cartSnap.exists()) {
+          cartSnap.forEach(child => {
+            const item = child.val();
+            item.__firebaseId = child.key;
+            item.id = child.key;
+            allData.push(item);
+          });
+        }
+        
+        // Load messages
+        const messagesRef = window.firebaseSDK.dbRef(database, 'messages');
+        const messagesSnap = await window.firebaseSDK.get(messagesRef);
+        if (messagesSnap.exists()) {
+          messagesSnap.forEach(child => {
+            const msg = child.val();
+            msg.__firebaseId = child.key;
+            msg.id = child.key;
+            allData.push(msg);
+          });
+        }
+        
+        // Load orders
+        const ordersRef = window.firebaseSDK.dbRef(database, 'orders');
+        const ordersSnap = await window.firebaseSDK.get(ordersRef);
+        if (ordersSnap.exists()) {
+          ordersSnap.forEach(child => {
+            const order = child.val();
+            order.__firebaseId = child.key;
+            order.id = child.key;
+            allData.push(order);
+          });
+        }
+        
+        console.log('Data loaded from Firebase:', allData.length, 'items');
+        renderUI();
+      } catch (error) {
+        console.error('Error loading data from Firebase:', error);
+      }
     }
 
+    // Real-time listeners for live updates
+    function setupRealtimeListeners() {
+      if (!database) return;
+      
+      // Listen for users changes
+      const usersRef = window.firebaseSDK.dbRef(database, 'users');
+      window.firebaseSDK.onValue(usersRef, (snapshot) => {
+        if (snapshot.exists()) {
+          // Remove old users, add new ones
+          allData = allData.filter(d => d.type !== 'user');
+          snapshot.forEach(child => {
+            const user = child.val();
+            user.__firebaseId = child.key;
+            user.id = child.key;
+            allData.push(user);
+          });
+          renderUI();
+        }
+      });
+
+      // Listen for products changes
+      const productsRef = window.firebaseSDK.dbRef(database, 'products');
+      window.firebaseSDK.onValue(productsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          allData = allData.filter(d => d.type !== 'product');
+          snapshot.forEach(child => {
+            const product = child.val();
+            product.__firebaseId = child.key;
+            product.id = child.key;
+            allData.push(product);
+          });
+          renderUI();
+        }
+      });
+    }
+
+    // Save data to Firebase
     async function saveToFirebase(collection, data) {
-      return saveToLocal(collection, data);
+      if (!firebaseReady || !database) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const collectionRef = window.firebaseSDK.dbRef(database, collection);
+        const newRef = window.firebaseSDK.push(collectionRef);
+        await window.firebaseSDK.set(newRef, data);
+        console.log('Saved to Firebase:', collection, data);
+        return newRef.key;
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        throw error;
+      }
     }
 
+    // Update data in Firebase
     async function updateInFirebase(collection, id, data) {
-      updateInLocal(collection, id, data);
+      if (!firebaseReady || !database) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const itemRef = window.firebaseSDK.dbRef(database, `${collection}/${id}`);
+        await window.firebaseSDK.update(itemRef, data);
+      } catch (error) {
+        console.error('Error updating Firebase:', error);
+        throw error;
+      }
     }
 
+    // Delete data from Firebase
     async function deleteFromFirebase(collection, id) {
-      deleteFromLocal(collection, id);
+      if (!firebaseReady || !database) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const itemRef = window.firebaseSDK.dbRef(database, `${collection}/${id}`);
+        await window.firebaseSDK.remove(itemRef);
+      } catch (error) {
+        console.error('Error deleting from Firebase:', error);
+        throw error;
+      }
     }
 
+    // Upload image to Firebase Storage
     async function uploadImageToFirebase(imageData) {
-      // Return the preview URL for localStorage demo
-      return imageData.preview;
+      if (!firebaseReady || !storage) {
+        throw new Error('Firebase Storage belum siap');
+      }
+      
+      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
+        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      }
+      
+      if (imageData.file.size > 5 * 1024 * 1024) {
+        throw new Error('Gambar terlalu besar (> 5MB).');
+      }
+      
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const ext = imageData.file.name.split('.').pop();
+      const filename = `${timestamp}_${randomId}.${ext}`;
+      const filepath = `products/${filename}`;
+      
+      try {
+        const fileRef = window.firebaseSDK.ref(storage, filepath);
+        await window.firebaseSDK.uploadBytes(fileRef, imageData.file);
+        
+        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(filepath)}?alt=media`;
+        
+        console.log('Image uploaded:', downloadUrl);
+        return downloadUrl;
+      } catch (error) {
+        console.error('Firebase Storage upload error:', error);
+        throw error;
+      }
     }
 
     // ==================== APP STATE ====================
     let currentUser = null;
     let currentChatWith = null;
     let currentPage = 'home';
-    
-    // Getter for allData (backward compatibility)
-    function getAllData() {
-      return [
-        ...(dataStore.users || []),
-        ...(dataStore.products || []),
-        ...(dataStore.cart || []),
-        ...(dataStore.messages || []),
-        ...(dataStore.orders || [])
-      ];
-    }
-
-    // Sync allData for backward compatibility
-    let allData = [];
-    function syncAllData() {
-      allData = getAllData();
-    }
     
     const defaultConfig = {
       site_title: 'S.O.P',
@@ -640,31 +694,31 @@
 
     // ==================== DATA HELPERS ====================
     function getUsers() {
-      return dataStore.users || [];
+      return allData.filter(d => d.type === 'user');
     }
 
     function getProducts() {
-      return dataStore.products || [];
+      return allData.filter(d => d.type === 'product');
     }
 
     function getCartItems() {
       if (!currentUser) return [];
-      return (dataStore.cart || []).filter(d => d.cartUserId === currentUser.email);
+      return allData.filter(d => d.type === 'cart' && d.cartUserId === currentUser.email);
     }
 
     function getMessages() {
       if (!currentUser) return [];
-      return (dataStore.messages || []).filter(d => 
-        d.messageFrom === currentUser.email || d.messageTo === currentUser.email);
+      return allData.filter(d => d.type === 'message' && 
+        (d.messageFrom === currentUser.email || d.messageTo === currentUser.email));
     }
 
     function getOrders() {
-      return dataStore.orders || [];
+      return allData.filter(d => d.type === 'order');
     }
 
     // Helper to find item by __firebaseId for updates/deletes
     function findItemByFirebaseId(firebaseId) {
-      return (dataStore.users || dataStore.products || dataStore.cart || dataStore.messages || dataStore.orders || []).find(d => d.__firebaseId === firebaseId);
+      return allData.find(d => d.__firebaseId === firebaseId);
     }
 
     // ==================== NAVIGATION ====================
@@ -682,6 +736,11 @@
         if (page === 'chat') renderChatList();
         if (page === 'seller') renderSellerDashboard();
         if (page === 'profile') renderProfile();
+        
+        // Setup form listeners when navigating to auth pages
+        if (page === 'login' || page === 'register' || page === 'checkout') {
+          setupFormEventListeners();
+        }
       }
       
       // Close mobile menu
@@ -742,6 +801,10 @@
     }
 
     function setupFormEventListeners() {
+      // Prevent double-attaching event listeners
+      if (window.formListenersAttached) return;
+      window.formListenersAttached = true;
+      
       const loginForm = document.getElementById('login-form');
       const registerForm = document.getElementById('register-form');
       const checkoutForm = document.getElementById('checkout-form');
@@ -752,7 +815,10 @@
           const email = document.getElementById('login-email').value;
           const password = document.getElementById('login-password').value;
           
+          console.log('Login attempt:', email);
           const users = getUsers();
+          console.log('Available users:', users);
+          
           const user = users.find(u => u.email === email && u.password === password);
           
           if (user) {
@@ -768,6 +834,7 @@
       }
 
       if (registerForm) {
+        console.log('Register form found, adding event listener');
         registerForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const name = document.getElementById('reg-name').value;
@@ -776,18 +843,18 @@
           const roleInput = document.querySelector('input[name="role"]:checked');
           const role = roleInput ? roleInput.value : 'buyer';
           
+          console.log('Registering:', { name, email, role });
+          
           const users = getUsers();
+          console.log('Current users:', users);
+          
           if (users.find(u => u.email === email)) {
             showToast('Email sudah didaftarkan', 'error');
             return;
           }
           
-          if (!firebaseReady) {
-            showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
-            return;
-          }
-          
           try {
+            console.log('Saving user to database...');
             const userId = await saveToFirebase('users', {
               name,
               email,
@@ -797,15 +864,8 @@
               createdAt: new Date().toISOString()
             });
             
-            allData.push({
-              type: 'user',
-              __firebaseId: userId,
-              name,
-              email,
-              password,
-              role,
-              createdAt: new Date().toISOString()
-            });
+            console.log('User saved with ID:', userId);
+            console.log('Updated users:', getUsers());
             
             showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
             navigateTo('login');
@@ -814,6 +874,8 @@
             showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
           }
         });
+      } else {
+        console.log('Register form NOT found');
       }
 
       if (checkoutForm) {
