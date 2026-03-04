@@ -587,8 +587,14 @@
 
     // Upload image to Firebase Storage
     async function uploadImageToFirebase(imageData) {
-      if (!firebaseReady || !storage) {
-        throw new Error('Firebase Storage belum siap');
+      if (!firebaseReady) {
+        // Fallback: use preview URL directly when Firebase is not ready
+        return imageData.preview;
+      }
+      
+      if (!storage) {
+        console.warn('Storage not initialized, using preview URL');
+        return imageData.preview;
       }
       
       if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
@@ -609,90 +615,20 @@
         const fileRef = window.firebaseSDK.ref(storage, filepath);
         await window.firebaseSDK.uploadBytes(fileRef, imageData.file);
         
+        // Use the correct Firebase Storage URL format
+        const bucketName = firebaseConfig.storageBucket.replace('.firebasestorage.app', '').replace('.appspot.com', '');
         const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(filepath)}?alt=media`;
         
         console.log('Image uploaded:', downloadUrl);
         return downloadUrl;
       } catch (error) {
-        console.error('Firebase Storage upload error:', error);
-        throw error;
+        console.error('Image upload failed:', error);
+        // Fallback to using the preview URL (base64)
+        return imageData.preview;
       }
     }
 
-    // ==================== APP STATE ====================
-    let currentUser = null;
-    let currentChatWith = null;
-    let currentPage = 'home';
-    
-    const defaultConfig = {
-      site_title: 'S.O.P',
-      tagline: 'Platform Jual Beli Komuniti Politeknik Anda',
-      banner_text: 'Selamat Datang ke S.O.P!',
-      primary_color: '#102a43',
-      secondary_color: '#ffffff',
-      accent_color: '#f97316',
-      text_color: '#102a43',
-      font_family: 'Poppins'
-    };
-
-    // ==================== SDK INITIALIZATION ====================
-    async function initApp() {
-      // Initialize Firebase first
-      initFirebase();
-      
-      // Initialize Element SDK
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange: async (config) => {
-            document.getElementById('nav-title').textContent = config.site_title || defaultConfig.site_title;
-            document.getElementById('banner-title').textContent = config.banner_text || defaultConfig.banner_text;
-            document.getElementById('banner-tagline').textContent = config.tagline || defaultConfig.tagline;
-          },
-          mapToCapabilities: (config) => ({
-            recolorables: [
-              {
-                get: () => config.primary_color || defaultConfig.primary_color,
-                set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
-              },
-              {
-                get: () => config.secondary_color || defaultConfig.secondary_color,
-                set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
-              },
-              {
-                get: () => config.accent_color || defaultConfig.accent_color,
-                set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
-              }
-            ],
-            borderables: [],
-            fontEditable: {
-              get: () => config.font_family || defaultConfig.font_family,
-              set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
-            },
-            fontSizeable: undefined
-          }),
-          mapToEditPanelValues: (config) => new Map([
-            ['site_title', config.site_title || defaultConfig.site_title],
-            ['tagline', config.tagline || defaultConfig.tagline],
-            ['banner_text', config.banner_text || defaultConfig.banner_text]
-          ])
-        });
-      }
-
-      // Check for saved user session
-      const savedUser = localStorage.getItem('sop_user');
-      if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        updateAuthNav();
-      }
-
-      // Setup form event listeners
-      setupFormEventListeners();
-      
-      renderUI();
-    }
-
-    // ==================== DATA HELPERS ====================
+    // Data helper functions
     function getUsers() {
       return allData.filter(d => d.type === 'user');
     }
@@ -706,101 +642,60 @@
       return allData.filter(d => d.type === 'cart' && d.cartUserId === currentUser.email);
     }
 
-    function getMessages() {
-      if (!currentUser) return [];
-      return allData.filter(d => d.type === 'message' && 
-        (d.messageFrom === currentUser.email || d.messageTo === currentUser.email));
-    }
+    let currentUser = null;
 
-    function getOrders() {
-      return allData.filter(d => d.type === 'order');
-    }
-
-    // Helper to find item by __firebaseId for updates/deletes
-    function findItemByFirebaseId(firebaseId) {
-      return allData.find(d => d.__firebaseId === firebaseId);
-    }
-
-    // ==================== NAVIGATION ====================
+    // Navigation
     function navigateTo(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const targetPage = document.getElementById(`page-${page}`);
+      const targetPage = document.getElementById('page-' + page);
       if (targetPage) {
         targetPage.classList.add('active');
-        currentPage = page;
-        
-        // Page-specific rendering
-        if (page === 'products') renderProducts();
-        if (page === 'cart') renderCart();
-        if (page === 'checkout') renderCheckout();
-        if (page === 'chat') renderChatList();
-        if (page === 'seller') renderSellerDashboard();
-        if (page === 'profile') renderProfile();
-        
-        // Setup form listeners when navigating to auth pages
-        if (page === 'login' || page === 'register' || page === 'checkout') {
-          setupFormEventListeners();
-        }
+        window.scrollTo(0, 0);
       }
-      
-      // Close mobile menu
-      const mobileMenu = document.getElementById('mobile-menu');
-      if (mobileMenu) mobileMenu.classList.add('hidden');
-      window.scrollTo(0, 0);
     }
 
-    function toggleMobileMenu() {
-      const mobileMenu = document.getElementById('mobile-menu');
-      if (mobileMenu) mobileMenu.classList.toggle('hidden');
+    // Toast notification
+    function showToast(message, type) {
+      const container = document.getElementById('toast-container');
+      const colors = { success: 'bg-green-500', error: 'bg-red-500', warning: 'bg-yellow-500' };
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + (colors[type] || colors.success) + ' text-white';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
 
-    // ==================== DARK MODE ====================
-    function toggleDarkMode() {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('sop_dark', document.documentElement.classList.contains('dark'));
-    }
-
-    // Load dark mode preference
-    if (localStorage.getItem('sop_dark') === 'true') {
-      document.documentElement.classList.add('dark');
-    }
-
-    // ==================== AUTH ====================
+    // Update auth navigation
     function updateAuthNav() {
       const authNav = document.getElementById('auth-nav');
-      const authNavMobile = document.getElementById('auth-nav-mobile');
-      
-      if (!authNav || !authNavMobile) return;
+      if (!authNav) return;
       
       if (currentUser) {
-        authNav.innerHTML = `
-          <a href="#" onclick="navigateTo('profile')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors flex items-center">
-            <div class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white text-sm font-bold mr-2">
-              ${currentUser.name.charAt(0).toUpperCase()}
-            </div>
-            ${currentUser.name.split(' ')[0]}
-          </a>
-        `;
-        authNavMobile.innerHTML = `
-          <a href="#" onclick="navigateTo('profile')" class="text-navy-600 dark:text-navy-200 py-2">
-            <i class="fas fa-user mr-2"></i> ${currentUser.name}
-          </a>
-        `;
+        authNav.innerHTML = '<a href="#" onclick="navigateTo(\'profile\')" class="text-navy-600 dark:text-navy-200">' + currentUser.name + '</a>';
       } else {
-        authNav.innerHTML = `
-          <a href="#" onclick="navigateTo('login')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors">
-            <i class="fas fa-sign-in-alt mr-1"></i> Login
-          </a>
-        `;
-        authNavMobile.innerHTML = `
-          <a href="#" onclick="navigateTo('login')" class="text-navy-600 dark:text-navy-200 py-2">
-            <i class="fas fa-sign-in-alt mr-2"></i> Login
-          </a>
-        `;
+        authNav.innerHTML = '<a href="#" onclick="navigateTo(\'login\')" class="text-navy-600 dark:text-navy-200">Login</a>';
       }
     }
 
-    // Direct register handler as backup
+    // Render UI (basic)
+    function renderUI() {
+      // Render products
+      const productsGrid = document.getElementById('products-grid');
+      if (productsGrid) {
+        const products = getProducts();
+        productsGrid.innerHTML = products.map(p => '<div class="bg-white p-4 rounded shadow">' + p.productName + ' - RM' + p.price + '</div>').join('');
+      }
+      
+      // Update cart badge
+      const cartBadge = document.getElementById('cart-badge');
+      if (cartBadge) {
+        const count = getCartItems().length;
+        cartBadge.textContent = count;
+        cartBadge.classList.toggle('hidden', count === 0);
+      }
+    }
+
+    // Registration function
     window.handleRegisterSubmit = async function() {
       const name = document.getElementById('reg-name').value;
       const email = document.getElementById('reg-email').value;
@@ -809,23 +704,12 @@
       const role = roleInput ? roleInput.value : 'buyer';
       
       if (!name || !email || !password) {
-        showToast('Sila isi semua ruangan', 'warning');
-        return;
-      }
-      
-      console.log('Registering:', { name, email, role });
-      
-      const users = getUsers();
-      console.log('Current users:', users);
-      
-      if (users.find(u => u.email === email)) {
-        showToast('Email sudah didaftarkan', 'error');
+        alert('Sila isi semua ruangan');
         return;
       }
       
       try {
-        console.log('Saving user to database...');
-        const userId = await saveToFirebase('users', {
+        await saveToFirebase('users', {
           name,
           email,
           password,
@@ -834,1051 +718,33 @@
           createdAt: new Date().toISOString()
         });
         
-        console.log('User saved with ID:', userId);
-        
-        showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
+        alert('Pendaftaran berjaya! Sila log masuk.');
         navigateTo('login');
       } catch (error) {
-        console.error('Registration error:', error);
-        showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
+        alert('Ralat: ' + error.message);
       }
     };
 
-    // Direct login handler as backup
+    // Login function
     window.handleLoginSubmit = function() {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
       
-      if (!email || !password) {
-        showToast('Sila isi email dan kata laluan', 'warning');
-        return;
-      }
-      
-      console.log('Login attempt:', email);
       const users = getUsers();
-      console.log('Available users:', users);
-      
       const user = users.find(u => u.email === email && u.password === password);
       
       if (user) {
         currentUser = { name: user.name, email: user.email, role: user.role };
         localStorage.setItem('sop_user', JSON.stringify(currentUser));
         updateAuthNav();
-        showToast('Log masuk berjaya!', 'success');
         navigateTo('home');
       } else {
-        showToast('Email atau kata laluan tidak sah', 'error');
+        alert('Email atau kata laluan tidak sah');
       }
     };
 
-    function setupFormEventListeners() {
-      const loginForm = document.getElementById('login-form');
-      const registerForm = document.getElementById('register-form');
-      const checkoutForm = document.getElementById('checkout-form');
-
-      if (loginForm && !loginForm.hasAttribute('data-listener-attached')) {
-        loginForm.setAttribute('data-listener-attached', 'true');
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = document.getElementById('login-email').value;
-          const password = document.getElementById('login-password').value;
-          
-          console.log('Login attempt:', email);
-          const users = getUsers();
-          console.log('Available users:', users);
-          
-          const user = users.find(u => u.email === email && u.password === password);
-          
-          if (user) {
-            currentUser = { name: user.name, email: user.email, role: user.role };
-            localStorage.setItem('sop_user', JSON.stringify(currentUser));
-            updateAuthNav();
-            showToast('Log masuk berjaya!', 'success');
-            navigateTo('home');
-          } else {
-            showToast('Email atau kata laluan tidak sah', 'error');
-          }
-        });
-      }
-
-      if (registerForm && !registerForm.hasAttribute('data-listener-attached')) {
-        registerForm.setAttribute('data-listener-attached', 'true');
-        console.log('Register form found, adding event listener');
-        registerForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const name = document.getElementById('reg-name').value;
-          const email = document.getElementById('reg-email').value;
-          const password = document.getElementById('reg-password').value;
-          const roleInput = document.querySelector('input[name="role"]:checked');
-          const role = roleInput ? roleInput.value : 'buyer';
-          
-          console.log('Registering:', { name, email, role });
-          
-          const users = getUsers();
-          console.log('Current users:', users);
-          
-          if (users.find(u => u.email === email)) {
-            showToast('Email sudah didaftarkan', 'error');
-            return;
-          }
-          
-          try {
-            console.log('Saving user to database...');
-            const userId = await saveToFirebase('users', {
-              name,
-              email,
-              password,
-              role,
-              type: 'user',
-              createdAt: new Date().toISOString()
-            });
-            
-            console.log('User saved with ID:', userId);
-            console.log('Updated users:', getUsers());
-            
-            showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
-            navigateTo('login');
-          } catch (error) {
-            console.error('Registration error:', error);
-            showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
-          }
-        });
-      } else {
-        console.log('Register form NOT found');
-      }
-
-      if (checkoutForm && !checkoutForm.hasAttribute('data-listener-attached')) {
-        checkoutForm.setAttribute('data-listener-attached', 'true');
-        checkoutForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          
-          const name = document.getElementById('cod-name').value;
-          const phone = document.getElementById('cod-phone').value;
-          const dept = document.getElementById('cod-dept').value;
-          const location = document.getElementById('cod-location').value;
-          
-          if (!location) {
-            showToast('Sila pilih lokasi COD', 'warning');
-            return;
-          }
-          
-          if (!firebaseReady) {
-            showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
-            return;
-          }
-          
-          const cartItems = getCartItems();
-          
-          try {
-            // Create order in Firebase
-            const orderId = await saveToFirebase('orders', {
-              type: 'order',
-              orderId: 'ORD-' + Date.now(),
-              orderUserId: currentUser.email,
-              customerName: name,
-              customerPhone: phone,
-              customerDept: dept,
-              codLocation: location,
-              orderStatus: 'pending',
-              createdAt: new Date().toISOString()
-            });
-            
-            allData.push({
-              type: 'order',
-              __firebaseId: orderId,
-              orderId: 'ORD-' + Date.now(),
-              orderUserId: currentUser.email,
-              customerName: name,
-              customerPhone: phone,
-              customerDept: dept,
-              codLocation: location,
-              orderStatus: 'pending',
-              createdAt: new Date().toISOString()
-            });
-            
-            // Clear cart items
-            for (const item of cartItems) {
-              await deleteFromFirebase('cart', item.__firebaseId);
-            }
-            
-            allData = allData.filter(d => !cartItems.find(ci => ci.__firebaseId === d.__firebaseId));
-            
-            showModal('Pesanan Berjaya!', `
-              <div class="text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i class="fas fa-check text-green-600 text-3xl"></i>
-                </div>
-                <p class="text-navy-600 dark:text-navy-300 mb-4">Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.</p>
-                <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
-                  Kembali ke Home
-                </button>
-              </div>
-            `);
-          } catch (error) {
-            console.error('Checkout error:', error);
-            showToast('Ralat membuat pesanan: ' + error.message, 'error');
-          }
-        });
-      }
-    }
-
-    function logout() {
-      currentUser = null;
-      localStorage.removeItem('sop_user');
-      updateAuthNav();
-      showToast('Log keluar berjaya', 'success');
-      navigateTo('home');
-    }
-
-    function togglePassword(inputId) {
-      const input = document.getElementById(inputId);
-      if (input) {
-        input.type = input.type === 'password' ? 'text' : 'password';
-      }
-    }
-
-    // ==================== PRODUCTS ====================
-    function renderUI() {
-      renderTrendingProducts();
-      renderProducts();
-      renderCart();
-      updateCartBadge();
-      
-      if (currentPage === 'seller') renderSellerDashboard();
-      if (currentPage === 'chat') renderChatList();
-    }
-
-    function renderTrendingProducts() {
-      const container = document.getElementById('trending-products');
-      const products = getProducts().slice(0, 8);
-      
-      if (products.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-8">
-            <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
-            <p class="text-navy-500 dark:text-navy-400">Belum ada produk. Jadilah penjual pertama!</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = products.map(p => createProductCard(p)).join('');
-    }
-
-    function renderProducts() {
-      const container = document.getElementById('products-grid');
-      const noProducts = document.getElementById('no-products');
-      let products = getProducts();
-      
-      // Apply filters
-      const search = document.getElementById('search-input')?.value.toLowerCase() || '';
-      const category = document.getElementById('category-filter')?.value || '';
-      const sort = document.getElementById('sort-filter')?.value || 'newest';
-      
-      if (search) {
-        products = products.filter(p => 
-          p.productName.toLowerCase().includes(search) || 
-          p.description?.toLowerCase().includes(search)
-        );
-      }
-      
-      if (category) {
-        products = products.filter(p => p.category === category);
-      }
-      
-      // Sort
-      switch(sort) {
-        case 'price-low':
-          products.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          products.sort((a, b) => b.price - a.price);
-          break;
-        case 'rating':
-          products.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-          break;
-        default:
-          products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      }
-      
-      if (products.length === 0) {
-        container.innerHTML = '';
-        noProducts.classList.remove('hidden');
-      } else {
-        noProducts.classList.add('hidden');
-        container.innerHTML = products.map(p => createProductCard(p)).join('');
-      }
-    }
-
-    function createProductCard(product) {
-      const rating = product.rating || Math.floor(Math.random() * 2) + 4;
-      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-      const categoryIcons = {
-        'Akademik': 'fa-book',
-        'Elektronik': 'fa-laptop',
-        'Asrama': 'fa-bed',
-        'Peribadi': 'fa-tshirt',
-        'Makanan': 'fa-cookie-bite'
-      };
-      const icon = categoryIcons[product.category] || 'fa-box';
-      
-      // Display single image_url instead of images array
-      const imageUrl = product.image_url || null;
-      
-      return `
-        <div class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in">
-          <div class="aspect-square bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-700 dark:to-navy-600 flex items-center justify-center relative group overflow-hidden">
-            ${imageUrl ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover" loading="lazy" onerror="console.error('Image failed:', this.src); this.parentElement.innerHTML='<i class=\"fas ${icon} text-5xl text-navy-400 dark:text-navy-300\"></i>';">` : `<i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i>`}
-          </div>
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-1 truncate">${product.productName}</h3>
-            <p class="text-accent-orange font-bold text-lg">RM ${product.price.toFixed(2)}</p>
-            <div class="flex items-center justify-between mt-2">
-              <span class="text-xs text-navy-500 dark:text-navy-400 truncate max-w-[60%]">${product.sellerName}</span>
-              <span class="text-yellow-500 text-xs">${stars}</span>
-            </div>
-            <div class="flex gap-2 mt-3">
-              <button onclick="addToCart('${product.id}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
-                <i class="fas fa-cart-plus mr-1"></i> Tambah
-              </button>
-              <button onclick="startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
-                <i class="fas fa-comment"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function searchProducts() {
-      renderProducts();
-    }
-
-    function filterByCategory(category) {
-      const filter = document.getElementById('category-filter');
-      if (filter) filter.value = category;
-      navigateTo('products');
-      renderProducts();
-    }
-
-    // ==================== CART ====================
-    function updateCartBadge() {
-      const badge = document.getElementById('cart-badge');
-      const cartItems = getCartItems();
-      const count = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-      
-      if (count > 0) {
-        badge.textContent = count;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-    }
-
-    async function addToCart(productId) {
-      if (!currentUser) {
-        showToast('Sila log masuk untuk menambah ke troli', 'warning');
-        navigateTo('login');
-        return;
-      }
-      
-      const existingItem = allData.find(d => 
-        d.type === 'cart' && 
-        d.cartProductId === productId && 
-        d.cartUserId === currentUser.email
-      );
-      
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        if (existingItem) {
-          await updateInFirebase('cart', existingItem.__firebaseId, {
-            quantity: (existingItem.quantity || 1) + 1
-          });
-          existingItem.quantity = (existingItem.quantity || 1) + 1;
-        } else {
-          const cartId = await saveToFirebase('cart', {
-            type: 'cart',
-            cartUserId: currentUser.email,
-            cartProductId: productId,
-            quantity: 1,
-            createdAt: new Date().toISOString()
-          });
-          
-          allData.push({
-            type: 'cart',
-            __firebaseId: cartId,
-            cartUserId: currentUser.email,
-            cartProductId: productId,
-            quantity: 1,
-            createdAt: new Date().toISOString()
-          });
-        }
-        
-        showToast('Ditambah ke troli!', 'success');
-        renderUI();
-      } catch (error) {
-        console.error('Add to cart error:', error);
-        showToast('Ralat menambah ke troli: ' + error.message, 'error');
-      }
-    }
-
-    function renderCart() {
-      const container = document.getElementById('cart-items');
-      const empty = document.getElementById('cart-empty');
-      const summary = document.getElementById('cart-summary');
-      const cartItems = getCartItems();
-      const products = getProducts();
-      
-      if (cartItems.length === 0) {
-        container.innerHTML = '';
-        empty.classList.remove('hidden');
-        summary.classList.add('hidden');
-        return;
-      }
-      
-      empty.classList.add('hidden');
-      summary.classList.remove('hidden');
-      
-      let total = 0;
-      container.innerHTML = cartItems.map(item => {
-        const product = products.find(p => p.id === item.cartProductId);
-        if (!product) return '';
-        
-        const itemTotal = product.price * (item.quantity || 1);
-        total += itemTotal;
-        
-        return `
-          <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-md flex items-center gap-4 fade-in">
-            <div class="w-20 h-20 bg-navy-100 dark:bg-navy-700 rounded-lg flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-box text-2xl text-navy-400"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-semibold truncate">${product.productName}</h3>
-              <p class="text-accent-orange font-bold">RM ${product.price.toFixed(2)}</p>
-              <div class="flex items-center gap-2 mt-2">
-                <button onclick="updateCartQty('${item.id}', -1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
-                  <i class="fas fa-minus text-xs"></i>
-                </button>
-                <span class="w-8 text-center font-medium">${item.quantity || 1}</span>
-                <button onclick="updateCartQty('${item.id}', 1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
-                  <i class="fas fa-plus text-xs"></i>
-                </button>
-              </div>
-            </div>
-            <div class="text-right">
-              <p class="font-bold text-lg">RM ${itemTotal.toFixed(2)}</p>
-              <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-600 text-sm mt-2">
-                <i class="fas fa-trash mr-1"></i> Buang
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      document.getElementById('cart-total').textContent = `RM ${total.toFixed(2)}`;
-    }
-
-    async function updateCartQty(cartId, change) {
-      const item = allData.find(d => d.__firebaseId === cartId);
-      if (!item) return;
-      
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        const newQty = (item.quantity || 1) + change;
-        if (newQty <= 0) {
-          await deleteFromFirebase('cart', cartId);
-          allData = allData.filter(d => d.__firebaseId !== cartId);
-        } else {
-          await updateInFirebase('cart', cartId, { quantity: newQty });
-          const index = allData.findIndex(d => d.__firebaseId === cartId);
-          if (index >= 0) {
-            allData[index].quantity = newQty;
-          }
-        }
-        renderUI();
-      } catch (error) {
-        console.error('Update cart error:', error);
-        showToast('Ralat mengemas kini troli: ' + error.message, 'error');
-      }
-    }
-
-    async function removeFromCart(cartId) {
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        await deleteFromFirebase('cart', cartId);
-        allData = allData.filter(d => d.__firebaseId !== cartId);
-        showToast('Item dibuang dari troli', 'success');
-        renderUI();
-      } catch (error) {
-        console.error('Remove from cart error:', error);
-        showToast('Ralat membuang item: ' + error.message, 'error');
-      }
-    }
-
-    // ==================== CHECKOUT ====================
-    function renderCheckout() {
-      const cartItems = getCartItems();
-      const products = getProducts();
-      const itemsContainer = document.getElementById('checkout-items');
-      const totalEl = document.getElementById('checkout-total');
-      
-      if (!itemsContainer || !totalEl) return;
-      
-      let total = 0;
-      itemsContainer.innerHTML = cartItems.map(item => {
-        const product = products.find(p => p.id === item.cartProductId);
-        if (!product) return '';
-        const itemTotal = product.price * (item.quantity || 1);
-        total += itemTotal;
-        return `<div class="flex justify-between"><span>${product.productName} x${item.quantity || 1}</span><span>RM ${itemTotal.toFixed(2)}</span></div>`;
-      }).join('');
-      
-      totalEl.textContent = `RM ${total.toFixed(2)}`;
-    }
-
-    // ==================== CHAT ====================
-    function renderChatList() {
-      if (!currentUser) {
-        document.getElementById('chat-list').innerHTML = `
-          <div class="p-4 text-center text-navy-500">
-            <i class="fas fa-lock text-2xl mb-2"></i>
-            <p>Sila log masuk untuk chat</p>
-          </div>
-        `;
-        return;
-      }
-      
-      const messages = getMessages();
-      const users = getUsers();
-      const chatPartners = new Set();
-      
-      messages.forEach(m => {
-        if (m.messageFrom !== currentUser.email) chatPartners.add(m.messageFrom);
-        if (m.messageTo !== currentUser.email) chatPartners.add(m.messageTo);
-      });
-      
-      const container = document.getElementById('chat-list');
-      if (chatPartners.size === 0) {
-        container.innerHTML = `
-          <div class="p-4 text-center text-navy-500">
-            <i class="fas fa-comments text-2xl mb-2"></i>
-            <p class="text-sm">Tiada perbualan</p>
-            <p class="text-xs mt-1">Chat dengan seller melalui halaman produk</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = Array.from(chatPartners).map(email => {
-        const user = users.find(u => u.email === email);
-        const name = user ? user.name : email.split('@')[0];
-        const lastMsg = messages.filter(m => m.messageFrom === email || m.messageTo === email).pop();
-        
-        return `
-          <div onclick="openChat('${email}')" class="p-4 hover:bg-navy-50 dark:hover:bg-navy-700 cursor-pointer border-b border-navy-100 dark:border-navy-700 transition-colors ${currentChatWith === email ? 'bg-navy-100 dark:bg-navy-700' : ''}">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold">
-                ${name.charAt(0).toUpperCase()}
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-medium truncate">${name}</p>
-                <p class="text-xs text-navy-500 dark:text-navy-400 truncate">${lastMsg?.messageText || ''}</p>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function openChat(email) {
-      currentChatWith = email;
-      const users = getUsers();
-      const user = users.find(u => u.email === email);
-      const name = user ? user.name : email.split('@')[0];
-      
-      document.getElementById('chat-with').textContent = name;
-      renderChatMessages();
-      renderChatList();
-    }
-
-    function renderChatMessages() {
-      if (!currentChatWith || !currentUser) return;
-      
-      const container = document.getElementById('chat-messages');
-      const messages = getMessages().filter(m => 
-        (m.messageFrom === currentUser.email && m.messageTo === currentChatWith) ||
-        (m.messageFrom === currentChatWith && m.messageTo === currentUser.email)
-      ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      
-      if (messages.length === 0) {
-        container.innerHTML = `
-          <div class="text-center text-navy-400 py-8">
-            <i class="fas fa-comments text-4xl mb-2"></i>
-            <p>Mulakan perbualan</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = messages.map(m => {
-        const isMe = m.messageFrom === currentUser.email;
-        return `
-          <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-            <div class="max-w-[70%] px-4 py-2 ${isMe ? 'bg-accent-orange text-white chat-bubble-right' : 'bg-white dark:bg-navy-700 chat-bubble-left shadow'}">
-              <p class="text-sm">${m.messageText}</p>
-              <p class="text-xs ${isMe ? 'text-orange-200' : 'text-navy-400'} mt-1">${new Date(m.createdAt).toLocaleTimeString('ms-MY', {hour: '2-digit', minute: '2-digit'})}</p>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      container.scrollTop = container.scrollHeight;
-    }
-
-    async function sendMessage() {
-      if (!currentUser || !currentChatWith) return;
-      
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (!text) return;
-      
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        const messageId = await saveToFirebase('messages', {
-          type: 'message',
-          messageFrom: currentUser.email,
-          messageTo: currentChatWith,
-          messageText: text,
-          createdAt: new Date().toISOString()
-        });
-        
-        allData.push({
-          type: 'message',
-          __firebaseId: messageId,
-          messageFrom: currentUser.email,
-          messageTo: currentChatWith,
-          messageText: text,
-          createdAt: new Date().toISOString()
-        });
-        
-        input.value = '';
-        renderChatMessages();
-      } catch (error) {
-        console.error('Send message error:', error);
-        showToast('Ralat menghantar mesej: ' + error.message, 'error');
-      }
-    }
-
-    function startChat(sellerId) {
-      if (!currentUser) {
-        showToast('Sila log masuk untuk chat', 'warning');
-        navigateTo('login');
-        return;
-      }
-      
-      currentChatWith = sellerId;
-      navigateTo('chat');
-      openChat(sellerId);
-    }
-
-    // ==================== SELLER DASHBOARD ====================
-    function renderSellerDashboard() {
-      if (!currentUser || currentUser.role !== 'seller') {
-        navigateTo('home');
-        return;
-      }
-      
-      const myProducts = getProducts().filter(p => p.sellerId === currentUser.email);
-      const orders = getOrders().filter(o => {
-        const orderProducts = myProducts.map(p => p.id);
-        return orderProducts.length > 0;
-      });
-      const messages = getMessages();
-      
-      document.getElementById('seller-product-count').textContent = myProducts.length;
-      document.getElementById('seller-order-count').textContent = orders.length;
-      document.getElementById('seller-msg-count').textContent = messages.filter(m => m.messageTo === currentUser.email).length;
-      
-      const container = document.getElementById('seller-products');
-      const noProducts = document.getElementById('seller-no-products');
-      
-      if (myProducts.length === 0) {
-        container.innerHTML = '';
-        noProducts.classList.remove('hidden');
-      } else {
-        noProducts.classList.add('hidden');
-        container.innerHTML = myProducts.map(p => `
-          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 fade-in">
-            <div class="flex items-start gap-4">
-              <div class="w-16 h-16 bg-navy-200 dark:bg-navy-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-box text-xl text-navy-400"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold truncate">${p.productName}</h3>
-                <p class="text-accent-orange font-bold">RM ${p.price.toFixed(2)}</p>
-                <span class="text-xs text-navy-500 dark:text-navy-400">${p.category}</span>
-              </div>
-              <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 p-2">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `).join('');
-      }
-    }
-
-    let uploadedImages = [];
-
-    function handleFiles(files) {
-      const statusEl = document.getElementById('upload-status');
-      if (!statusEl) return;
-      
-      if (!files || files.length === 0) return;
-      
-      const file = files[0];
-      
-      // Validate file type
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        showToast('Format gambar tidak sah. Gunakan JPG atau PNG.', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">Format tidak sah (JPG/PNG sahaja)</p>';
-        return;
-      }
-      
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Gambar terlalu besar (> 5MB).', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">Saiz > 5MB</p>';
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        uploadedImages = [{
-          file: file,
-          preview: e.target.result,
-          name: file.name,
-          size: (file.size / 1024 / 1024).toFixed(2)
-        }];
-        
-        renderImagePreviews();
-        statusEl.innerHTML = `<p class="text-green-600">Gambar bersedia untuk dimuat naik (${uploadedImages[0].size}MB)</p>`;
-      };
-      
-      reader.onerror = () => {
-        showToast('Ralat membaca fail gambar', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">Ralat membaca fail</p>';
-      };
-      
-      reader.readAsDataURL(file);
-    }
-
-    function showAddProductModal() {
-      uploadedImages = [];
-      showModal('Tambah Produk', `
-        <form id="add-product-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
-          <div>
-            <label class="block text-sm font-medium mb-1">Nama Produk</label>
-            <input type="text" id="prod-name" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Harga (RM)</label>
-            <input type="number" id="prod-price" required min="0" step="0.01" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Kategori</label>
-            <select id="prod-category" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
-              <option value="Akademik">📚 Akademik</option>
-              <option value="Elektronik">💻 Elektronik</option>
-              <option value="Asrama">🏠 Asrama</option>
-              <option value="Peribadi">👕 Peribadi</option>
-              <option value="Makanan">🍪 Makanan</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Keterangan</label>
-            <textarea id="prod-desc" rows="2" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, 5MB max)</span></label>
-            <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
-              <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
-              <p class="text-sm font-medium">Klik untuk pilih gambar atau drag & drop</p>
-              <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">1 gambar sahaja per produk</p>
-              <input type="file" id="file-input" accept=".jpg,.jpeg,.png" style="display:none;">
-            </div>
-            <div id="image-preview" class="mt-3"></div>
-            <div id="upload-status" class="mt-2 text-sm"></div>
-          </div>
-          <button type="submit" id="submit-btn" class="w-full btn-primary bg-accent-orange text-white py-2 rounded-lg font-medium">
-            <i class="fas fa-plus mr-2"></i> Tambah Produk
-          </button>
-        </form>
-      `);
-      
-      const fileInput = document.getElementById('file-input');
-      const dropZone = fileInput ? fileInput.parentElement : null;
-      
-      if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          dropZone.classList.add('bg-navy-100', 'dark:bg-navy-600');
-        });
-        
-        dropZone.addEventListener('dragleave', () => {
-          dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
-        });
-        
-        dropZone.addEventListener('drop', (e) => {
-          e.preventDefault();
-          dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
-          handleFiles(e.dataTransfer.files);
-        });
-      }
-      
-      if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-          handleFiles(e.target.files);
-        });
-      }
-      
-      const form = document.getElementById('add-product-form');
-      if (form) {
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          
-          if (!firebaseReady) {
-            showToast('Firebase belum dikonfig. Sila periksa Firebase credentials.', 'error');
-            return;
-          }
-          
-          if (!uploadedImages[0]) {
-            showToast('Sila muat naik gambar produk', 'warning');
-            return;
-          }
-          
-          const submitBtn = document.getElementById('submit-btn');
-          if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sedang memproses...';
-          }
-          
-          try {
-            // Upload image to Firebase Storage
-            const imageUrl = await uploadImageToFirebase(uploadedImages[0]);
-            
-            if (allData.length >= 999) {
-              showToast('Had storan dicapai', 'error');
-              if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
-              }
-              return;
-            }
-            
-            // Save product with image_url to Firebase
-            const result = await saveToFirebase('products', {
-              type: 'product',
-              productName: document.getElementById('prod-name').value,
-              price: parseFloat(document.getElementById('prod-price').value),
-              category: document.getElementById('prod-category').value,
-              description: document.getElementById('prod-desc').value,
-              image_url: imageUrl,
-              sellerId: currentUser.email,
-              sellerName: currentUser.name,
-              rating: 5,
-              createdAt: new Date().toISOString()
-            });
-            
-            allData.push({
-              id: result,
-              type: 'product',
-              productName: document.getElementById('prod-name').value,
-              price: parseFloat(document.getElementById('prod-price').value),
-              category: document.getElementById('prod-category').value,
-              description: document.getElementById('prod-desc').value,
-              image_url: imageUrl,
-              sellerId: currentUser.email,
-              sellerName: currentUser.name,
-              rating: 5,
-              createdAt: new Date().toISOString()
-            });
-            
-            closeModal();
-            showToast('Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
-            uploadedImages = [];
-            renderUI();
-          } catch (error) {
-            console.error('Error adding product:', error);
-            showToast('Ralat: ' + error.message, 'error');
-          } finally {
-            if (submitBtn) {
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
-            }
-          }
-        });
-      }
-    }
-
-    function renderImagePreviews() {
-      const container = document.getElementById('image-preview');
-      if (uploadedImages.length === 0) {
-        container.innerHTML = '';
-        return;
-      }
-      
-      const img = uploadedImages[0];
-      container.innerHTML = `
-        <div class="relative group">
-          <img src="${img.preview}" alt="Preview" class="w-full max-w-48 aspect-square object-cover rounded-lg border border-navy-200 dark:border-navy-600 mx-auto">
-          <button type="button" onclick="removeImage()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <i class="fas fa-trash text-sm"></i>
-          </button>
-          <div class="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-            ${img.size}MB
-          </div>
-        </div>
-      `;
-    }
-
-    function removeImage() {
-      uploadedImages = [];
-      renderImagePreviews();
-      const statusEl = document.getElementById('upload-status');
-      statusEl.innerHTML = '';
-      document.getElementById('file-input').value = '';
-    }
-
-    async function deleteProduct(productId) {
-      const product = allData.find(d => d.id === productId);
-      if (product) {
-        showModal('Padam Produk?', `
-          <div class="text-center">
-            <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
-            <p class="mb-4">Adakah anda pasti mahu padam produk ini?</p>
-            <div class="flex gap-2 justify-center">
-              <button onclick="closeModal()" class="px-4 py-2 bg-navy-200 dark:bg-navy-700 rounded-lg">Batal</button>
-              <button onclick="confirmDeleteProduct('${productId}')" class="px-4 py-2 bg-red-500 text-white rounded-lg">Padam</button>
-            </div>
-          </div>
-        `);
-      }
-    }
-
-    async function confirmDeleteProduct(productId) {
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        const product = allData.find(d => d.__firebaseId === productId);
-        if (!product) return;
-        
-        await deleteFromFirebase('products', productId);
-        allData = allData.filter(d => d.__firebaseId !== productId);
-        closeModal();
-        showToast('Produk telah dipadam', 'success');
-        renderUI();
-      } catch (error) {
-        console.error('Delete product error:', error);
-        showToast('Ralat memadam produk: ' + error.message, 'error');
-      }
-    }
-
-    // ==================== PROFILE ====================
-    function renderProfile() {
-      if (!currentUser) {
-        navigateTo('login');
-        return;
-      }
-      
-      document.getElementById('profile-name').textContent = currentUser.name;
-      document.getElementById('profile-email').textContent = currentUser.email;
-      document.getElementById('profile-badge').textContent = currentUser.role === 'seller' ? 'Seller' : 'Buyer';
-      
-      const sellerBtn = document.getElementById('seller-dashboard-btn');
-      if (currentUser.role === 'seller') {
-        sellerBtn.classList.remove('hidden');
-      } else {
-        sellerBtn.classList.add('hidden');
-      }
-    }
-
-    // ==================== UI HELPERS ====================
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const colors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-500'
-      };
-      const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        warning: 'fa-exclamation-triangle',
-        info: 'fa-info-circle'
-      };
-      
-      const toast = document.createElement('div');
-      toast.className = `toast ${colors[type]} text-white flex items-center gap-2`;
-      toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${message}`;
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    function showModal(title, content) {
-      const container = document.getElementById('modal-container');
-      container.innerHTML = `
-        <div class="modal-overlay" onclick="closeModal()">
-          <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold">${title}</h3>
-              <button onclick="closeModal()" class="text-navy-400 hover:text-navy-600">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            ${content}
-          </div>
-        </div>
-      `;
-    }
-
-    function closeModal() {
-      document.getElementById('modal-container').innerHTML = '';
-    }
-
-    // ==================== INITIALIZE ====================
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        initApp();
-        updateAuthNav();
-      });
-    } else {
-      initApp();
-      updateAuthNav();
-    }
+    // Initialize Firebase on page load
+    initFirebase();
   </script>
 </body>
 </html>
