@@ -370,31 +370,9 @@
    </main><!-- Toast Container -->
    <div id="toast-container"></div><!-- Modal Container -->
    <div id="modal-container"></div>
-  </div>
-  
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-    import { getDatabase, ref as dbRef, set, get, remove, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-    window.firebaseSDK = {
-      initializeApp,
-      getStorage,
-      ref,
-      uploadBytes,
-      getDatabase,
-      dbRef,
-      set,
-      get,
-      remove,
-      push,
-      update,
-      onValue
-    };
-  </script>
-  
-  <script>
+   </div>
+   
+   <script>
     // ==================== FIREBASE CONFIGURATION ====================
     const firebaseConfig = {
       apiKey: "AIzaSyDzlzxfNLpbmJOUglPbJbq4YRCz5ApvKwQ",
@@ -415,24 +393,43 @@
     // Initialize Firebase
     async function initFirebase() {
       const statusEl = document.getElementById('firebase-status');
+      
       try {
-        statusEl.textContent = 'Connecting to Firebase...';
+        statusEl.textContent = 'Loading Firebase SDK...';
         statusEl.style.background = '#2196F3';
+        
+        // Dynamically import Firebase SDK
+        const [{ initializeApp, getStorage, ref, uploadBytes }, 
+               { getDatabase, ref: dbRef, set, get, remove, push, update, onValue }] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js")
+        ]);
+        
+        window.firebaseSDK = {
+          initializeApp,
+          getStorage,
+          ref,
+          uploadBytes,
+          getDatabase,
+          dbRef,
+          set,
+          get,
+          remove,
+          push,
+          update,
+          onValue
+        };
+        
+        statusEl.textContent = 'Connecting to Firebase...';
         
         app = window.firebaseSDK.initializeApp(firebaseConfig);
-        statusEl.textContent = 'Loading data...';
-        statusEl.style.background = '#2196F3';
-        
         storage = window.firebaseSDK.getStorage(app);
         database = window.firebaseSDK.getDatabase(app);
-        
-        // Wait a bit for database to be ready
-        await new Promise(resolve => setTimeout(resolve, 1000));
         
         firebaseReady = true;
         statusEl.textContent = '✓ Connected to Firebase';
         statusEl.style.background = '#4CAF50';
-        statusEl.style.display = 'none';
+        setTimeout(() => { if(statusEl) statusEl.style.display = 'none'; }, 2000);
         console.log('Firebase initialized successfully');
         
         // Load data from Firebase
