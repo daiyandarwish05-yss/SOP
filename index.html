@@ -1,0 +1,1719 @@
+<!doctype html>
+<html lang="ms" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.O.P – Shop Online Poly</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script><!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              50: '#f0f4f8',
+              100: '#d9e2ec',
+              200: '#bcccdc',
+              300: '#9fb3c8',
+              400: '#829ab1',
+              500: '#627d98',
+              600: '#486581',
+              700: '#334e68',
+              800: '#243b53',
+              900: '#102a43',
+            },
+            accent: {
+              orange: '#f97316',
+              orangeHover: '#ea580c',
+            }
+          }
+        }
+      }
+    }
+    
+    // ==================== FIREBASE SETUP ====================
+    // PENTING: Ganti dengan Firebase config anda sendiri
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    let storageRef = null;
+    let db = null;
+    let firebaseReady = false;
+
+    async function initFirebase() {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        db = firebase.database();
+        storageRef = storage.ref();
+        firebaseReady = true;
+        console.log('Firebase initialized successfully');
+        // Load data from Firebase after initialization
+        loadDataFromFirebase();
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showToast('⚠️ Firebase belum dikonfig. Aplikasi terbatas.', 'warning');
+      }
+    }
+
+    // Load all data from Firebase Realtime Database
+    async function loadDataFromFirebase() {
+      try {
+        const snapshot = await db.ref('/').once('value');
+        if (snapshot.exists()) {
+          allData = [];
+          snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            data.id = childSnapshot.key;
+            allData.push(data);
+          });
+          renderUI();
+        }
+      } catch (error) {
+        console.error('Error loading data from Firebase:', error);
+      }
+    }
+
+    // Save data to Firebase
+    async function saveToFirebase(collection, data) {
+      if (!firebaseReady || !db) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const key = db.ref(collection).push().key;
+        const updates = {};
+        updates[`/${collection}/${key}`] = data;
+        await db.ref().update(updates);
+        return key;
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Update data in Firebase
+    async function updateInFirebase(collection, id, data) {
+      if (!firebaseReady || !db) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        await db.ref(`/${collection}/${id}`).update(data);
+      } catch (error) {
+        console.error('Error updating Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Delete data from Firebase
+    async function deleteFromFirebase(collection, id) {
+      if (!firebaseReady || !db) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        await db.ref(`/${collection}/${id}`).remove();
+      } catch (error) {
+        console.error('Error deleting from Firebase:', error);
+        throw error;
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+    .btn-primary { transition: all 0.2s ease; }
+    .btn-primary:hover { transform: scale(1.02); }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-bubble-left { border-radius: 18px 18px 18px 4px; }
+    .chat-bubble-right { border-radius: 18px 18px 4px 18px; }
+    input:focus, textarea:focus, select:focus { outline: none; ring: 2px; ring-color: #f97316; }
+    .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; border-radius: 8px; z-index: 1000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
+    .modal-content { background: white; border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; animation: fadeIn 0.3s ease; }
+    .dark .modal-content { background: #1e293b; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full bg-navy-50 dark:bg-navy-900 text-navy-900 dark:text-white overflow-auto">
+  <div id="app" class="h-full w-full flex flex-col">
+   <!-- Navigation -->
+   <nav id="navbar" class="bg-white dark:bg-navy-800 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4">
+     <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
+      <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
+       <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center">
+        <i class="fas fa-store text-white text-lg"></i>
+       </div><span id="nav-title" class="font-bold text-xl text-navy-800 dark:text-white">S.O.P</span>
+      </div><!-- Desktop Nav -->
+      <div class="hidden md:flex items-center space-x-6">
+       <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-home mr-1"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-shopping-bag mr-1"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative"> <i class="fas fa-shopping-cart mr-1"></i> Cart <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span> </a> <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-comments mr-1"></i> Chat </a>
+       <div id="auth-nav"></div><button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-navy-100 dark:bg-navy-700 text-navy-600 dark:text-yellow-400 hover:bg-navy-200 dark:hover:bg-navy-600 transition-colors"> <i class="fas fa-moon dark:hidden"></i> <i class="fas fa-sun hidden dark:block"></i> </button>
+      </div><!-- Mobile Menu Button --> <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-navy-600 dark:text-white"> <i class="fas fa-bars text-xl"></i> </button>
+     </div><!-- Mobile Nav -->
+     <div id="mobile-menu" class="hidden md:hidden pb-4">
+      <div class="flex flex-col space-y-3">
+       <a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-home mr-2"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-bag mr-2"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-cart mr-2"></i> Cart </a> <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-comments mr-2"></i> Chat </a>
+       <div id="auth-nav-mobile"></div>
+      </div>
+     </div>
+    </div>
+   </nav><!-- Main Content -->
+   <main class="flex-1 overflow-auto">
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page active">
+     <!-- Hero Banner -->
+     <div class="bg-gradient-to-r from-navy-800 via-navy-700 to-navy-600 text-white">
+      <div class="max-w-7xl mx-auto px-4 py-12 md:py-20">
+       <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="text-center md:text-left mb-8 md:mb-0">
+         <h1 id="banner-title" class="text-3xl md:text-5xl font-bold mb-4">Selamat Datang ke S.O.P!</h1>
+         <p id="banner-tagline" class="text-lg md:text-xl text-navy-200 mb-6">Platform Jual Beli Komuniti Politeknik Anda</p>
+         <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg"> <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli </button> <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100"> <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Seller </button>
+         </div>
+        </div>
+        <div class="w-64 h-64 relative">
+         <div class="absolute inset-0 bg-accent-orange/20 rounded-full animate-pulse"></div>
+         <div class="absolute inset-4 bg-white/10 rounded-full flex items-center justify-center">
+          <i class="fas fa-store text-8xl text-white/80"></i>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Features -->
+     <div class="max-w-7xl mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+       <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
+        <div class="w-14 h-14 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4">
+         <i class="fas fa-hand-holding-dollar text-2xl text-green-600"></i>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">COD Sahaja</h3>
+        <p class="text-navy-500 dark:text-navy-300 text-sm">Pembayaran secara tunai semasa penyerahan. Selamat dan mudah!</p>
+       </div>
+       <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
+        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4">
+         <i class="fas fa-users text-2xl text-blue-600"></i>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Komuniti Politeknik</h3>
+        <p class="text-navy-500 dark:text-navy-300 text-sm">Platform eksklusif untuk pelajar, pensyarah dan staf politeknik.</p>
+       </div>
+       <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
+        <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4">
+         <i class="fas fa-comments text-2xl text-accent-orange"></i>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Chat Terus</h3>
+        <p class="text-navy-500 dark:text-navy-300 text-sm">Berbincang terus dengan penjual untuk urusan yang lebih lancar.</p>
+       </div>
+      </div>
+     </div><!-- Categories -->
+     <div class="max-w-7xl mx-auto px-4 py-8">
+      <h2 class="text-2xl font-bold mb-6">Kategori Produk</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="categories-grid">
+       <div onclick="filterByCategory('Akademik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
+        <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-book text-blue-600 text-xl"></i>
+        </div><span class="text-sm font-medium">Akademik</span>
+       </div>
+       <div onclick="filterByCategory('Elektronik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
+        <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-laptop text-purple-600 text-xl"></i>
+        </div><span class="text-sm font-medium">Elektronik</span>
+       </div>
+       <div onclick="filterByCategory('Asrama')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
+        <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-bed text-green-600 text-xl"></i>
+        </div><span class="text-sm font-medium">Asrama</span>
+       </div>
+       <div onclick="filterByCategory('Peribadi')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
+        <div class="w-12 h-12 mx-auto bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-tshirt text-pink-600 text-xl"></i>
+        </div><span class="text-sm font-medium">Peribadi</span>
+       </div>
+       <div onclick="filterByCategory('Makanan')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
+        <div class="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-cookie-bite text-yellow-600 text-xl"></i>
+        </div><span class="text-sm font-medium">Makanan</span>
+       </div>
+       <div onclick="filterByCategory('')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
+        <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-th text-gray-600 dark:text-gray-300 text-xl"></i>
+        </div><span class="text-sm font-medium">Semua</span>
+       </div>
+      </div>
+     </div><!-- Trending Products -->
+     <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-6">
+       <h2 class="text-2xl font-bold">Produk Trending</h2><button onclick="navigateTo('products')" class="text-accent-orange hover:text-accent-orangeHover font-medium"> Lihat Semua <i class="fas fa-arrow-right ml-1"></i> </button>
+      </div>
+      <div id="trending-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+       <!-- Products loaded dynamically -->
+      </div>
+     </div>
+    </div><!-- PRODUCTS PAGE -->
+    <div id="page-products" class="page">
+     <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Search & Filter -->
+      <div class="bg-white dark:bg-navy-800 rounded-2xl p-4 mb-6 shadow-lg">
+       <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1 relative">
+         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400"></i> <input type="text" id="search-input" placeholder="Cari produk..." class="w-full pl-12 pr-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" onkeyup="searchProducts()">
+        </div><select id="category-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Semua Kategori</option> <option value="Akademik">📚 Akademik</option> <option value="Elektronik">💻 Elektronik</option> <option value="Asrama">🏠 Asrama</option> <option value="Peribadi">👕 Peribadi</option> <option value="Makanan">🍪 Makanan</option> </select> <select id="sort-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="newest">Terbaru</option> <option value="price-low">Harga: Rendah ke Tinggi</option> <option value="price-high">Harga: Tinggi ke Rendah</option> <option value="rating">Rating Tertinggi</option> </select>
+       </div>
+      </div><!-- Products Grid -->
+      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+       <!-- Products loaded dynamically -->
+      </div>
+      <div id="no-products" class="hidden text-center py-12">
+       <i class="fas fa-box-open text-6xl text-navy-300 mb-4"></i>
+       <p class="text-navy-500 dark:text-navy-400">Tiada produk dijumpai</p>
+      </div>
+     </div>
+    </div><!-- CART PAGE -->
+    <div id="page-cart" class="page">
+     <div class="max-w-4xl mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-6"><i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya</h1>
+      <div id="cart-items" class="space-y-4 mb-6">
+       <!-- Cart items loaded dynamically -->
+      </div>
+      <div id="cart-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg">
+       <i class="fas fa-shopping-cart text-6xl text-navy-300 mb-4"></i>
+       <p class="text-navy-500 dark:text-navy-400 mb-4">Troli anda kosong</p><button onclick="navigateTo('products')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl"> Mula Membeli </button>
+      </div>
+      <div id="cart-summary" class="hidden bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg">
+       <div class="flex justify-between items-center mb-4">
+        <span class="text-lg">Jumlah:</span> <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
+       </div><button onclick="navigateTo('checkout')" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-truck mr-2"></i> Proceed COD Order </button>
+      </div>
+     </div>
+    </div><!-- CHECKOUT PAGE -->
+    <div id="page-checkout" class="page">
+     <div class="max-w-2xl mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Checkout COD</h1>
+      <form id="checkout-form" class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg space-y-4">
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-name">Nama Penuh</label> <input type="text" id="cod-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Masukkan nama penuh">
+       </div>
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-phone">No Telefon</label> <input type="tel" id="cod-phone" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 012-3456789">
+       </div>
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label> <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: DIT, DKM, DKA">
+       </div>
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label> <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Pilih lokasi</option> <option value="Cafeteria">☕ Cafeteria</option> <option value="Library">📚 Library</option> <option value="Kolej Kediaman">🏠 Kolej Kediaman</option> <option value="Parking Gate">🚗 Parking Gate</option> <option value="Main Lobby">🏛️ Main Lobby</option> </select>
+       </div>
+       <div id="checkout-summary" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mt-4">
+        <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
+        <div id="checkout-items" class="text-sm space-y-1 mb-2"></div>
+        <div class="border-t border-navy-200 dark:border-navy-600 pt-2 mt-2">
+         <div class="flex justify-between font-bold">
+          <span>Jumlah:</span> <span id="checkout-total" class="text-accent-orange">RM 0.00</span>
+         </div>
+        </div>
+       </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold mt-4"> <i class="fas fa-check-circle mr-2"></i> Confirm Order </button>
+      </form>
+     </div>
+    </div><!-- CHAT PAGE -->
+    <div id="page-chat" class="page">
+     <div class="max-w-4xl mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-6"><i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej</h1>
+      <div class="flex flex-col md:flex-row gap-4 h-96 md:h-[500px]">
+       <!-- Chat List -->
+       <div class="w-full md:w-1/3 bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
+        <div class="p-4 bg-navy-100 dark:bg-navy-700">
+         <h3 class="font-semibold">Perbualan</h3>
+        </div>
+        <div id="chat-list" class="overflow-y-auto h-full max-h-80">
+         <!-- Chat contacts loaded dynamically -->
+        </div>
+       </div><!-- Chat Window -->
+       <div class="flex-1 bg-white dark:bg-navy-800 rounded-2xl shadow-lg flex flex-col overflow-hidden">
+        <div id="chat-header" class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center">
+         <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold mr-3">
+          <i class="fas fa-user"></i>
+         </div><span id="chat-with" class="font-semibold">Pilih perbualan</span>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-navy-50 dark:bg-navy-900">
+         <div class="text-center text-navy-400 py-8">
+          <i class="fas fa-comments text-4xl mb-2"></i>
+          <p>Pilih perbualan untuk mula chat</p>
+         </div>
+        </div>
+        <div class="p-4 bg-white dark:bg-navy-800 border-t border-navy-100 dark:border-navy-700">
+         <div class="flex gap-2">
+          <input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-2 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange" onkeypress="if(event.key==='Enter')sendMessage()"> <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors"> <i class="fas fa-paper-plane"></i> </button>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- LOGIN PAGE -->
+    <div id="page-login" class="page">
+     <div class="max-w-md mx-auto px-4 py-12">
+      <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
+       <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
+         <i class="fas fa-user text-white text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold">Log Masuk</h1>
+        <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Selamat kembali ke S.O.P!</p>
+       </div>
+       <form id="login-form" class="space-y-4">
+        <div>
+         <label class="block text-sm font-medium mb-2" for="login-email">Email</label> <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
+        </div>
+        <div>
+         <label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
+         <div class="relative">
+          <input type="password" id="login-password" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="••••••••"> <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
+         </div>
+        </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-sign-in-alt mr-2"></i> Log Masuk </button>
+       </form>
+       <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Belum ada akaun? <a href="#" onclick="navigateTo('register')" class="text-accent-orange hover:underline font-medium">Daftar sekarang</a></p>
+      </div>
+     </div>
+    </div><!-- REGISTER PAGE -->
+    <div id="page-register" class="page">
+     <div class="max-w-md mx-auto px-4 py-8">
+      <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
+       <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
+         <i class="fas fa-user-plus text-white text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold">Daftar Akaun</h1>
+        <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Sertai komuniti S.O.P hari ini!</p>
+       </div>
+       <form id="register-form" class="space-y-4">
+        <div>
+         <label class="block text-sm font-medium mb-2" for="reg-name">Nama Penuh</label> <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda">
+        </div>
+        <div>
+         <label class="block text-sm font-medium mb-2" for="reg-email">Email</label> <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
+        </div>
+        <div>
+         <label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
+         <div class="relative">
+          <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 aksara"> <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
+         </div>
+        </div>
+        <div>
+         <label class="block text-sm font-medium mb-2">Daftar Sebagai</label>
+         <div class="grid grid-cols-2 gap-4">
+          <label class="cursor-pointer"> <input type="radio" name="role" value="buyer" class="hidden peer" checked>
+           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
+            <i class="fas fa-shopping-bag text-2xl mb-2"></i>
+            <p class="font-medium">Buyer</p>
+           </div></label> <label class="cursor-pointer"> <input type="radio" name="role" value="seller" class="hidden peer">
+           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
+            <i class="fas fa-store text-2xl mb-2"></i>
+            <p class="font-medium">Seller</p>
+           </div></label>
+         </div>
+        </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-user-plus mr-2"></i> Daftar Sekarang </button>
+       </form>
+       <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Sudah ada akaun? <a href="#" onclick="navigateTo('login')" class="text-accent-orange hover:underline font-medium">Log masuk</a></p>
+      </div>
+     </div>
+    </div><!-- SELLER DASHBOARD -->
+    <div id="page-seller" class="page">
+     <div class="max-w-6xl mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-6">
+       <h1 class="text-2xl font-bold"><i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard</h1><button onclick="showAddProductModal()" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-6 py-2 rounded-xl font-semibold"> <i class="fas fa-plus mr-2"></i> Tambah Produk </button>
+      </div><!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+       <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-sm text-navy-500 dark:text-navy-400">Jumlah Produk</p>
+          <p id="seller-product-count" class="text-2xl font-bold">0</p>
+         </div>
+         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-box text-blue-600"></i>
+         </div>
+        </div>
+       </div>
+       <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-sm text-navy-500 dark:text-navy-400">Pesanan Aktif</p>
+          <p id="seller-order-count" class="text-2xl font-bold">0</p>
+         </div>
+         <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-clipboard-list text-green-600"></i>
+         </div>
+        </div>
+       </div>
+       <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-sm text-navy-500 dark:text-navy-400">Mesej Baru</p>
+          <p id="seller-msg-count" class="text-2xl font-bold">0</p>
+         </div>
+         <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-envelope text-accent-orange"></i>
+         </div>
+        </div>
+       </div>
+       <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center justify-between">
+         <div>
+          <p class="text-sm text-navy-500 dark:text-navy-400">Rating</p>
+          <p class="text-2xl font-bold">⭐ 4.8</p>
+         </div>
+         <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-star text-yellow-600"></i>
+         </div>
+        </div>
+       </div>
+      </div><!-- My Products -->
+      <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
+       <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
+        <h2 class="font-semibold">Produk Saya</h2>
+       </div>
+       <div id="seller-products" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Seller products loaded dynamically -->
+       </div>
+       <div id="seller-no-products" class="hidden p-8 text-center">
+        <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
+        <p class="text-navy-500 dark:text-navy-400">Anda belum ada produk. Tambah produk pertama anda!</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- PROFILE PAGE -->
+    <div id="page-profile" class="page">
+     <div class="max-w-2xl mx-auto px-4 py-8">
+      <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
+       <div class="text-center mb-8">
+        <div class="w-24 h-24 bg-gradient-to-br from-navy-600 to-accent-orange rounded-full flex items-center justify-center mx-auto mb-4">
+         <i class="fas fa-user text-white text-4xl"></i>
+        </div>
+        <h1 id="profile-name" class="text-2xl font-bold">Nama Pengguna</h1>
+        <p id="profile-email" class="text-navy-500 dark:text-navy-400">email@politeknik.edu.my</p><span id="profile-badge" class="inline-block mt-2 px-4 py-1 bg-accent-orange text-white text-sm rounded-full">Buyer</span>
+       </div>
+       <div class="space-y-4">
+        <button id="seller-dashboard-btn" onclick="navigateTo('seller')" class="hidden w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard </button> <button onclick="navigateTo('cart')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya </button> <button onclick="navigateTo('chat')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej </button> <button onclick="logout()" class="w-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-300 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-sign-out-alt mr-2"></i> Log Keluar </button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </main><!-- Toast Container -->
+   <div id="toast-container"></div><!-- Modal Container -->
+   <div id="modal-container"></div>
+  </div>
+  <script>
+    // ==================== FIREBASE SETUP ====================
+    // PENTING: Ganti dengan Firebase config anda sendiri
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    let storageRef = null;
+    let firebaseReady = false;
+
+    async function initFirebase() {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        storageRef = storage.ref();
+        firebaseReady = true;
+        console.log('Firebase initialized successfully');
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showToast('⚠️ Firebase belum dikonfig. Upload gambar tidak tersedia.', 'warning');
+      }
+    }
+
+    // ==================== APP STATE ====================
+    let currentUser = null;
+    let allData = [];
+    let currentChatWith = null;
+    let currentPage = 'home';
+    
+    const defaultConfig = {
+      site_title: 'S.O.P',
+      tagline: 'Platform Jual Beli Komuniti Politeknik Anda',
+      banner_text: 'Selamat Datang ke S.O.P!',
+      primary_color: '#102a43',
+      secondary_color: '#ffffff',
+      accent_color: '#f97316',
+      text_color: '#102a43',
+      font_family: 'Poppins'
+    };
+
+    // ==================== SDK INITIALIZATION ====================
+    async function initApp() {
+      // Initialize Firebase first
+      initFirebase();
+      
+      // Initialize Element SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('nav-title').textContent = config.site_title || defaultConfig.site_title;
+            document.getElementById('banner-title').textContent = config.banner_text || defaultConfig.banner_text;
+            document.getElementById('banner-tagline').textContent = config.tagline || defaultConfig.tagline;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.primary_color || defaultConfig.primary_color,
+                set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
+              },
+              {
+                get: () => config.secondary_color || defaultConfig.secondary_color,
+                set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
+              },
+              {
+                get: () => config.accent_color || defaultConfig.accent_color,
+                set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+            },
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['site_title', config.site_title || defaultConfig.site_title],
+            ['tagline', config.tagline || defaultConfig.tagline],
+            ['banner_text', config.banner_text || defaultConfig.banner_text]
+          ])
+        });
+      }
+
+      // Check for saved user session
+      const savedUser = localStorage.getItem('sop_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        updateAuthNav();
+      }
+
+      renderUI();
+    }
+
+    // ==================== DATA HELPERS ====================
+    function getUsers() {
+      return allData.filter(d => d.type === 'user');
+    }
+
+    function getProducts() {
+      return allData.filter(d => d.type === 'product');
+    }
+
+    function getCartItems() {
+      if (!currentUser) return [];
+      return allData.filter(d => d.type === 'cart' && d.cartUserId === currentUser.email);
+    }
+
+    function getMessages() {
+      if (!currentUser) return [];
+      return allData.filter(d => d.type === 'message' && 
+        (d.messageFrom === currentUser.email || d.messageTo === currentUser.email));
+    }
+
+    function getOrders() {
+      return allData.filter(d => d.type === 'order');
+    }
+
+    // ==================== NAVIGATION ====================
+    function navigateTo(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const targetPage = document.getElementById(`page-${page}`);
+      if (targetPage) {
+        targetPage.classList.add('active');
+        currentPage = page;
+        
+        // Page-specific rendering
+        if (page === 'products') renderProducts();
+        if (page === 'cart') renderCart();
+        if (page === 'checkout') renderCheckout();
+        if (page === 'chat') renderChatList();
+        if (page === 'seller') renderSellerDashboard();
+        if (page === 'profile') renderProfile();
+      }
+      
+      // Close mobile menu
+      document.getElementById('mobile-menu').classList.add('hidden');
+      window.scrollTo(0, 0);
+    }
+
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    }
+
+    // ==================== DARK MODE ====================
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('sop_dark', document.documentElement.classList.contains('dark'));
+    }
+
+    // Load dark mode preference
+    if (localStorage.getItem('sop_dark') === 'true') {
+      document.documentElement.classList.add('dark');
+    }
+
+    // ==================== AUTH ====================
+    function updateAuthNav() {
+      const authNav = document.getElementById('auth-nav');
+      const authNavMobile = document.getElementById('auth-nav-mobile');
+      
+      if (currentUser) {
+        authNav.innerHTML = `
+          <a href="#" onclick="navigateTo('profile')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors flex items-center">
+            <div class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white text-sm font-bold mr-2">
+              ${currentUser.name.charAt(0).toUpperCase()}
+            </div>
+            ${currentUser.name.split(' ')[0]}
+          </a>
+        `;
+        authNavMobile.innerHTML = `
+          <a href="#" onclick="navigateTo('profile')" class="text-navy-600 dark:text-navy-200 py-2">
+            <i class="fas fa-user mr-2"></i> ${currentUser.name}
+          </a>
+        `;
+      } else {
+        authNav.innerHTML = `
+          <a href="#" onclick="navigateTo('login')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors">
+            <i class="fas fa-sign-in-alt mr-1"></i> Login
+          </a>
+        `;
+        authNavMobile.innerHTML = `
+          <a href="#" onclick="navigateTo('login')" class="text-navy-600 dark:text-navy-200 py-2">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
+          </a>
+        `;
+      }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      const users = getUsers();
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        currentUser = { name: user.name, email: user.email, role: user.role };
+        localStorage.setItem('sop_user', JSON.stringify(currentUser));
+        updateAuthNav();
+        showToast('Log masuk berjaya!', 'success');
+        navigateTo('home');
+      } else {
+        showToast('Email atau kata laluan tidak sah', 'error');
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const role = document.querySelector('input[name="role"]:checked').value;
+      
+      const users = getUsers();
+      if (users.find(u => u.email === email)) {
+        showToast('Email sudah didaftarkan', 'error');
+        return;
+      }
+      
+      if (!firebaseReady) {
+        showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
+        return;
+      }
+      
+      try {
+        const userId = await saveToFirebase('users', {
+          name,
+          email,
+          password,
+          role,
+          type: 'user',
+          createdAt: new Date().toISOString()
+        });
+        
+        allData.push({
+          id: userId,
+          type: 'user',
+          name,
+          email,
+          password,
+          role,
+          createdAt: new Date().toISOString()
+        });
+        
+        showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
+        navigateTo('login');
+      } catch (error) {
+        console.error('Registration error:', error);
+        showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
+      }
+    });
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('sop_user');
+      updateAuthNav();
+      showToast('Log keluar berjaya', 'success');
+      navigateTo('home');
+    }
+
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // ==================== PRODUCTS ====================
+    function renderUI() {
+      renderTrendingProducts();
+      renderProducts();
+      renderCart();
+      updateCartBadge();
+      
+      if (currentPage === 'seller') renderSellerDashboard();
+      if (currentPage === 'chat') renderChatList();
+    }
+
+    function renderTrendingProducts() {
+      const container = document.getElementById('trending-products');
+      const products = getProducts().slice(0, 8);
+      
+      if (products.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
+            <p class="text-navy-500 dark:text-navy-400">Belum ada produk. Jadilah penjual pertama!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = products.map(p => createProductCard(p)).join('');
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('products-grid');
+      const noProducts = document.getElementById('no-products');
+      let products = getProducts();
+      
+      // Apply filters
+      const search = document.getElementById('search-input')?.value.toLowerCase() || '';
+      const category = document.getElementById('category-filter')?.value || '';
+      const sort = document.getElementById('sort-filter')?.value || 'newest';
+      
+      if (search) {
+        products = products.filter(p => 
+          p.productName.toLowerCase().includes(search) || 
+          p.description?.toLowerCase().includes(search)
+        );
+      }
+      
+      if (category) {
+        products = products.filter(p => p.category === category);
+      }
+      
+      // Sort
+      switch(sort) {
+        case 'price-low':
+          products.sort((a, b) => a.price - b.price);
+          break;
+        case 'price-high':
+          products.sort((a, b) => b.price - a.price);
+          break;
+        case 'rating':
+          products.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+          break;
+        default:
+          products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      
+      if (products.length === 0) {
+        container.innerHTML = '';
+        noProducts.classList.remove('hidden');
+      } else {
+        noProducts.classList.add('hidden');
+        container.innerHTML = products.map(p => createProductCard(p)).join('');
+      }
+    }
+
+    function createProductCard(product) {
+      const rating = product.rating || Math.floor(Math.random() * 2) + 4;
+      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const categoryIcons = {
+        'Akademik': 'fa-book',
+        'Elektronik': 'fa-laptop',
+        'Asrama': 'fa-bed',
+        'Peribadi': 'fa-tshirt',
+        'Makanan': 'fa-cookie-bite'
+      };
+      const icon = categoryIcons[product.category] || 'fa-box';
+      
+      // Display single image_url instead of images array
+      const imageUrl = product.image_url || null;
+      
+      return `
+        <div class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in">
+          <div class="aspect-square bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-700 dark:to-navy-600 flex items-center justify-center relative group overflow-hidden">
+            ${imageUrl ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover" loading="lazy" onerror="console.error('Image failed:', this.src); this.parentElement.innerHTML='<i class=\"fas ${icon} text-5xl text-navy-400 dark:text-navy-300\"></i>';">` : `<i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i>`}
+          </div>
+          <div class="p-4">
+            <h3 class="font-semibold text-sm mb-1 truncate">${product.productName}</h3>
+            <p class="text-accent-orange font-bold text-lg">RM ${product.price.toFixed(2)}</p>
+            <div class="flex items-center justify-between mt-2">
+              <span class="text-xs text-navy-500 dark:text-navy-400 truncate max-w-[60%]">${product.sellerName}</span>
+              <span class="text-yellow-500 text-xs">${stars}</span>
+            </div>
+            <div class="flex gap-2 mt-3">
+              <button onclick="addToCart('${product.id}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
+                <i class="fas fa-cart-plus mr-1"></i> Tambah
+              </button>
+              <button onclick="startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
+                <i class="fas fa-comment"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function searchProducts() {
+      renderProducts();
+    }
+
+    function filterByCategory(category) {
+      const filter = document.getElementById('category-filter');
+      if (filter) filter.value = category;
+      navigateTo('products');
+      renderProducts();
+    }
+
+    // ==================== CART ====================
+    function updateCartBadge() {
+      const badge = document.getElementById('cart-badge');
+      const cartItems = getCartItems();
+      const count = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    async function addToCart(productId) {
+      if (!currentUser) {
+        showToast('Sila log masuk untuk menambah ke troli', 'warning');
+        navigateTo('login');
+        return;
+      }
+      
+      const existingItem = allData.find(d => 
+        d.type === 'cart' && 
+        d.cartProductId === productId && 
+        d.cartUserId === currentUser.email
+      );
+      
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        if (existingItem) {
+          await updateInFirebase('cart', existingItem.id, {
+            quantity: (existingItem.quantity || 1) + 1
+          });
+        } else {
+          const cartId = await saveToFirebase('cart', {
+            type: 'cart',
+            cartUserId: currentUser.email,
+            cartProductId: productId,
+            quantity: 1,
+            createdAt: new Date().toISOString()
+          });
+          
+          allData.push({
+            id: cartId,
+            type: 'cart',
+            cartUserId: currentUser.email,
+            cartProductId: productId,
+            quantity: 1,
+            createdAt: new Date().toISOString()
+          });
+        }
+        
+        showToast('Ditambah ke troli!', 'success');
+        renderUI();
+      } catch (error) {
+        console.error('Add to cart error:', error);
+        showToast('Ralat menambah ke troli: ' + error.message, 'error');
+      }
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      const empty = document.getElementById('cart-empty');
+      const summary = document.getElementById('cart-summary');
+      const cartItems = getCartItems();
+      const products = getProducts();
+      
+      if (cartItems.length === 0) {
+        container.innerHTML = '';
+        empty.classList.remove('hidden');
+        summary.classList.add('hidden');
+        return;
+      }
+      
+      empty.classList.add('hidden');
+      summary.classList.remove('hidden');
+      
+      let total = 0;
+      container.innerHTML = cartItems.map(item => {
+        const product = products.find(p => p.id === item.cartProductId);
+        if (!product) return '';
+        
+        const itemTotal = product.price * (item.quantity || 1);
+        total += itemTotal;
+        
+        return `
+          <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-md flex items-center gap-4 fade-in">
+            <div class="w-20 h-20 bg-navy-100 dark:bg-navy-700 rounded-lg flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-box text-2xl text-navy-400"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold truncate">${product.productName}</h3>
+              <p class="text-accent-orange font-bold">RM ${product.price.toFixed(2)}</p>
+              <div class="flex items-center gap-2 mt-2">
+                <button onclick="updateCartQty('${item.id}', -1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
+                  <i class="fas fa-minus text-xs"></i>
+                </button>
+                <span class="w-8 text-center font-medium">${item.quantity || 1}</span>
+                <button onclick="updateCartQty('${item.id}', 1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
+                  <i class="fas fa-plus text-xs"></i>
+                </button>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-lg">RM ${itemTotal.toFixed(2)}</p>
+              <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-600 text-sm mt-2">
+                <i class="fas fa-trash mr-1"></i> Buang
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('cart-total').textContent = `RM ${total.toFixed(2)}`;
+    }
+
+    async function updateCartQty(cartId, change) {
+      const item = allData.find(d => d.id === cartId);
+      if (!item) return;
+      
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        const newQty = (item.quantity || 1) + change;
+        if (newQty <= 0) {
+          await deleteFromFirebase('cart', cartId);
+          allData = allData.filter(d => d.id !== cartId);
+        } else {
+          await updateInFirebase('cart', cartId, { quantity: newQty });
+          const index = allData.findIndex(d => d.id === cartId);
+          if (index >= 0) {
+            allData[index].quantity = newQty;
+          }
+        }
+        renderUI();
+      } catch (error) {
+        console.error('Update cart error:', error);
+        showToast('Ralat mengemas kini troli: ' + error.message, 'error');
+      }
+    }
+
+    async function removeFromCart(cartId) {
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        await deleteFromFirebase('cart', cartId);
+        allData = allData.filter(d => d.id !== cartId);
+        showToast('Item dibuang dari troli', 'success');
+        renderUI();
+      } catch (error) {
+        console.error('Remove from cart error:', error);
+        showToast('Ralat membuang item: ' + error.message, 'error');
+      }
+    }
+
+    // ==================== CHECKOUT ====================
+    function renderCheckout() {
+      const cartItems = getCartItems();
+      const products = getProducts();
+      const itemsContainer = document.getElementById('checkout-items');
+      const totalEl = document.getElementById('checkout-total');
+      
+      let total = 0;
+      itemsContainer.innerHTML = cartItems.map(item => {
+        const product = products.find(p => p.id === item.cartProductId);
+        if (!product) return '';
+        const itemTotal = product.price * (item.quantity || 1);
+        total += itemTotal;
+        return `<div class="flex justify-between"><span>${product.productName} x${item.quantity || 1}</span><span>RM ${itemTotal.toFixed(2)}</span></div>`;
+      }).join('');
+      
+      totalEl.textContent = `RM ${total.toFixed(2)}`;
+    }
+
+    document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('cod-name').value;
+      const phone = document.getElementById('cod-phone').value;
+      const dept = document.getElementById('cod-dept').value;
+      const location = document.getElementById('cod-location').value;
+      
+      if (!location) {
+        showToast('Sila pilih lokasi COD', 'warning');
+        return;
+      }
+      
+      if (!firebaseReady) {
+        showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
+        return;
+      }
+      
+      const cartItems = getCartItems();
+      
+      try {
+        // Create order in Firebase
+        const orderId = await saveToFirebase('orders', {
+          type: 'order',
+          orderId: 'ORD-' + Date.now(),
+          orderUserId: currentUser.email,
+          customerName: name,
+          customerPhone: phone,
+          customerDept: dept,
+          codLocation: location,
+          orderStatus: 'pending',
+          createdAt: new Date().toISOString()
+        });
+        
+        allData.push({
+          id: orderId,
+          type: 'order',
+          orderId: 'ORD-' + Date.now(),
+          orderUserId: currentUser.email,
+          customerName: name,
+          customerPhone: phone,
+          customerDept: dept,
+          codLocation: location,
+          orderStatus: 'pending',
+          createdAt: new Date().toISOString()
+        });
+        
+        // Clear cart items
+        for (const item of cartItems) {
+          await deleteFromFirebase('cart', item.id);
+        }
+        
+        allData = allData.filter(d => !cartItems.find(ci => ci.id === d.id));
+        
+        showModal('Pesanan Berjaya!', `
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-check text-green-600 text-3xl"></i>
+            </div>
+            <p class="text-navy-600 dark:text-navy-300 mb-4">Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.</p>
+            <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
+              Kembali ke Home
+            </button>
+          </div>
+        `);
+      } catch (error) {
+        console.error('Checkout error:', error);
+        showToast('Ralat membuat pesanan: ' + error.message, 'error');
+      }
+    });
+
+    // ==================== CHAT ====================
+    function renderChatList() {
+      if (!currentUser) {
+        document.getElementById('chat-list').innerHTML = `
+          <div class="p-4 text-center text-navy-500">
+            <i class="fas fa-lock text-2xl mb-2"></i>
+            <p>Sila log masuk untuk chat</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const messages = getMessages();
+      const users = getUsers();
+      const chatPartners = new Set();
+      
+      messages.forEach(m => {
+        if (m.messageFrom !== currentUser.email) chatPartners.add(m.messageFrom);
+        if (m.messageTo !== currentUser.email) chatPartners.add(m.messageTo);
+      });
+      
+      const container = document.getElementById('chat-list');
+      if (chatPartners.size === 0) {
+        container.innerHTML = `
+          <div class="p-4 text-center text-navy-500">
+            <i class="fas fa-comments text-2xl mb-2"></i>
+            <p class="text-sm">Tiada perbualan</p>
+            <p class="text-xs mt-1">Chat dengan seller melalui halaman produk</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = Array.from(chatPartners).map(email => {
+        const user = users.find(u => u.email === email);
+        const name = user ? user.name : email.split('@')[0];
+        const lastMsg = messages.filter(m => m.messageFrom === email || m.messageTo === email).pop();
+        
+        return `
+          <div onclick="openChat('${email}')" class="p-4 hover:bg-navy-50 dark:hover:bg-navy-700 cursor-pointer border-b border-navy-100 dark:border-navy-700 transition-colors ${currentChatWith === email ? 'bg-navy-100 dark:bg-navy-700' : ''}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold">
+                ${name.charAt(0).toUpperCase()}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium truncate">${name}</p>
+                <p class="text-xs text-navy-500 dark:text-navy-400 truncate">${lastMsg?.messageText || ''}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openChat(email) {
+      currentChatWith = email;
+      const users = getUsers();
+      const user = users.find(u => u.email === email);
+      const name = user ? user.name : email.split('@')[0];
+      
+      document.getElementById('chat-with').textContent = name;
+      renderChatMessages();
+      renderChatList();
+    }
+
+    function renderChatMessages() {
+      if (!currentChatWith || !currentUser) return;
+      
+      const container = document.getElementById('chat-messages');
+      const messages = getMessages().filter(m => 
+        (m.messageFrom === currentUser.email && m.messageTo === currentChatWith) ||
+        (m.messageFrom === currentChatWith && m.messageTo === currentUser.email)
+      ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-navy-400 py-8">
+            <i class="fas fa-comments text-4xl mb-2"></i>
+            <p>Mulakan perbualan</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = messages.map(m => {
+        const isMe = m.messageFrom === currentUser.email;
+        return `
+          <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[70%] px-4 py-2 ${isMe ? 'bg-accent-orange text-white chat-bubble-right' : 'bg-white dark:bg-navy-700 chat-bubble-left shadow'}">
+              <p class="text-sm">${m.messageText}</p>
+              <p class="text-xs ${isMe ? 'text-orange-200' : 'text-navy-400'} mt-1">${new Date(m.createdAt).toLocaleTimeString('ms-MY', {hour: '2-digit', minute: '2-digit'})}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendMessage() {
+      if (!currentUser || !currentChatWith) return;
+      
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        const messageId = await saveToFirebase('messages', {
+          type: 'message',
+          messageFrom: currentUser.email,
+          messageTo: currentChatWith,
+          messageText: text,
+          createdAt: new Date().toISOString()
+        });
+        
+        allData.push({
+          id: messageId,
+          type: 'message',
+          messageFrom: currentUser.email,
+          messageTo: currentChatWith,
+          messageText: text,
+          createdAt: new Date().toISOString()
+        });
+        
+        input.value = '';
+        renderChatMessages();
+      } catch (error) {
+        console.error('Send message error:', error);
+        showToast('Ralat menghantar mesej: ' + error.message, 'error');
+      }
+    }
+
+    function startChat(sellerId) {
+      if (!currentUser) {
+        showToast('Sila log masuk untuk chat', 'warning');
+        navigateTo('login');
+        return;
+      }
+      
+      currentChatWith = sellerId;
+      navigateTo('chat');
+      openChat(sellerId);
+    }
+
+    // ==================== SELLER DASHBOARD ====================
+    function renderSellerDashboard() {
+      if (!currentUser || currentUser.role !== 'seller') {
+        navigateTo('home');
+        return;
+      }
+      
+      const myProducts = getProducts().filter(p => p.sellerId === currentUser.email);
+      const orders = getOrders().filter(o => {
+        const orderProducts = myProducts.map(p => p.id);
+        return orderProducts.length > 0;
+      });
+      const messages = getMessages();
+      
+      document.getElementById('seller-product-count').textContent = myProducts.length;
+      document.getElementById('seller-order-count').textContent = orders.length;
+      document.getElementById('seller-msg-count').textContent = messages.filter(m => m.messageTo === currentUser.email).length;
+      
+      const container = document.getElementById('seller-products');
+      const noProducts = document.getElementById('seller-no-products');
+      
+      if (myProducts.length === 0) {
+        container.innerHTML = '';
+        noProducts.classList.remove('hidden');
+      } else {
+        noProducts.classList.add('hidden');
+        container.innerHTML = myProducts.map(p => `
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 fade-in">
+            <div class="flex items-start gap-4">
+              <div class="w-16 h-16 bg-navy-200 dark:bg-navy-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-box text-xl text-navy-400"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold truncate">${p.productName}</h3>
+                <p class="text-accent-orange font-bold">RM ${p.price.toFixed(2)}</p>
+                <span class="text-xs text-navy-500 dark:text-navy-400">${p.category}</span>
+              </div>
+              <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 p-2">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    let uploadedImages = [];
+
+    function showAddProductModal() {
+      uploadedImages = [];
+      showModal('Tambah Produk', `
+        <form id="add-product-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+          <div>
+            <label class="block text-sm font-medium mb-1">Nama Produk</label>
+            <input type="text" id="prod-name" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Harga (RM)</label>
+            <input type="number" id="prod-price" required min="0" step="0.01" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Kategori</label>
+            <select id="prod-category" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+              <option value="Akademik">📚 Akademik</option>
+              <option value="Elektronik">💻 Elektronik</option>
+              <option value="Asrama">🏠 Asrama</option>
+              <option value="Peribadi">👕 Peribadi</option>
+              <option value="Makanan">🍪 Makanan</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Keterangan</label>
+            <textarea id="prod-desc" rows="2" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, 5MB max)</span></label>
+            <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
+              <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
+              <p class="text-sm font-medium">Klik untuk pilih gambar atau drag & drop</p>
+              <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">1 gambar sahaja per produk</p>
+              <input type="file" id="file-input" accept=".jpg,.jpeg,.png" style="display:none;">
+            </div>
+            <div id="image-preview" class="mt-3"></div>
+            <div id="upload-status" class="mt-2 text-sm"></div>
+          </div>
+          <button type="submit" id="submit-btn" class="w-full btn-primary bg-accent-orange text-white py-2 rounded-lg font-medium">
+            <i class="fas fa-plus mr-2"></i> Tambah Produk
+          </button>
+        </form>
+      `);
+      
+      const fileInput = document.getElementById('file-input');
+      const dropZone = fileInput.parentElement;
+      
+      // Drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('bg-navy-100', 'dark:bg-navy-600');
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+        handleFiles(e.dataTransfer.files);
+      });
+      
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+      });
+      
+      document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!firebaseReady) {
+          showToast('❌ Firebase belum dikonfig. Sila periksa Firebase credentials.', 'error');
+          return;
+        }
+        
+        if (!uploadedImages[0]) {
+          showToast('Sila muat naik gambar produk', 'warning');
+          return;
+        }
+        
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sedang memproses...';
+        
+        try {
+          // Upload image to Firebase Storage
+          const imageUrl = await uploadImageToFirebase(uploadedImages[0]);
+          
+          if (allData.length >= 999) {
+            showToast('Had storan dicapai', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
+            return;
+          }
+          
+          // Save product with image_url to Firebase
+          const result = await saveToFirebase('products', {
+            type: 'product',
+            productName: document.getElementById('prod-name').value,
+            price: parseFloat(document.getElementById('prod-price').value),
+            category: document.getElementById('prod-category').value,
+            description: document.getElementById('prod-desc').value,
+            image_url: imageUrl,
+            sellerId: currentUser.email,
+            sellerName: currentUser.name,
+            rating: 5,
+            createdAt: new Date().toISOString()
+          });
+          
+          allData.push({
+            id: result,
+            type: 'product',
+            productName: document.getElementById('prod-name').value,
+            price: parseFloat(document.getElementById('prod-price').value),
+            category: document.getElementById('prod-category').value,
+            description: document.getElementById('prod-desc').value,
+            image_url: imageUrl,
+            sellerId: currentUser.email,
+            sellerName: currentUser.name,
+            rating: 5,
+            createdAt: new Date().toISOString()
+          });
+          
+          closeModal();
+          showToast('✅ Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
+          uploadedImages = [];
+          renderUI();
+        } catch (error) {
+          console.error('Error adding product:', error);
+          showToast(`❌ Ralat: ${error.message}`, 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
+        }
+      });
+    }
+
+    // ==================== FIREBASE IMAGE UPLOAD ====================
+    async function uploadImageToFirebase(imageData) {
+      if (!firebaseReady || !storageRef) {
+        throw new Error('Firebase belum siap. Periksa konfigurasi.');
+      }
+      
+      // Validate file type before upload
+      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
+        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      }
+      
+      // Validate file size (5MB)
+      if (imageData.file.size > 5 * 1024 * 1024) {
+        throw new Error('Gambar terlalu besar (> 5MB).');
+      }
+      
+      // Generate unique filename: timestamp + random ID
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const ext = imageData.file.name.split('.').pop();
+      const filename = `${timestamp}_${randomId}.${ext}`;
+      const filepath = `products/${filename}`;
+      
+      // Upload to Firebase Storage
+      const fileRef = storageRef.child(filepath);
+      const snapshot = await fileRef.put(imageData.file);
+      
+      // Get download URL
+      const downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    }
+
+    function handleFiles(files) {
+      const statusEl = document.getElementById('upload-status');
+      
+      if (files.length === 0) return;
+      
+      const file = files[0]; // Only accept 1 file per product
+      
+      // Validate file type
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        showToast('❌ Format gambar tidak sah. Gunakan JPG atau PNG.', 'error');
+        statusEl.innerHTML = '<p class="text-red-500">❌ Format tidak sah (JPG/PNG sahaja)</p>';
+        return;
+      }
+      
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ Gambar terlalu besar (> 5MB).', 'error');
+        statusEl.innerHTML = '<p class="text-red-500">❌ Saiz > 5MB</p>';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImages = [{
+          file: file,
+          preview: e.target.result,
+          name: file.name,
+          size: (file.size / 1024 / 1024).toFixed(2)
+        }];
+        
+        renderImagePreviews();
+        statusEl.innerHTML = `<p class="text-green-600">✅ Gambar bersedia untuk dimuat naik (${uploadedImages[0].size}MB)</p>`;
+      };
+      
+      reader.onerror = () => {
+        showToast('❌ Ralat membaca fail gambar', 'error');
+        statusEl.innerHTML = '<p class="text-red-500">❌ Ralat membaca fail</p>';
+      };
+      
+      reader.readAsDataURL(file);
+    }
+
+    function renderImagePreviews() {
+      const container = document.getElementById('image-preview');
+      if (uploadedImages.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      const img = uploadedImages[0];
+      container.innerHTML = `
+        <div class="relative group">
+          <img src="${img.preview}" alt="Preview" class="w-full max-w-48 aspect-square object-cover rounded-lg border border-navy-200 dark:border-navy-600 mx-auto">
+          <button type="button" onclick="removeImage()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fas fa-trash text-sm"></i>
+          </button>
+          <div class="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+            ${img.size}MB
+          </div>
+        </div>
+      `;
+    }
+
+    function removeImage() {
+      uploadedImages = [];
+      renderImagePreviews();
+      const statusEl = document.getElementById('upload-status');
+      statusEl.innerHTML = '';
+      document.getElementById('file-input').value = '';
+    }
+
+    async function deleteProduct(productId) {
+      const product = allData.find(d => d.id === productId);
+      if (product) {
+        showModal('Padam Produk?', `
+          <div class="text-center">
+            <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+            <p class="mb-4">Adakah anda pasti mahu padam produk ini?</p>
+            <div class="flex gap-2 justify-center">
+              <button onclick="closeModal()" class="px-4 py-2 bg-navy-200 dark:bg-navy-700 rounded-lg">Batal</button>
+              <button onclick="confirmDeleteProduct('${productId}')" class="px-4 py-2 bg-red-500 text-white rounded-lg">Padam</button>
+            </div>
+          </div>
+        `);
+      }
+    }
+
+    async function confirmDeleteProduct(productId) {
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        await deleteFromFirebase('products', productId);
+        allData = allData.filter(d => d.id !== productId);
+        closeModal();
+        showToast('Produk telah dipadam', 'success');
+        renderUI();
+      } catch (error) {
+        console.error('Delete product error:', error);
+        showToast('Ralat memadam produk: ' + error.message, 'error');
+      }
+    }
+
+    // ==================== PROFILE ====================
+    function renderProfile() {
+      if (!currentUser) {
+        navigateTo('login');
+        return;
+      }
+      
+      document.getElementById('profile-name').textContent = currentUser.name;
+      document.getElementById('profile-email').textContent = currentUser.email;
+      document.getElementById('profile-badge').textContent = currentUser.role === 'seller' ? 'Seller' : 'Buyer';
+      
+      const sellerBtn = document.getElementById('seller-dashboard-btn');
+      if (currentUser.role === 'seller') {
+        sellerBtn.classList.remove('hidden');
+      } else {
+        sellerBtn.classList.add('hidden');
+      }
+    }
+
+    // ==================== UI HELPERS ====================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+      };
+      const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${colors[type]} text-white flex items-center gap-2`;
+      toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${message}`;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function showModal(title, content) {
+      const container = document.getElementById('modal-container');
+      container.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()">
+          <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold">${title}</h3>
+              <button onclick="closeModal()" class="text-navy-400 hover:text-navy-600">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            ${content}
+          </div>
+        </div>
+      `;
+    }
+
+    function closeModal() {
+      document.getElementById('modal-container').innerHTML = '';
+    }
+
+    // ==================== INITIALIZE ====================
+    initApp();
+    updateAuthNav();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d7399b484d414eb',t:'MTc3MjY1NTgyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
