@@ -32,6 +32,17 @@
     // Signal when Firebase modules are loaded
     window.firebaseModulesReady = true;
   </script>
+  <script>
+    // Guard: prevent default hash navigation on anchors to allow inline onclick handlers to run reliably
+    document.addEventListener('click', function (e) {
+      const a = e.target.closest('a');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (href === '#' || href === '') {
+        e.preventDefault();
+      }
+    }, true);
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -1329,6 +1340,11 @@
       if (!currentUser) {
         showToast('Sila log masuk untuk chat', 'warning');
         navigateTo('login');
+        return;
+      }
+      // Guard against missing sellerId
+      if (!sellerId) {
+        showToast('Penjual tidak dikenali', 'warning');
         return;
       }
       
