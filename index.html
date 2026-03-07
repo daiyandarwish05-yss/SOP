@@ -31,6 +31,23 @@
 
     // Signal when Firebase modules are loaded
     window.firebaseModulesReady = true;
+
+    // Expose key navigation/interaction functions to global scope so inline onclicks work on static hosting
+    window.navigateTo = navigateTo;
+    window.toggleMobileMenu = toggleMobileMenu;
+    window.toggleDarkMode = toggleDarkMode;
+    window.addToCart = addToCart;
+    window.startChat = startChat;
+    window.filterByCategory = filterByCategory;
+    window.searchProducts = searchProducts;
+    window.logout = logout;
+    window.updateCartQty = updateCartQty;
+    window.removeFromCart = removeFromCart;
+    window.showToast = showToast;
+    window.showModal = showModal;
+    window.closeModal = closeModal;
+    window.openChat = openChat;
+    window.renderUI = renderUI;
   </script>
   <script>
     // Guard: prevent default hash navigation on anchors to allow inline onclick handlers to run reliably
@@ -671,6 +688,7 @@
 
     // ==================== NAVIGATION ====================
     function navigateTo(page) {
+      console.log('Button clicked: navigateTo', page);
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const targetPage = document.getElementById(`page-${page}`);
       if (targetPage) {
@@ -692,11 +710,13 @@
     }
 
     function toggleMobileMenu() {
+      console.log('Button clicked: toggleMobileMenu');
       document.getElementById('mobile-menu').classList.toggle('hidden');
     }
 
     // ==================== DARK MODE ====================
     function toggleDarkMode() {
+      console.log('Button clicked: toggleDarkMode');
       document.documentElement.classList.toggle('dark');
       localStorage.setItem('sop_dark', document.documentElement.classList.contains('dark'));
     }
@@ -805,6 +825,7 @@
     });
 
     function logout() {
+      console.log('Button clicked: logout');
       currentUser = null;
       localStorage.removeItem('sop_user');
       updateAuthNav();
@@ -931,10 +952,12 @@
     }
 
     function searchProducts() {
+      console.log('Button clicked: searchProducts');
       renderProducts();
     }
 
     function filterByCategory(category) {
+      console.log('Button clicked: filterByCategory', category);
       const filter = document.getElementById('category-filter');
       if (filter) filter.value = category;
       navigateTo('products');
@@ -956,6 +979,7 @@
     }
 
     async function addToCart(productId) {
+      console.log('Button clicked: addToCart', productId);
       if (!currentUser) {
         showToast('Sila log masuk untuk menambah ke troli', 'warning');
         navigateTo('login');
@@ -1063,6 +1087,7 @@
     }
 
     async function updateCartQty(cartId, change) {
+      console.log('Button clicked: updateCartQty', cartId, change);
       const item = allData.find(d => d.__firebaseId === cartId);
       if (!item) return;
       
@@ -1091,6 +1116,7 @@
     }
 
     async function removeFromCart(cartId) {
+      console.log('Button clicked: removeFromCart', cartId);
       if (!firebaseReady) {
         showToast('Firebase belum siap.', 'error');
         return;
@@ -1335,6 +1361,7 @@
     }
 
     function startChat(sellerId) {
+      console.log('Button clicked: startChat', sellerId);
       if (!currentUser) {
         showToast('Sila log masuk untuk chat', 'warning');
         navigateTo('login');
@@ -1400,6 +1427,7 @@
     let uploadedImages = [];
 
     function showAddProductModal() {
+      console.log('Button clicked: showAddProductModal');
       uploadedImages = [];
       showModal('Tambah Produk', `
         <form id="add-product-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
@@ -1607,6 +1635,7 @@
     }
 
     async function deleteProduct(productId) {
+      console.log('Button clicked: deleteProduct', productId);
       const product = allData.find(d => d.id === productId);
       if (product) {
         showModal('Padam Produk?', `
