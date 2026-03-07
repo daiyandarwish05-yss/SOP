@@ -7,8 +7,30 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script><!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getBytes } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+    import { getDatabase, ref as dbRef, set, get, remove, push, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    // Make Firebase modules globally available
+    window.firebase = {
+      initializeApp,
+      getStorage,
+      ref,
+      uploadBytes,
+      getBytes,
+      getDatabase,
+      dbRef,
+      set,
+      get,
+      remove,
+      push,
+      update
+    };
+
+    // Signal when Firebase modules are loaded
+    window.firebaseModulesReady = true;
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -65,39 +87,48 @@
   <style>body { box-sizing: border-box; }</style>
  </head>
  <body class="h-full bg-navy-50 dark:bg-navy-900 text-navy-900 dark:text-white overflow-auto">
-  <div id="app" class="h-full w-full flex flex-col"><!-- Navigation -->
+  <div id="app" class="h-full w-full flex flex-col">
+   <!-- Navigation -->
    <nav id="navbar" class="bg-white dark:bg-navy-800 shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4">
-     <div class="flex justify-between items-center h-16"><!-- Logo -->
+     <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
       <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
-       <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center"><i class="fas fa-store text-white text-lg"></i>
+       <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center">
+        <i class="fas fa-store text-white text-lg"></i>
        </div><span id="nav-title" class="font-bold text-xl text-navy-800 dark:text-white">S.O.P</span>
       </div><!-- Desktop Nav -->
-      <div class="hidden md:flex items-center space-x-6"><a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-home mr-1"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-shopping-bag mr-1"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative"> <i class="fas fa-shopping-cart mr-1"></i> Cart <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span> </a> <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-comments mr-1"></i> Chat </a>
+      <div class="hidden md:flex items-center space-x-6">
+       <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-home mr-1"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-shopping-bag mr-1"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative"> <i class="fas fa-shopping-cart mr-1"></i> Cart <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span> </a> <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"> <i class="fas fa-comments mr-1"></i> Chat </a>
        <div id="auth-nav"></div><button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-navy-100 dark:bg-navy-700 text-navy-600 dark:text-yellow-400 hover:bg-navy-200 dark:hover:bg-navy-600 transition-colors"> <i class="fas fa-moon dark:hidden"></i> <i class="fas fa-sun hidden dark:block"></i> </button>
       </div><!-- Mobile Menu Button --> <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-navy-600 dark:text-white"> <i class="fas fa-bars text-xl"></i> </button>
      </div><!-- Mobile Nav -->
      <div id="mobile-menu" class="hidden md:hidden pb-4">
-      <div class="flex flex-col space-y-3"><a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-home mr-2"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-bag mr-2"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-cart mr-2"></i> Cart </a> <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-comments mr-2"></i> Chat </a>
+      <div class="flex flex-col space-y-3">
+       <a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-home mr-2"></i> Home </a> <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-bag mr-2"></i> Products </a> <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-shopping-cart mr-2"></i> Cart </a> <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"> <i class="fas fa-comments mr-2"></i> Chat </a>
        <div id="auth-nav-mobile"></div>
       </div>
      </div>
     </div>
    </nav><!-- Main Content -->
-   <main class="flex-1 overflow-auto"><!-- HOME PAGE -->
-    <div id="page-home" class="page active"><!-- Hero Banner -->
+   <main class="flex-1 overflow-auto">
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page active">
+     <!-- Hero Banner -->
      <div class="bg-gradient-to-r from-navy-800 via-navy-700 to-navy-600 text-white">
       <div class="max-w-7xl mx-auto px-4 py-12 md:py-20">
        <div class="flex flex-col md:flex-row items-center justify-between">
         <div class="text-center md:text-left mb-8 md:mb-0">
          <h1 id="banner-title" class="text-3xl md:text-5xl font-bold mb-4">Selamat Datang ke S.O.P!</h1>
          <p id="banner-tagline" class="text-lg md:text-xl text-navy-200 mb-6">Platform Jual Beli Komuniti Politeknik Anda</p>
-         <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"><button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg"> <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli </button> <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100"> <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Seller </button>
+         <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg"> <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli </button> <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100"> <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Seller </button>
          </div>
         </div>
         <div class="w-64 h-64 relative">
          <div class="absolute inset-0 bg-accent-orange/20 rounded-full animate-pulse"></div>
-         <div class="absolute inset-4 bg-white/10 rounded-full flex items-center justify-center"><i class="fas fa-store text-8xl text-white/80"></i>
+         <div class="absolute inset-4 bg-white/10 rounded-full flex items-center justify-center">
+          <i class="fas fa-store text-8xl text-white/80"></i>
          </div>
         </div>
        </div>
@@ -106,19 +137,22 @@
      <div class="max-w-7xl mx-auto px-4 py-12">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
-        <div class="w-14 h-14 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4"><i class="fas fa-hand-holding-dollar text-2xl text-green-600"></i>
+        <div class="w-14 h-14 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4">
+         <i class="fas fa-hand-holding-dollar text-2xl text-green-600"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">COD Sahaja</h3>
         <p class="text-navy-500 dark:text-navy-300 text-sm">Pembayaran secara tunai semasa penyerahan. Selamat dan mudah!</p>
        </div>
        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
-        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4"><i class="fas fa-users text-2xl text-blue-600"></i>
+        <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4">
+         <i class="fas fa-users text-2xl text-blue-600"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">Komuniti Politeknik</h3>
         <p class="text-navy-500 dark:text-navy-300 text-sm">Platform eksklusif untuk pelajar, pensyarah dan staf politeknik.</p>
        </div>
        <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
-        <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4"><i class="fas fa-comments text-2xl text-accent-orange"></i>
+        <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4">
+         <i class="fas fa-comments text-2xl text-accent-orange"></i>
         </div>
         <h3 class="font-semibold text-lg mb-2">Chat Terus</h3>
         <p class="text-navy-500 dark:text-navy-300 text-sm">Berbincang terus dengan penjual untuk urusan yang lebih lancar.</p>
@@ -129,27 +163,33 @@
       <h2 class="text-2xl font-bold mb-6">Kategori Produk</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="categories-grid">
        <div onclick="filterByCategory('Akademik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-book text-blue-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-book text-blue-600 text-xl"></i>
         </div><span class="text-sm font-medium">Akademik</span>
        </div>
        <div onclick="filterByCategory('Elektronik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-laptop text-purple-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-laptop text-purple-600 text-xl"></i>
         </div><span class="text-sm font-medium">Elektronik</span>
        </div>
        <div onclick="filterByCategory('Asrama')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-bed text-green-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-bed text-green-600 text-xl"></i>
         </div><span class="text-sm font-medium">Asrama</span>
        </div>
        <div onclick="filterByCategory('Peribadi')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-tshirt text-pink-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-tshirt text-pink-600 text-xl"></i>
         </div><span class="text-sm font-medium">Peribadi</span>
        </div>
        <div onclick="filterByCategory('Makanan')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-2"><i class="fas fa-cookie-bite text-yellow-600 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-cookie-bite text-yellow-600 text-xl"></i>
         </div><span class="text-sm font-medium">Makanan</span>
        </div>
        <div onclick="filterByCategory('')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-        <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2"><i class="fas fa-th text-gray-600 dark:text-gray-300 text-xl"></i>
+        <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
+         <i class="fas fa-th text-gray-600 dark:text-gray-300 text-xl"></i>
         </div><span class="text-sm font-medium">Semua</span>
        </div>
       </div>
@@ -158,21 +198,26 @@
       <div class="flex justify-between items-center mb-6">
        <h2 class="text-2xl font-bold">Produk Trending</h2><button onclick="navigateTo('products')" class="text-accent-orange hover:text-accent-orangeHover font-medium"> Lihat Semua <i class="fas fa-arrow-right ml-1"></i> </button>
       </div>
-      <div id="trending-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"><!-- Products loaded dynamically -->
+      <div id="trending-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+       <!-- Products loaded dynamically -->
       </div>
      </div>
     </div><!-- PRODUCTS PAGE -->
     <div id="page-products" class="page">
-     <div class="max-w-7xl mx-auto px-4 py-8"><!-- Search & Filter -->
+     <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Search & Filter -->
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-4 mb-6 shadow-lg">
        <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1 relative"><i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400"></i> <input type="text" id="search-input" placeholder="Cari produk..." class="w-full pl-12 pr-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" onkeyup="searchProducts()">
+        <div class="flex-1 relative">
+         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-navy-400"></i> <input type="text" id="search-input" placeholder="Cari produk..." class="w-full pl-12 pr-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" onkeyup="searchProducts()">
         </div><select id="category-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Semua Kategori</option> <option value="Akademik">📚 Akademik</option> <option value="Elektronik">💻 Elektronik</option> <option value="Asrama">🏠 Asrama</option> <option value="Peribadi">👕 Peribadi</option> <option value="Makanan">🍪 Makanan</option> </select> <select id="sort-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="newest">Terbaru</option> <option value="price-low">Harga: Rendah ke Tinggi</option> <option value="price-high">Harga: Tinggi ke Rendah</option> <option value="rating">Rating Tertinggi</option> </select>
        </div>
       </div><!-- Products Grid -->
-      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"><!-- Products loaded dynamically -->
+      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+       <!-- Products loaded dynamically -->
       </div>
-      <div id="no-products" class="hidden text-center py-12"><i class="fas fa-box-open text-6xl text-navy-300 mb-4"></i>
+      <div id="no-products" class="hidden text-center py-12">
+       <i class="fas fa-box-open text-6xl text-navy-300 mb-4"></i>
        <p class="text-navy-500 dark:text-navy-400">Tiada produk dijumpai</p>
       </div>
      </div>
@@ -180,13 +225,16 @@
     <div id="page-cart" class="page">
      <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-6"><i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya</h1>
-      <div id="cart-items" class="space-y-4 mb-6"><!-- Cart items loaded dynamically -->
+      <div id="cart-items" class="space-y-4 mb-6">
+       <!-- Cart items loaded dynamically -->
       </div>
-      <div id="cart-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg"><i class="fas fa-shopping-cart text-6xl text-navy-300 mb-4"></i>
+      <div id="cart-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg">
+       <i class="fas fa-shopping-cart text-6xl text-navy-300 mb-4"></i>
        <p class="text-navy-500 dark:text-navy-400 mb-4">Troli anda kosong</p><button onclick="navigateTo('products')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl"> Mula Membeli </button>
       </div>
       <div id="cart-summary" class="hidden bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg">
-       <div class="flex justify-between items-center mb-4"><span class="text-lg">Jumlah:</span> <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
+       <div class="flex justify-between items-center mb-4">
+        <span class="text-lg">Jumlah:</span> <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
        </div><button onclick="navigateTo('checkout')" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-truck mr-2"></i> Proceed COD Order </button>
       </div>
      </div>
@@ -195,19 +243,24 @@
      <div class="max-w-2xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Checkout COD</h1>
       <form id="checkout-form" class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg space-y-4">
-       <div><label class="block text-sm font-medium mb-2" for="cod-name">Nama Penuh</label> <input type="text" id="cod-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Masukkan nama penuh">
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-name">Nama Penuh</label> <input type="text" id="cod-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Masukkan nama penuh">
        </div>
-       <div><label class="block text-sm font-medium mb-2" for="cod-phone">No Telefon</label> <input type="tel" id="cod-phone" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 012-3456789">
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-phone">No Telefon</label> <input type="tel" id="cod-phone" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 012-3456789">
        </div>
-       <div><label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label> <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: DIT, DKM, DKA">
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label> <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: DIT, DKM, DKA">
        </div>
-       <div><label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label> <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Pilih lokasi</option> <option value="Cafeteria">☕ Cafeteria</option> <option value="Library">📚 Library</option> <option value="Kolej Kediaman">🏠 Kolej Kediaman</option> <option value="Parking Gate">🚗 Parking Gate</option> <option value="Main Lobby">🏛️ Main Lobby</option> </select>
+       <div>
+        <label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label> <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"> <option value="">Pilih lokasi</option> <option value="Cafeteria">☕ Cafeteria</option> <option value="Library">📚 Library</option> <option value="Kolej Kediaman">🏠 Kolej Kediaman</option> <option value="Parking Gate">🚗 Parking Gate</option> <option value="Main Lobby">🏛️ Main Lobby</option> </select>
        </div>
        <div id="checkout-summary" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mt-4">
         <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
         <div id="checkout-items" class="text-sm space-y-1 mb-2"></div>
         <div class="border-t border-navy-200 dark:border-navy-600 pt-2 mt-2">
-         <div class="flex justify-between font-bold"><span>Jumlah:</span> <span id="checkout-total" class="text-accent-orange">RM 0.00</span>
+         <div class="flex justify-between font-bold">
+          <span>Jumlah:</span> <span id="checkout-total" class="text-accent-orange">RM 0.00</span>
          </div>
         </div>
        </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold mt-4"> <i class="fas fa-check-circle mr-2"></i> Confirm Order </button>
@@ -217,26 +270,31 @@
     <div id="page-chat" class="page">
      <div class="max-w-4xl mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-6"><i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej</h1>
-      <div class="flex flex-col md:flex-row gap-4 h-96 md:h-[500px]"><!-- Chat List -->
+      <div class="flex flex-col md:flex-row gap-4 h-96 md:h-[500px]">
+       <!-- Chat List -->
        <div class="w-full md:w-1/3 bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
         <div class="p-4 bg-navy-100 dark:bg-navy-700">
          <h3 class="font-semibold">Perbualan</h3>
         </div>
-        <div id="chat-list" class="overflow-y-auto h-full max-h-80"><!-- Chat contacts loaded dynamically -->
+        <div id="chat-list" class="overflow-y-auto h-full max-h-80">
+         <!-- Chat contacts loaded dynamically -->
         </div>
        </div><!-- Chat Window -->
        <div class="flex-1 bg-white dark:bg-navy-800 rounded-2xl shadow-lg flex flex-col overflow-hidden">
         <div id="chat-header" class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center">
-         <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold mr-3"><i class="fas fa-user"></i>
+         <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold mr-3">
+          <i class="fas fa-user"></i>
          </div><span id="chat-with" class="font-semibold">Pilih perbualan</span>
         </div>
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-navy-50 dark:bg-navy-900">
-         <div class="text-center text-navy-400 py-8"><i class="fas fa-comments text-4xl mb-2"></i>
+         <div class="text-center text-navy-400 py-8">
+          <i class="fas fa-comments text-4xl mb-2"></i>
           <p>Pilih perbualan untuk mula chat</p>
          </div>
         </div>
         <div class="p-4 bg-white dark:bg-navy-800 border-t border-navy-100 dark:border-navy-700">
-         <div class="flex gap-2"><input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-2 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange" onkeypress="if(event.key==='Enter')sendMessage()"> <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors"> <i class="fas fa-paper-plane"></i> </button>
+         <div class="flex gap-2">
+          <input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-2 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange" onkeypress="if(event.key==='Enter')sendMessage()"> <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors"> <i class="fas fa-paper-plane"></i> </button>
          </div>
         </div>
        </div>
@@ -247,16 +305,20 @@
      <div class="max-w-md mx-auto px-4 py-12">
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
        <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-user text-white text-2xl"></i>
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
+         <i class="fas fa-user text-white text-2xl"></i>
         </div>
         <h1 class="text-2xl font-bold">Log Masuk</h1>
         <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Selamat kembali ke S.O.P!</p>
        </div>
        <form id="login-form" class="space-y-4">
-        <div><label class="block text-sm font-medium mb-2" for="login-email">Email</label> <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
+        <div>
+         <label class="block text-sm font-medium mb-2" for="login-email">Email</label> <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
         </div>
-        <div><label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
-         <div class="relative"><input type="password" id="login-password" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="••••••••"> <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
+        <div>
+         <label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
+         <div class="relative">
+          <input type="password" id="login-password" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="••••••••"> <button type="button" onclick="togglePassword('login-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
          </div>
         </div><button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"> <i class="fas fa-sign-in-alt mr-2"></i> Log Masuk </button>
        </form>
@@ -268,26 +330,35 @@
      <div class="max-w-md mx-auto px-4 py-8">
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
        <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-user-plus text-white text-2xl"></i>
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
+         <i class="fas fa-user-plus text-white text-2xl"></i>
         </div>
         <h1 class="text-2xl font-bold">Daftar Akaun</h1>
         <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Sertai komuniti S.O.P hari ini!</p>
        </div>
        <form id="register-form" class="space-y-4">
-        <div><label class="block text-sm font-medium mb-2" for="reg-name">Nama Penuh</label> <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda">
+        <div>
+         <label class="block text-sm font-medium mb-2" for="reg-name">Nama Penuh</label> <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda">
         </div>
-        <div><label class="block text-sm font-medium mb-2" for="reg-email">Email</label> <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
+        <div>
+         <label class="block text-sm font-medium mb-2" for="reg-email">Email</label> <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my">
         </div>
-        <div><label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
-         <div class="relative"><input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 aksara"> <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
+        <div>
+         <label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
+         <div class="relative">
+          <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 aksara"> <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400"> <i class="fas fa-eye"></i> </button>
          </div>
         </div>
-        <div><label class="block text-sm font-medium mb-2">Daftar Sebagai</label>
-         <div class="grid grid-cols-2 gap-4"><label class="cursor-pointer"> <input type="radio" name="role" value="buyer" class="hidden peer" checked>
-           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange"><i class="fas fa-shopping-bag text-2xl mb-2"></i>
+        <div>
+         <label class="block text-sm font-medium mb-2">Daftar Sebagai</label>
+         <div class="grid grid-cols-2 gap-4">
+          <label class="cursor-pointer"> <input type="radio" name="role" value="buyer" class="hidden peer" checked>
+           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
+            <i class="fas fa-shopping-bag text-2xl mb-2"></i>
             <p class="font-medium">Buyer</p>
            </div></label> <label class="cursor-pointer"> <input type="radio" name="role" value="seller" class="hidden peer">
-           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange"><i class="fas fa-store text-2xl mb-2"></i>
+           <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
+            <i class="fas fa-store text-2xl mb-2"></i>
             <p class="font-medium">Seller</p>
            </div></label>
          </div>
@@ -309,7 +380,8 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Jumlah Produk</p>
           <p id="seller-product-count" class="text-2xl font-bold">0</p>
          </div>
-         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center"><i class="fas fa-box text-blue-600"></i>
+         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-box text-blue-600"></i>
          </div>
         </div>
        </div>
@@ -319,7 +391,8 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Pesanan Aktif</p>
           <p id="seller-order-count" class="text-2xl font-bold">0</p>
          </div>
-         <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center"><i class="fas fa-clipboard-list text-green-600"></i>
+         <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-clipboard-list text-green-600"></i>
          </div>
         </div>
        </div>
@@ -329,7 +402,8 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Mesej Baru</p>
           <p id="seller-msg-count" class="text-2xl font-bold">0</p>
          </div>
-         <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center"><i class="fas fa-envelope text-accent-orange"></i>
+         <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-envelope text-accent-orange"></i>
          </div>
         </div>
        </div>
@@ -339,7 +413,8 @@
           <p class="text-sm text-navy-500 dark:text-navy-400">Rating</p>
           <p class="text-2xl font-bold">⭐ 4.8</p>
          </div>
-         <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center"><i class="fas fa-star text-yellow-600"></i>
+         <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+          <i class="fas fa-star text-yellow-600"></i>
          </div>
         </div>
        </div>
@@ -348,9 +423,11 @@
        <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
         <h2 class="font-semibold">Produk Saya</h2>
        </div>
-       <div id="seller-products" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><!-- Seller products loaded dynamically -->
+       <div id="seller-products" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Seller products loaded dynamically -->
        </div>
-       <div id="seller-no-products" class="hidden p-8 text-center"><i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
+       <div id="seller-no-products" class="hidden p-8 text-center">
+        <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
         <p class="text-navy-500 dark:text-navy-400">Anda belum ada produk. Tambah produk pertama anda!</p>
        </div>
       </div>
@@ -360,12 +437,14 @@
      <div class="max-w-2xl mx-auto px-4 py-8">
       <div class="bg-white dark:bg-navy-800 rounded-2xl p-8 shadow-lg">
        <div class="text-center mb-8">
-        <div class="w-24 h-24 bg-gradient-to-br from-navy-600 to-accent-orange rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-user text-white text-4xl"></i>
+        <div class="w-24 h-24 bg-gradient-to-br from-navy-600 to-accent-orange rounded-full flex items-center justify-center mx-auto mb-4">
+         <i class="fas fa-user text-white text-4xl"></i>
         </div>
         <h1 id="profile-name" class="text-2xl font-bold">Nama Pengguna</h1>
         <p id="profile-email" class="text-navy-500 dark:text-navy-400">email@politeknik.edu.my</p><span id="profile-badge" class="inline-block mt-2 px-4 py-1 bg-accent-orange text-white text-sm rounded-full">Buyer</span>
        </div>
-       <div class="space-y-4"><button id="seller-dashboard-btn" onclick="navigateTo('seller')" class="hidden w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard </button> <button onclick="navigateTo('cart')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya </button> <button onclick="navigateTo('chat')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej </button> <button onclick="logout()" class="w-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-300 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-sign-out-alt mr-2"></i> Log Keluar </button>
+       <div class="space-y-4">
+        <button id="seller-dashboard-btn" onclick="navigateTo('seller')" class="hidden w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard </button> <button onclick="navigateTo('cart')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya </button> <button onclick="navigateTo('chat')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej </button> <button onclick="logout()" class="w-full bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-300 py-3 rounded-xl font-medium transition-colors"> <i class="fas fa-sign-out-alt mr-2"></i> Log Keluar </button>
        </div>
       </div>
      </div>
@@ -376,29 +455,164 @@
   </div>
   <script>
     // ==================== FIREBASE SETUP ====================
-    // PENTING: Ganti dengan Firebase config anda sendiri
+    // FIREBASE CONFIG - Replace dengan Firebase credentials anda
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_AUTH_DOMAIN",
       projectId: "YOUR_PROJECT_ID",
       storageBucket: "YOUR_STORAGE_BUCKET",
       messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      appId: "YOUR_APP_ID",
+      databaseURL: "YOUR_DATABASE_URL"
     };
 
-    let storageRef = null;
+    let storage = null;
+    let database = null;
     let firebaseReady = false;
 
     async function initFirebase() {
       try {
-        firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
-        storageRef = storage.ref();
+        // Wait for Firebase modules to load
+        if (!window.firebaseModulesReady) {
+          console.warn('Waiting for Firebase modules...');
+          await new Promise(resolve => {
+            const check = setInterval(() => {
+              if (window.firebaseModulesReady) {
+                clearInterval(check);
+                resolve();
+              }
+            }, 100);
+          });
+        }
+
+        // Initialize Firebase app
+        const app = window.firebase.initializeApp(firebaseConfig);
+        
+        // Get references to Storage and Database
+        storage = window.firebase.getStorage(app);
+        database = window.firebase.getDatabase(app);
+        
         firebaseReady = true;
-        console.log('Firebase initialized successfully');
+        console.log('✅ Firebase initialized successfully');
+        
+        // Load data from Firebase after initialization
+        loadDataFromFirebase();
       } catch (error) {
         console.error('Firebase initialization error:', error);
-        showToast('⚠️ Firebase belum dikonfig. Upload gambar tidak tersedia.', 'warning');
+        showToast('⚠️ Firebase belum dikonfig. Periksa konfigurasi Firebase.', 'warning');
+      }
+    }
+
+    // Load all data from Firebase Realtime Database
+    async function loadDataFromFirebase() {
+      if (!database) return;
+      try {
+        const dbRootRef = window.firebase.dbRef(database, '/');
+        const snapshot = await window.firebase.get(dbRootRef);
+        allData = [];
+        
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnapshot) => {
+            const collection = childSnapshot.key;
+            const items = childSnapshot.val();
+            if (items && typeof items === 'object') {
+              Object.keys(items).forEach(key => {
+                const item = items[key];
+                item.__firebaseId = key;
+                item.id = key; // For compatibility
+                allData.push(item);
+              });
+            }
+          });
+        }
+        console.log('✅ Data loaded from Firebase:', allData.length, 'items');
+        renderUI();
+      } catch (error) {
+        console.error('Error loading data from Firebase:', error);
+      }
+    }
+
+    // Save data to Firebase
+    async function saveToFirebase(collection, data) {
+      if (!firebaseReady || !database) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const collectionRef = window.firebase.dbRef(database, collection);
+        const newRef = window.firebase.push(collectionRef);
+        await window.firebase.set(newRef, data);
+        return newRef.key;
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Update data in Firebase
+    async function updateInFirebase(collection, id, data) {
+      if (!firebaseReady || !database) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
+        await window.firebase.update(itemRef, data);
+      } catch (error) {
+        console.error('Error updating Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Delete data from Firebase
+    async function deleteFromFirebase(collection, id) {
+      if (!firebaseReady || !database) {
+        throw new Error('Firebase belum siap');
+      }
+      try {
+        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
+        await window.firebase.remove(itemRef);
+      } catch (error) {
+        console.error('Error deleting from Firebase:', error);
+        throw error;
+      }
+    }
+
+    // Upload image to Firebase Storage
+    async function uploadImageToFirebase(imageData) {
+      if (!firebaseReady || !storage) {
+        throw new Error('Firebase Storage belum siap. Periksa konfigurasi.');
+      }
+      
+      // Validate file type before upload
+      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
+        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      }
+      
+      // Validate file size (5MB)
+      if (imageData.file.size > 5 * 1024 * 1024) {
+        throw new Error('Gambar terlalu besar (> 5MB).');
+      }
+      
+      // Generate unique filename: timestamp + random ID
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const ext = imageData.file.name.split('.').pop();
+      const filename = `${timestamp}_${randomId}.${ext}`;
+      const filepath = `products/${filename}`;
+      
+      try {
+        // Upload to Firebase Storage
+        const fileRef = window.firebase.ref(storage, filepath);
+        const snapshot = await window.firebase.uploadBytes(fileRef, imageData.file);
+        
+        // Get download URL - use REST API as modular SDK doesn't have getDownloadURL
+        const projectId = firebaseConfig.projectId;
+        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(filepath)}?alt=media`;
+        
+        console.log('✅ Image uploaded:', downloadUrl);
+        return downloadUrl;
+      } catch (error) {
+        console.error('Firebase Storage upload error:', error);
+        throw new Error('Ralat memuat naik gambar ke Firebase Storage: ' + error.message);
       }
     }
 
@@ -420,13 +634,6 @@
     };
 
     // ==================== SDK INITIALIZATION ====================
-    const dataHandler = {
-      onDataChanged(data) {
-        allData = data;
-        renderUI();
-      }
-    };
-
     async function initApp() {
       // Initialize Firebase first
       initFirebase();
@@ -470,14 +677,6 @@
         });
       }
 
-      // Initialize Data SDK
-      if (window.dataSdk) {
-        const result = await window.dataSdk.init(dataHandler);
-        if (!result.isOk) {
-          console.error('Failed to initialize Data SDK');
-        }
-      }
-
       // Check for saved user session
       const savedUser = localStorage.getItem('sop_user');
       if (savedUser) {
@@ -510,6 +709,11 @@
 
     function getOrders() {
       return allData.filter(d => d.type === 'order');
+    }
+
+    // Helper to find item by __firebaseId for updates/deletes
+    function findItemByFirebaseId(firebaseId) {
+      return allData.find(d => d.__firebaseId === firebaseId);
     }
 
     // ==================== NAVIGATION ====================
@@ -614,25 +818,36 @@
         return;
       }
       
-      if (allData.length >= 999) {
-        showToast('Had pendaftaran dicapai. Sila hubungi admin.', 'error');
+      if (!firebaseReady) {
+        showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
         return;
       }
       
-      const result = await window.dataSdk.create({
-        type: 'user',
-        name,
-        email,
-        password,
-        role,
-        createdAt: new Date().toISOString()
-      });
-      
-      if (result.isOk) {
+      try {
+        const userId = await saveToFirebase('users', {
+          name,
+          email,
+          password,
+          role,
+          type: 'user',
+          createdAt: new Date().toISOString()
+        });
+        
+        allData.push({
+          type: 'user',
+          __firebaseId: userId,
+          name,
+          email,
+          password,
+          role,
+          createdAt: new Date().toISOString()
+        });
+        
         showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
         navigateTo('login');
-      } else {
-        showToast('Ralat semasa pendaftaran', 'error');
+      } catch (error) {
+        console.error('Registration error:', error);
+        showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
       }
     });
 
@@ -750,7 +965,7 @@
               <span class="text-yellow-500 text-xs">${stars}</span>
             </div>
             <div class="flex gap-2 mt-3">
-              <button onclick="addToCart('${product.__backendId}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
+              <button onclick="addToCart('${product.__firebaseId || product.id}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
                 <i class="fas fa-cart-plus mr-1"></i> Tambah
               </button>
               <button onclick="startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
@@ -794,32 +1009,57 @@
         return;
       }
       
+      // Find product by __firebaseId or id
+      const product = allData.find(d => d.type === 'product' && (d.__firebaseId === productId || d.id === productId));
+      if (!product) {
+        showToast('Produk tidak dijumpai', 'error');
+        return;
+      }
+      
       const existingItem = allData.find(d => 
         d.type === 'cart' && 
-        d.cartProductId === productId && 
+        (d.cartProductId === productId || d.cartProductId === product.__firebaseId || d.cartProductId === product.id) &&
         d.cartUserId === currentUser.email
       );
       
-      if (existingItem) {
-        await window.dataSdk.update({
-          ...existingItem,
-          quantity: (existingItem.quantity || 1) + 1
-        });
-      } else {
-        if (allData.length >= 999) {
-          showToast('Had storan dicapai', 'error');
-          return;
-        }
-        await window.dataSdk.create({
-          type: 'cart',
-          cartUserId: currentUser.email,
-          cartProductId: productId,
-          quantity: 1,
-          createdAt: new Date().toISOString()
-        });
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
       }
       
-      showToast('Ditambah ke troli!', 'success');
+      try {
+        const actualProductId = product.__firebaseId || product.id;
+        
+        if (existingItem) {
+          await updateInFirebase('cart', existingItem.__firebaseId, {
+            quantity: (existingItem.quantity || 1) + 1
+          });
+          existingItem.quantity = (existingItem.quantity || 1) + 1;
+        } else {
+          const cartId = await saveToFirebase('cart', {
+            type: 'cart',
+            cartUserId: currentUser.email,
+            cartProductId: actualProductId,
+            quantity: 1,
+            createdAt: new Date().toISOString()
+          });
+          
+          allData.push({
+            type: 'cart',
+            __firebaseId: cartId,
+            cartUserId: currentUser.email,
+            cartProductId: actualProductId,
+            quantity: 1,
+            createdAt: new Date().toISOString()
+          });
+        }
+        
+        showToast('Ditambah ke troli!', 'success');
+        renderUI();
+      } catch (error) {
+        console.error('Add to cart error:', error);
+        showToast('Ralat menambah ke troli: ' + error.message, 'error');
+      }
     }
 
     function renderCart() {
@@ -841,7 +1081,7 @@
       
       let total = 0;
       container.innerHTML = cartItems.map(item => {
-        const product = products.find(p => p.__backendId === item.cartProductId);
+        const product = products.find(p => p.id === item.cartProductId);
         if (!product) return '';
         
         const itemTotal = product.price * (item.quantity || 1);
@@ -856,18 +1096,18 @@
               <h3 class="font-semibold truncate">${product.productName}</h3>
               <p class="text-accent-orange font-bold">RM ${product.price.toFixed(2)}</p>
               <div class="flex items-center gap-2 mt-2">
-                <button onclick="updateCartQty('${item.__backendId}', -1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
+                <button onclick="updateCartQty('${item.id}', -1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
                   <i class="fas fa-minus text-xs"></i>
                 </button>
                 <span class="w-8 text-center font-medium">${item.quantity || 1}</span>
-                <button onclick="updateCartQty('${item.__backendId}', 1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
+                <button onclick="updateCartQty('${item.id}', 1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
                   <i class="fas fa-plus text-xs"></i>
                 </button>
               </div>
             </div>
             <div class="text-right">
               <p class="font-bold text-lg">RM ${itemTotal.toFixed(2)}</p>
-              <button onclick="removeFromCart('${item.__backendId}')" class="text-red-500 hover:text-red-600 text-sm mt-2">
+              <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-600 text-sm mt-2">
                 <i class="fas fa-trash mr-1"></i> Buang
               </button>
             </div>
@@ -879,22 +1119,47 @@
     }
 
     async function updateCartQty(cartId, change) {
-      const item = allData.find(d => d.__backendId === cartId);
+      const item = allData.find(d => d.__firebaseId === cartId);
       if (!item) return;
       
-      const newQty = (item.quantity || 1) + change;
-      if (newQty <= 0) {
-        await window.dataSdk.delete(item);
-      } else {
-        await window.dataSdk.update({ ...item, quantity: newQty });
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        const newQty = (item.quantity || 1) + change;
+        if (newQty <= 0) {
+          await deleteFromFirebase('cart', cartId);
+          allData = allData.filter(d => d.__firebaseId !== cartId);
+        } else {
+          await updateInFirebase('cart', cartId, { quantity: newQty });
+          const index = allData.findIndex(d => d.__firebaseId === cartId);
+          if (index >= 0) {
+            allData[index].quantity = newQty;
+          }
+        }
+        renderUI();
+      } catch (error) {
+        console.error('Update cart error:', error);
+        showToast('Ralat mengemas kini troli: ' + error.message, 'error');
       }
     }
 
     async function removeFromCart(cartId) {
-      const item = allData.find(d => d.__backendId === cartId);
-      if (item) {
-        await window.dataSdk.delete(item);
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        await deleteFromFirebase('cart', cartId);
+        allData = allData.filter(d => d.__firebaseId !== cartId);
         showToast('Item dibuang dari troli', 'success');
+        renderUI();
+      } catch (error) {
+        console.error('Remove from cart error:', error);
+        showToast('Ralat membuang item: ' + error.message, 'error');
       }
     }
 
@@ -907,7 +1172,7 @@
       
       let total = 0;
       itemsContainer.innerHTML = cartItems.map(item => {
-        const product = products.find(p => p.__backendId === item.cartProductId);
+        const product = products.find(p => p.id === item.cartProductId);
         if (!product) return '';
         const itemTotal = product.price * (item.quantity || 1);
         total += itemTotal;
@@ -930,42 +1195,62 @@
         return;
       }
       
-      const cartItems = getCartItems();
-      
-      // Create order
-      if (allData.length >= 999) {
-        showToast('Had storan dicapai', 'error');
+      if (!firebaseReady) {
+        showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
         return;
       }
       
-      await window.dataSdk.create({
-        type: 'order',
-        orderId: 'ORD-' + Date.now(),
-        orderUserId: currentUser.email,
-        customerName: name,
-        customerPhone: phone,
-        customerDept: dept,
-        codLocation: location,
-        orderStatus: 'pending',
-        createdAt: new Date().toISOString()
-      });
+      const cartItems = getCartItems();
       
-      // Clear cart
-      for (const item of cartItems) {
-        await window.dataSdk.delete(item);
-      }
-      
-      showModal('Pesanan Berjaya!', `
-        <div class="text-center">
-          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-check text-green-600 text-3xl"></i>
+      try {
+        // Create order in Firebase
+        const orderId = await saveToFirebase('orders', {
+          type: 'order',
+          orderId: 'ORD-' + Date.now(),
+          orderUserId: currentUser.email,
+          customerName: name,
+          customerPhone: phone,
+          customerDept: dept,
+          codLocation: location,
+          orderStatus: 'pending',
+          createdAt: new Date().toISOString()
+        });
+        
+        allData.push({
+          type: 'order',
+          __firebaseId: orderId,
+          orderId: 'ORD-' + Date.now(),
+          orderUserId: currentUser.email,
+          customerName: name,
+          customerPhone: phone,
+          customerDept: dept,
+          codLocation: location,
+          orderStatus: 'pending',
+          createdAt: new Date().toISOString()
+        });
+        
+        // Clear cart items
+        for (const item of cartItems) {
+          await deleteFromFirebase('cart', item.__firebaseId);
+        }
+        
+        allData = allData.filter(d => !cartItems.find(ci => ci.__firebaseId === d.__firebaseId));
+        
+        showModal('Pesanan Berjaya!', `
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-check text-green-600 text-3xl"></i>
+            </div>
+            <p class="text-navy-600 dark:text-navy-300 mb-4">Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.</p>
+            <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
+              Kembali ke Home
+            </button>
           </div>
-          <p class="text-navy-600 dark:text-navy-300 mb-4">Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.</p>
-          <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
-            Kembali ke Home
-          </button>
-        </div>
-      `);
+        `);
+      } catch (error) {
+        console.error('Checkout error:', error);
+        showToast('Ralat membuat pesanan: ' + error.message, 'error');
+      }
     });
 
     // ==================== CHAT ====================
@@ -1074,20 +1359,35 @@
       const text = input.value.trim();
       if (!text) return;
       
-      if (allData.length >= 999) {
-        showToast('Had storan dicapai', 'error');
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
         return;
       }
       
-      await window.dataSdk.create({
-        type: 'message',
-        messageFrom: currentUser.email,
-        messageTo: currentChatWith,
-        messageText: text,
-        createdAt: new Date().toISOString()
-      });
-      
-      input.value = '';
+      try {
+        const messageId = await saveToFirebase('messages', {
+          type: 'message',
+          messageFrom: currentUser.email,
+          messageTo: currentChatWith,
+          messageText: text,
+          createdAt: new Date().toISOString()
+        });
+        
+        allData.push({
+          type: 'message',
+          __firebaseId: messageId,
+          messageFrom: currentUser.email,
+          messageTo: currentChatWith,
+          messageText: text,
+          createdAt: new Date().toISOString()
+        });
+        
+        input.value = '';
+        renderChatMessages();
+      } catch (error) {
+        console.error('Send message error:', error);
+        showToast('Ralat menghantar mesej: ' + error.message, 'error');
+      }
     }
 
     function startChat(sellerId) {
@@ -1111,7 +1411,7 @@
       
       const myProducts = getProducts().filter(p => p.sellerId === currentUser.email);
       const orders = getOrders().filter(o => {
-        const orderProducts = myProducts.map(p => p.__backendId);
+        const orderProducts = myProducts.map(p => p.id);
         return orderProducts.length > 0;
       });
       const messages = getMessages();
@@ -1139,7 +1439,7 @@
                 <p class="text-accent-orange font-bold">RM ${p.price.toFixed(2)}</p>
                 <span class="text-xs text-navy-500 dark:text-navy-400">${p.category}</span>
               </div>
-              <button onclick="deleteProduct('${p.__backendId}')" class="text-red-500 hover:text-red-600 p-2">
+              <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 p-2">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
@@ -1149,6 +1449,48 @@
     }
 
     let uploadedImages = [];
+
+    function handleFiles(files) {
+      const statusEl = document.getElementById('upload-status');
+      
+      if (files.length === 0) return;
+      
+      const file = files[0]; // Only accept 1 file per product
+      
+      // Validate file type
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        showToast('❌ Format gambar tidak sah. Gunakan JPG atau PNG.', 'error');
+        statusEl.innerHTML = '<p class="text-red-500">❌ Format tidak sah (JPG/PNG sahaja)</p>';
+        return;
+      }
+      
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ Gambar terlalu besar (> 5MB).', 'error');
+        statusEl.innerHTML = '<p class="text-red-500">❌ Saiz > 5MB</p>';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImages = [{
+          file: file,
+          preview: e.target.result,
+          name: file.name,
+          size: (file.size / 1024 / 1024).toFixed(2)
+        }];
+        
+        renderImagePreviews();
+        statusEl.innerHTML = `<p class="text-green-600">✅ Gambar bersedia untuk dimuat naik (${uploadedImages[0].size}MB)</p>`;
+      };
+      
+      reader.onerror = () => {
+        showToast('❌ Ralat membaca fail gambar', 'error');
+        statusEl.innerHTML = '<p class="text-red-500">❌ Ralat membaca fail</p>';
+      };
+      
+      reader.readAsDataURL(file);
+    }
 
     function showAddProductModal() {
       uploadedImages = [];
@@ -1193,160 +1535,105 @@
         </form>
       `);
       
-      const fileInput = document.getElementById('file-input');
-      const dropZone = fileInput.parentElement;
-      
-      // Drag and drop
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('bg-navy-100', 'dark:bg-navy-600');
-      });
-      
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
-      });
-      
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
-        handleFiles(e.dataTransfer.files);
-      });
-      
-      fileInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-      });
-      
-      document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
+      setTimeout(() => {
+        const fileInput = document.getElementById('file-input');
+        if (!fileInput) return;
         
-        if (!firebaseReady) {
-          showToast('❌ Firebase belum dikonfig. Sila periksa Firebase credentials.', 'error');
-          return;
-        }
+        const dropZone = fileInput.parentElement;
         
-        if (!uploadedImages[0]) {
-          showToast('Sila muat naik gambar produk', 'warning');
-          return;
-        }
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropZone.classList.add('bg-navy-100', 'dark:bg-navy-600');
+        });
         
-        const submitBtn = document.getElementById('submit-btn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sedang memproses...';
+        dropZone.addEventListener('dragleave', () => {
+          dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+        });
         
-        try {
-          // Upload image to Firebase Storage
-          const imageUrl = await uploadImageToFirebase(uploadedImages[0]);
-          
-          if (allData.length >= 999) {
-            showToast('Had storan dicapai', 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
-            return;
-          }
-          
-          // Save product with image_url to Data SDK
-          const result = await window.dataSdk.create({
-            type: 'product',
-            productName: document.getElementById('prod-name').value,
-            price: parseFloat(document.getElementById('prod-price').value),
-            category: document.getElementById('prod-category').value,
-            description: document.getElementById('prod-desc').value,
-            image_url: imageUrl,
-            sellerId: currentUser.email,
-            sellerName: currentUser.name,
-            rating: 5,
-            createdAt: new Date().toISOString()
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+          handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+          handleFiles(e.target.files);
+        });
+        
+        const addForm = document.getElementById('add-product-form');
+        if (addForm) {
+          addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!firebaseReady) {
+              showToast('❌ Firebase belum dikonfig. Sila periksa Firebase credentials.', 'error');
+              return;
+            }
+            
+            if (!uploadedImages[0]) {
+              showToast('Sila muat naik gambar produk', 'warning');
+              return;
+            }
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sedang memproses...';
+            
+            try {
+              // Upload image to Firebase Storage
+              const imageUrl = await uploadImageToFirebase(uploadedImages[0]);
+              
+              if (allData.length >= 999) {
+                showToast('Had storan dicapai', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
+                return;
+              }
+              
+              // Save product with image_url to Firebase
+              const result = await saveToFirebase('products', {
+                type: 'product',
+                productName: document.getElementById('prod-name').value,
+                price: parseFloat(document.getElementById('prod-price').value),
+                category: document.getElementById('prod-category').value,
+                description: document.getElementById('prod-desc').value,
+                image_url: imageUrl,
+                sellerId: currentUser.email,
+                sellerName: currentUser.name,
+                rating: 5,
+                createdAt: new Date().toISOString()
+              });
+              
+              allData.push({
+                id: result,
+                __firebaseId: result,
+                type: 'product',
+                productName: document.getElementById('prod-name').value,
+                price: parseFloat(document.getElementById('prod-price').value),
+                category: document.getElementById('prod-category').value,
+                description: document.getElementById('prod-desc').value,
+                image_url: imageUrl,
+                sellerId: currentUser.email,
+                sellerName: currentUser.name,
+                rating: 5,
+                createdAt: new Date().toISOString()
+              });
+              
+              closeModal();
+              showToast('✅ Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
+              uploadedImages = [];
+              renderUI();
+            } catch (error) {
+              console.error('Error adding product:', error);
+              showToast(`❌ Ralat: ${error.message}`, 'error');
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
+            }
           });
-          
-          if (result.isOk) {
-            closeModal();
-            showToast('✅ Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
-            uploadedImages = [];
-          } else {
-            showToast('❌ Ralat semasa menyimpan produk ke Canva Sheet', 'error');
-          }
-        } catch (error) {
-          console.error('Error adding product:', error);
-          showToast(`❌ Ralat: ${error.message}`, 'error');
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah Produk';
         }
-      });
-    }
-
-    // ==================== FIREBASE IMAGE UPLOAD ====================
-    async function uploadImageToFirebase(imageData) {
-      if (!firebaseReady || !storageRef) {
-        throw new Error('Firebase belum siap. Periksa konfigurasi.');
-      }
-      
-      // Validate file type before upload
-      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
-        throw new Error('Format tidak sah. Hanya JPG/PNG.');
-      }
-      
-      // Validate file size (5MB)
-      if (imageData.file.size > 5 * 1024 * 1024) {
-        throw new Error('Gambar terlalu besar (> 5MB).');
-      }
-      
-      // Generate unique filename: timestamp + random ID
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 8);
-      const ext = imageData.file.name.split('.').pop();
-      const filename = `${timestamp}_${randomId}.${ext}`;
-      const filepath = `products/${filename}`;
-      
-      // Upload to Firebase Storage
-      const fileRef = storageRef.child(filepath);
-      const snapshot = await fileRef.put(imageData.file);
-      
-      // Get download URL
-      const downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
-    }
-
-    function handleFiles(files) {
-      const statusEl = document.getElementById('upload-status');
-      
-      if (files.length === 0) return;
-      
-      const file = files[0]; // Only accept 1 file per product
-      
-      // Validate file type
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        showToast('❌ Format gambar tidak sah. Gunakan JPG atau PNG.', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">❌ Format tidak sah (JPG/PNG sahaja)</p>';
-        return;
-      }
-      
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ Gambar terlalu besar (> 5MB).', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">❌ Saiz > 5MB</p>';
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        uploadedImages = [{
-          file: file,
-          preview: e.target.result,
-          name: file.name,
-          size: (file.size / 1024 / 1024).toFixed(2)
-        }];
-        
-        renderImagePreviews();
-        statusEl.innerHTML = `<p class="text-green-600">✅ Gambar bersedia untuk dimuat naik (${uploadedImages[0].size}MB)</p>`;
-      };
-      
-      reader.onerror = () => {
-        showToast('❌ Ralat membaca fail gambar', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">❌ Ralat membaca fail</p>';
-      };
-      
-      reader.readAsDataURL(file);
+      }, 100);
     }
 
     function renderImagePreviews() {
@@ -1379,7 +1666,7 @@
     }
 
     async function deleteProduct(productId) {
-      const product = allData.find(d => d.__backendId === productId);
+      const product = allData.find(d => d.id === productId);
       if (product) {
         showModal('Padam Produk?', `
           <div class="text-center">
@@ -1395,11 +1682,23 @@
     }
 
     async function confirmDeleteProduct(productId) {
-      const product = allData.find(d => d.__backendId === productId);
-      if (product) {
-        await window.dataSdk.delete(product);
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+      
+      try {
+        const product = allData.find(d => d.__firebaseId === productId);
+        if (!product) return;
+        
+        await deleteFromFirebase('products', productId);
+        allData = allData.filter(d => d.__firebaseId !== productId);
         closeModal();
         showToast('Produk telah dipadam', 'success');
+        renderUI();
+      } catch (error) {
+        console.error('Delete product error:', error);
+        showToast('Ralat memadam produk: ' + error.message, 'error');
       }
     }
 
@@ -1474,5 +1773,5 @@
     initApp();
     updateAuthNav();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d8c8d01f715cac4',t:'MTc3MjkxNzQ0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d8c95dab1e0cac4',t:'MTc3MjkxNzgxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
