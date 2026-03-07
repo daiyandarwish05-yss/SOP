@@ -5,61 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>S.O.P – Shop Online Poly</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <!-- Use relative paths for GitHub Pages / Firebase Hosting compatibility -->
-  <script src="./_sdk/element_sdk.js"></script>
-  <script src="./_sdk/data_sdk.js"></script><!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-    import { getDatabase, ref as dbRef, set, get, remove, push, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-    // Make Firebase modules globally available
-    window.firebase = {
-      initializeApp,
-      getStorage,
-      ref,
-      uploadBytes,
-      getDownloadURL,
-      getDatabase,
-      dbRef,
-      set,
-      get,
-      remove,
-      push,
-      update
-    };
-
-    // Signal when Firebase modules are loaded
-    window.firebaseModulesReady = true;
-
-    // Expose key navigation/interaction functions to global scope so inline onclicks work on static hosting
-    window.navigateTo = navigateTo;
-    window.toggleMobileMenu = toggleMobileMenu;
-    window.toggleDarkMode = toggleDarkMode;
-    window.addToCart = addToCart;
-    window.startChat = startChat;
-    window.filterByCategory = filterByCategory;
-    window.searchProducts = searchProducts;
-    window.logout = logout;
-    window.updateCartQty = updateCartQty;
-    window.removeFromCart = removeFromCart;
-    window.showToast = showToast;
-    window.showModal = showModal;
-    window.closeModal = closeModal;
-    window.openChat = openChat;
-    window.renderUI = renderUI;
-  </script>
-  <script>
-    // Guard: prevent default hash navigation on anchors to allow inline onclick handlers to run reliably
-    document.addEventListener('click', function (e) {
-      const a = e.target.closest('a');
-      if (!a) return;
-      const href = a.getAttribute('href');
-      if (href === '#' || href === '') {
-        e.preventDefault();
-      }
-    }, true);
-  </script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script><!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -427,162 +376,29 @@
   </div>
   <script>
     // ==================== FIREBASE SETUP ====================
-    // FIREBASE CONFIG - Replace dengan Firebase credentials anda
+    // PENTING: Ganti dengan Firebase config anda sendiri
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_AUTH_DOMAIN",
       projectId: "YOUR_PROJECT_ID",
       storageBucket: "YOUR_STORAGE_BUCKET",
       messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID",
-      databaseURL: "YOUR_DATABASE_URL"
+      appId: "YOUR_APP_ID"
     };
 
-    let storage = null;
-    let database = null;
+    let storageRef = null;
     let firebaseReady = false;
 
     async function initFirebase() {
       try {
-        // Wait for Firebase modules to load
-        if (!window.firebaseModulesReady) {
-          console.warn('Waiting for Firebase modules...');
-          await new Promise(resolve => {
-            const check = setInterval(() => {
-              if (window.firebaseModulesReady) {
-                clearInterval(check);
-                resolve();
-              }
-            }, 100);
-          });
-        }
-
-        // Initialize Firebase app
-        const app = window.firebase.initializeApp(firebaseConfig);
-        
-        // Get references to Storage and Database
-        storage = window.firebase.getStorage(app);
-        database = window.firebase.getDatabase(app);
-        
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        storageRef = storage.ref();
         firebaseReady = true;
-        console.log('✅ Firebase initialized successfully');
-        
-        // Load data from Firebase after initialization
-        loadDataFromFirebase();
+        console.log('Firebase initialized successfully');
       } catch (error) {
         console.error('Firebase initialization error:', error);
-        showToast('⚠️ Firebase belum dikonfig. Periksa konfigurasi Firebase.', 'warning');
-      }
-    }
-
-    // Load all data from Firebase Realtime Database
-    async function loadDataFromFirebase() {
-      if (!database) return;
-      try {
-        const dbRootRef = window.firebase.dbRef(database, '/');
-        const snapshot = await window.firebase.get(dbRootRef);
-        allData = [];
-        
-        if (snapshot.exists()) {
-          snapshot.forEach((childSnapshot) => {
-            const collection = childSnapshot.key;
-            const items = childSnapshot.val();
-            if (items && typeof items === 'object') {
-              Object.keys(items).forEach(key => {
-                const item = items[key];
-                item.__firebaseId = key;
-                item.id = key; // For compatibility
-                allData.push(item);
-              });
-            }
-          });
-        }
-        console.log('✅ Data loaded from Firebase:', allData.length, 'items');
-        renderUI();
-      } catch (error) {
-        console.error('Error loading data from Firebase:', error);
-      }
-    }
-
-    // Save data to Firebase
-    async function saveToFirebase(collection, data) {
-      if (!firebaseReady || !database) {
-        throw new Error('Firebase belum siap');
-      }
-      try {
-        const collectionRef = window.firebase.dbRef(database, collection);
-        const newRef = window.firebase.push(collectionRef);
-        await window.firebase.set(newRef, data);
-        return newRef.key;
-      } catch (error) {
-        console.error('Error saving to Firebase:', error);
-        throw error;
-      }
-    }
-
-    // Update data in Firebase
-    async function updateInFirebase(collection, id, data) {
-      if (!firebaseReady || !database) {
-        throw new Error('Firebase belum siap');
-      }
-      try {
-        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
-        await window.firebase.update(itemRef, data);
-      } catch (error) {
-        console.error('Error updating Firebase:', error);
-        throw error;
-      }
-    }
-
-    // Delete data from Firebase
-    async function deleteFromFirebase(collection, id) {
-      if (!firebaseReady || !database) {
-        throw new Error('Firebase belum siap');
-      }
-      try {
-        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
-        await window.firebase.remove(itemRef);
-      } catch (error) {
-        console.error('Error deleting from Firebase:', error);
-        throw error;
-      }
-    }
-
-    // Upload image to Firebase Storage
-    async function uploadImageToFirebase(imageData) {
-      if (!firebaseReady || !storage) {
-        throw new Error('Firebase Storage belum siap. Periksa konfigurasi.');
-      }
-      
-      // Validate file type before upload
-      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
-        throw new Error('Format tidak sah. Hanya JPG/PNG.');
-      }
-      
-      // Validate file size (5MB)
-      if (imageData.file.size > 5 * 1024 * 1024) {
-        throw new Error('Gambar terlalu besar (> 5MB).');
-      }
-      
-      // Generate unique filename: timestamp + random ID
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 8);
-      const ext = imageData.file.name.split('.').pop();
-      const filename = `${timestamp}_${randomId}.${ext}`;
-      const filepath = `products/${filename}`;
-      
-      try {
-        // Upload to Firebase Storage
-        const fileRef = window.firebase.ref(storage, filepath);
-        const snapshot = await window.firebase.uploadBytes(fileRef, imageData.file);
-        
-        // Get download URL using modular SDK
-        const downloadUrl = await getDownloadURL(fileRef);
-        console.log('✅ Image uploaded. Download URL obtained');
-        return downloadUrl;
-      } catch (error) {
-        console.error('Firebase Storage upload error:', error);
-        throw new Error('Ralat memuat naik gambar ke Firebase Storage: ' + error.message);
+        showToast('⚠️ Firebase belum dikonfig. Upload gambar tidak tersedia.', 'warning');
       }
     }
 
@@ -604,6 +420,13 @@
     };
 
     // ==================== SDK INITIALIZATION ====================
+    const dataHandler = {
+      onDataChanged(data) {
+        allData = data;
+        renderUI();
+      }
+    };
+
     async function initApp() {
       // Initialize Firebase first
       initFirebase();
@@ -647,6 +470,14 @@
         });
       }
 
+      // Initialize Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+
       // Check for saved user session
       const savedUser = localStorage.getItem('sop_user');
       if (savedUser) {
@@ -681,14 +512,8 @@
       return allData.filter(d => d.type === 'order');
     }
 
-    // Helper to find item by __firebaseId for updates/deletes
-    function findItemByFirebaseId(firebaseId) {
-      return allData.find(d => d.__firebaseId === firebaseId);
-    }
-
     // ==================== NAVIGATION ====================
     function navigateTo(page) {
-      console.log('Button clicked: navigateTo', page);
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const targetPage = document.getElementById(`page-${page}`);
       if (targetPage) {
@@ -710,13 +535,11 @@
     }
 
     function toggleMobileMenu() {
-      console.log('Button clicked: toggleMobileMenu');
       document.getElementById('mobile-menu').classList.toggle('hidden');
     }
 
     // ==================== DARK MODE ====================
     function toggleDarkMode() {
-      console.log('Button clicked: toggleDarkMode');
       document.documentElement.classList.toggle('dark');
       localStorage.setItem('sop_dark', document.documentElement.classList.contains('dark'));
     }
@@ -791,41 +614,29 @@
         return;
       }
       
-      if (!firebaseReady) {
-        showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
+      if (allData.length >= 999) {
+        showToast('Had pendaftaran dicapai. Sila hubungi admin.', 'error');
         return;
       }
       
-      try {
-        const userId = await saveToFirebase('users', {
-          name,
-          email,
-          password,
-          role,
-          type: 'user',
-          createdAt: new Date().toISOString()
-        });
-        
-        allData.push({
-          type: 'user',
-          __firebaseId: userId,
-          name,
-          email,
-          password,
-          role,
-          createdAt: new Date().toISOString()
-        });
-        
+      const result = await window.dataSdk.create({
+        type: 'user',
+        name,
+        email,
+        password,
+        role,
+        createdAt: new Date().toISOString()
+      });
+      
+      if (result.isOk) {
         showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
         navigateTo('login');
-      } catch (error) {
-        console.error('Registration error:', error);
-        showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
+      } else {
+        showToast('Ralat semasa pendaftaran', 'error');
       }
     });
 
     function logout() {
-      console.log('Button clicked: logout');
       currentUser = null;
       localStorage.removeItem('sop_user');
       updateAuthNav();
@@ -939,7 +750,7 @@
               <span class="text-yellow-500 text-xs">${stars}</span>
             </div>
             <div class="flex gap-2 mt-3">
-              <button onclick="addToCart('${product.id}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
+              <button onclick="addToCart('${product.__backendId}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
                 <i class="fas fa-cart-plus mr-1"></i> Tambah
               </button>
               <button onclick="startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
@@ -952,12 +763,10 @@
     }
 
     function searchProducts() {
-      console.log('Button clicked: searchProducts');
       renderProducts();
     }
 
     function filterByCategory(category) {
-      console.log('Button clicked: filterByCategory', category);
       const filter = document.getElementById('category-filter');
       if (filter) filter.value = category;
       navigateTo('products');
@@ -979,7 +788,6 @@
     }
 
     async function addToCart(productId) {
-      console.log('Button clicked: addToCart', productId);
       if (!currentUser) {
         showToast('Sila log masuk untuk menambah ke troli', 'warning');
         navigateTo('login');
@@ -992,42 +800,26 @@
         d.cartUserId === currentUser.email
       );
       
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
+      if (existingItem) {
+        await window.dataSdk.update({
+          ...existingItem,
+          quantity: (existingItem.quantity || 1) + 1
+        });
+      } else {
+        if (allData.length >= 999) {
+          showToast('Had storan dicapai', 'error');
+          return;
+        }
+        await window.dataSdk.create({
+          type: 'cart',
+          cartUserId: currentUser.email,
+          cartProductId: productId,
+          quantity: 1,
+          createdAt: new Date().toISOString()
+        });
       }
       
-      try {
-        if (existingItem) {
-          await updateInFirebase('cart', existingItem.__firebaseId, {
-            quantity: (existingItem.quantity || 1) + 1
-          });
-          existingItem.quantity = (existingItem.quantity || 1) + 1;
-        } else {
-          const cartId = await saveToFirebase('cart', {
-            type: 'cart',
-            cartUserId: currentUser.email,
-            cartProductId: productId,
-            quantity: 1,
-            createdAt: new Date().toISOString()
-          });
-          
-          allData.push({
-            type: 'cart',
-            __firebaseId: cartId,
-            cartUserId: currentUser.email,
-            cartProductId: productId,
-            quantity: 1,
-            createdAt: new Date().toISOString()
-          });
-        }
-        
-        showToast('Ditambah ke troli!', 'success');
-        renderUI();
-      } catch (error) {
-        console.error('Add to cart error:', error);
-        showToast('Ralat menambah ke troli: ' + error.message, 'error');
-      }
+      showToast('Ditambah ke troli!', 'success');
     }
 
     function renderCart() {
@@ -1049,7 +841,7 @@
       
       let total = 0;
       container.innerHTML = cartItems.map(item => {
-        const product = products.find(p => p.id === item.cartProductId);
+        const product = products.find(p => p.__backendId === item.cartProductId);
         if (!product) return '';
         
         const itemTotal = product.price * (item.quantity || 1);
@@ -1064,18 +856,18 @@
               <h3 class="font-semibold truncate">${product.productName}</h3>
               <p class="text-accent-orange font-bold">RM ${product.price.toFixed(2)}</p>
               <div class="flex items-center gap-2 mt-2">
-                <button onclick="updateCartQty('${item.id}', -1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
+                <button onclick="updateCartQty('${item.__backendId}', -1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
                   <i class="fas fa-minus text-xs"></i>
                 </button>
                 <span class="w-8 text-center font-medium">${item.quantity || 1}</span>
-                <button onclick="updateCartQty('${item.id}', 1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
+                <button onclick="updateCartQty('${item.__backendId}', 1)" class="w-8 h-8 bg-navy-100 dark:bg-navy-700 rounded-full flex items-center justify-center hover:bg-navy-200">
                   <i class="fas fa-plus text-xs"></i>
                 </button>
               </div>
             </div>
             <div class="text-right">
               <p class="font-bold text-lg">RM ${itemTotal.toFixed(2)}</p>
-              <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-600 text-sm mt-2">
+              <button onclick="removeFromCart('${item.__backendId}')" class="text-red-500 hover:text-red-600 text-sm mt-2">
                 <i class="fas fa-trash mr-1"></i> Buang
               </button>
             </div>
@@ -1087,49 +879,22 @@
     }
 
     async function updateCartQty(cartId, change) {
-      console.log('Button clicked: updateCartQty', cartId, change);
-      const item = allData.find(d => d.__firebaseId === cartId);
+      const item = allData.find(d => d.__backendId === cartId);
       if (!item) return;
       
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        const newQty = (item.quantity || 1) + change;
-        if (newQty <= 0) {
-          await deleteFromFirebase('cart', cartId);
-          allData = allData.filter(d => d.__firebaseId !== cartId);
-        } else {
-          await updateInFirebase('cart', cartId, { quantity: newQty });
-          const index = allData.findIndex(d => d.__firebaseId === cartId);
-          if (index >= 0) {
-            allData[index].quantity = newQty;
-          }
-        }
-        renderUI();
-      } catch (error) {
-        console.error('Update cart error:', error);
-        showToast('Ralat mengemas kini troli: ' + error.message, 'error');
+      const newQty = (item.quantity || 1) + change;
+      if (newQty <= 0) {
+        await window.dataSdk.delete(item);
+      } else {
+        await window.dataSdk.update({ ...item, quantity: newQty });
       }
     }
 
     async function removeFromCart(cartId) {
-      console.log('Button clicked: removeFromCart', cartId);
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        await deleteFromFirebase('cart', cartId);
-        allData = allData.filter(d => d.__firebaseId !== cartId);
+      const item = allData.find(d => d.__backendId === cartId);
+      if (item) {
+        await window.dataSdk.delete(item);
         showToast('Item dibuang dari troli', 'success');
-        renderUI();
-      } catch (error) {
-        console.error('Remove from cart error:', error);
-        showToast('Ralat membuang item: ' + error.message, 'error');
       }
     }
 
@@ -1142,7 +907,7 @@
       
       let total = 0;
       itemsContainer.innerHTML = cartItems.map(item => {
-        const product = products.find(p => p.id === item.cartProductId);
+        const product = products.find(p => p.__backendId === item.cartProductId);
         if (!product) return '';
         const itemTotal = product.price * (item.quantity || 1);
         total += itemTotal;
@@ -1165,62 +930,42 @@
         return;
       }
       
-      if (!firebaseReady) {
-        showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
+      const cartItems = getCartItems();
+      
+      // Create order
+      if (allData.length >= 999) {
+        showToast('Had storan dicapai', 'error');
         return;
       }
       
-      const cartItems = getCartItems();
+      await window.dataSdk.create({
+        type: 'order',
+        orderId: 'ORD-' + Date.now(),
+        orderUserId: currentUser.email,
+        customerName: name,
+        customerPhone: phone,
+        customerDept: dept,
+        codLocation: location,
+        orderStatus: 'pending',
+        createdAt: new Date().toISOString()
+      });
       
-      try {
-        // Create order in Firebase
-        const orderId = await saveToFirebase('orders', {
-          type: 'order',
-          orderId: 'ORD-' + Date.now(),
-          orderUserId: currentUser.email,
-          customerName: name,
-          customerPhone: phone,
-          customerDept: dept,
-          codLocation: location,
-          orderStatus: 'pending',
-          createdAt: new Date().toISOString()
-        });
-        
-        allData.push({
-          type: 'order',
-          __firebaseId: orderId,
-          orderId: 'ORD-' + Date.now(),
-          orderUserId: currentUser.email,
-          customerName: name,
-          customerPhone: phone,
-          customerDept: dept,
-          codLocation: location,
-          orderStatus: 'pending',
-          createdAt: new Date().toISOString()
-        });
-        
-        // Clear cart items
-        for (const item of cartItems) {
-          await deleteFromFirebase('cart', item.__firebaseId);
-        }
-        
-        allData = allData.filter(d => !cartItems.find(ci => ci.__firebaseId === d.__firebaseId));
-        
-        showModal('Pesanan Berjaya!', `
-          <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-check text-green-600 text-3xl"></i>
-            </div>
-            <p class="text-navy-600 dark:text-navy-300 mb-4">Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.</p>
-            <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
-              Kembali ke Home
-            </button>
-          </div>
-        `);
-      } catch (error) {
-        console.error('Checkout error:', error);
-        showToast('Ralat membuat pesanan: ' + error.message, 'error');
+      // Clear cart
+      for (const item of cartItems) {
+        await window.dataSdk.delete(item);
       }
+      
+      showModal('Pesanan Berjaya!', `
+        <div class="text-center">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-600 text-3xl"></i>
+          </div>
+          <p class="text-navy-600 dark:text-navy-300 mb-4">Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.</p>
+          <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
+            Kembali ke Home
+          </button>
+        </div>
+      `);
     });
 
     // ==================== CHAT ====================
@@ -1329,47 +1074,26 @@
       const text = input.value.trim();
       if (!text) return;
       
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
+      if (allData.length >= 999) {
+        showToast('Had storan dicapai', 'error');
         return;
       }
       
-      try {
-        const messageId = await saveToFirebase('messages', {
-          type: 'message',
-          messageFrom: currentUser.email,
-          messageTo: currentChatWith,
-          messageText: text,
-          createdAt: new Date().toISOString()
-        });
-        
-        allData.push({
-          type: 'message',
-          __firebaseId: messageId,
-          messageFrom: currentUser.email,
-          messageTo: currentChatWith,
-          messageText: text,
-          createdAt: new Date().toISOString()
-        });
-        
-        input.value = '';
-        renderChatMessages();
-      } catch (error) {
-        console.error('Send message error:', error);
-        showToast('Ralat menghantar mesej: ' + error.message, 'error');
-      }
+      await window.dataSdk.create({
+        type: 'message',
+        messageFrom: currentUser.email,
+        messageTo: currentChatWith,
+        messageText: text,
+        createdAt: new Date().toISOString()
+      });
+      
+      input.value = '';
     }
 
     function startChat(sellerId) {
-      console.log('Button clicked: startChat', sellerId);
       if (!currentUser) {
         showToast('Sila log masuk untuk chat', 'warning');
         navigateTo('login');
-        return;
-      }
-      // Guard against missing sellerId
-      if (!sellerId) {
-        showToast('Penjual tidak dikenali', 'warning');
         return;
       }
       
@@ -1387,7 +1111,7 @@
       
       const myProducts = getProducts().filter(p => p.sellerId === currentUser.email);
       const orders = getOrders().filter(o => {
-        const orderProducts = myProducts.map(p => p.id);
+        const orderProducts = myProducts.map(p => p.__backendId);
         return orderProducts.length > 0;
       });
       const messages = getMessages();
@@ -1415,7 +1139,7 @@
                 <p class="text-accent-orange font-bold">RM ${p.price.toFixed(2)}</p>
                 <span class="text-xs text-navy-500 dark:text-navy-400">${p.category}</span>
               </div>
-              <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 p-2">
+              <button onclick="deleteProduct('${p.__backendId}')" class="text-red-500 hover:text-red-600 p-2">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
@@ -1427,7 +1151,6 @@
     let uploadedImages = [];
 
     function showAddProductModal() {
-      console.log('Button clicked: showAddProductModal');
       uploadedImages = [];
       showModal('Tambah Produk', `
         <form id="add-product-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
@@ -1521,8 +1244,8 @@
             return;
           }
           
-          // Save product with image_url to Firebase
-          const result = await saveToFirebase('products', {
+          // Save product with image_url to Data SDK
+          const result = await window.dataSdk.create({
             type: 'product',
             productName: document.getElementById('prod-name').value,
             price: parseFloat(document.getElementById('prod-price').value),
@@ -1535,24 +1258,13 @@
             createdAt: new Date().toISOString()
           });
           
-          allData.push({
-            id: result,
-            type: 'product',
-            productName: document.getElementById('prod-name').value,
-            price: parseFloat(document.getElementById('prod-price').value),
-            category: document.getElementById('prod-category').value,
-            description: document.getElementById('prod-desc').value,
-            image_url: imageUrl,
-            sellerId: currentUser.email,
-            sellerName: currentUser.name,
-            rating: 5,
-            createdAt: new Date().toISOString()
-          });
-          
-          closeModal();
-          showToast('✅ Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
-          uploadedImages = [];
-          renderUI();
+          if (result.isOk) {
+            closeModal();
+            showToast('✅ Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
+            uploadedImages = [];
+          } else {
+            showToast('❌ Ralat semasa menyimpan produk ke Canva Sheet', 'error');
+          }
         } catch (error) {
           console.error('Error adding product:', error);
           showToast(`❌ Ralat: ${error.message}`, 'error');
@@ -1563,7 +1275,39 @@
       });
     }
 
+    // ==================== FIREBASE IMAGE UPLOAD ====================
+    async function uploadImageToFirebase(imageData) {
+      if (!firebaseReady || !storageRef) {
+        throw new Error('Firebase belum siap. Periksa konfigurasi.');
+      }
+      
+      // Validate file type before upload
+      if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
+        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      }
+      
+      // Validate file size (5MB)
+      if (imageData.file.size > 5 * 1024 * 1024) {
+        throw new Error('Gambar terlalu besar (> 5MB).');
+      }
+      
+      // Generate unique filename: timestamp + random ID
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const ext = imageData.file.name.split('.').pop();
+      const filename = `${timestamp}_${randomId}.${ext}`;
+      const filepath = `products/${filename}`;
+      
+      // Upload to Firebase Storage
+      const fileRef = storageRef.child(filepath);
+      const snapshot = await fileRef.put(imageData.file);
+      
+      // Get download URL
+      const downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    }
 
+    function handleFiles(files) {
       const statusEl = document.getElementById('upload-status');
       
       if (files.length === 0) return;
@@ -1635,8 +1379,7 @@
     }
 
     async function deleteProduct(productId) {
-      console.log('Button clicked: deleteProduct', productId);
-      const product = allData.find(d => d.id === productId);
+      const product = allData.find(d => d.__backendId === productId);
       if (product) {
         showModal('Padam Produk?', `
           <div class="text-center">
@@ -1652,23 +1395,11 @@
     }
 
     async function confirmDeleteProduct(productId) {
-      if (!firebaseReady) {
-        showToast('Firebase belum siap.', 'error');
-        return;
-      }
-      
-      try {
-        const product = allData.find(d => d.__firebaseId === productId);
-        if (!product) return;
-        
-        await deleteFromFirebase('products', productId);
-        allData = allData.filter(d => d.__firebaseId !== productId);
+      const product = allData.find(d => d.__backendId === productId);
+      if (product) {
+        await window.dataSdk.delete(product);
         closeModal();
         showToast('Produk telah dipadam', 'success');
-        renderUI();
-      } catch (error) {
-        console.error('Delete product error:', error);
-        showToast('Ralat memadam produk: ' + error.message, 'error');
       }
     }
 
@@ -1743,5 +1474,5 @@
     initApp();
     updateAuthNav();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d73c46051dbb4dc',t:'MTc3MjY1NzU3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d8c8d01f715cac4',t:'MTc3MjkxNzQ0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
