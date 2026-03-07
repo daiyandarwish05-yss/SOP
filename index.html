@@ -10,7 +10,7 @@
   <script src="./_sdk/data_sdk.js"></script><!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getStorage, ref, uploadBytes, getBytes } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
     import { getDatabase, ref as dbRef, set, get, remove, push, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     // Make Firebase modules globally available
@@ -19,7 +19,7 @@
       getStorage,
       ref,
       uploadBytes,
-      getBytes,
+      getDownloadURL,
       getDatabase,
       dbRef,
       set,
@@ -559,11 +559,9 @@
         const fileRef = window.firebase.ref(storage, filepath);
         const snapshot = await window.firebase.uploadBytes(fileRef, imageData.file);
         
-        // Get download URL - use REST API as modular SDK doesn't have getDownloadURL
-        const projectId = firebaseConfig.projectId;
-        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(filepath)}?alt=media`;
-        
-        console.log('✅ Image uploaded:', downloadUrl);
+        // Get download URL using modular SDK
+        const downloadUrl = await getDownloadURL(fileRef);
+        console.log('✅ Image uploaded. Download URL obtained');
         return downloadUrl;
       } catch (error) {
         console.error('Firebase Storage upload error:', error);
