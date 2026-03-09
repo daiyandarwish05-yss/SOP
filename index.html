@@ -77,7 +77,10 @@
     .btn-primary { transition: all 0.2s ease; }
     .btn-primary:hover { transform: scale(1.02); }
     .fade-in { animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     .chat-bubble-left { border-radius: 18px 18px 18px 4px; }
     .chat-bubble-right { border-radius: 18px 18px 4px 18px; }
     input:focus, textarea:focus, select:focus { outline: none; }
@@ -380,19 +383,30 @@
                 </div>
                 <span id="chat-with" class="font-semibold">Pilih perbualan</span>
               </div>
+
               <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-navy-50 dark:bg-navy-900">
                 <div class="text-center text-navy-400 py-8">
                   <i class="fas fa-comments text-4xl mb-2"></i>
                   <p>Pilih perbualan untuk mula chat</p>
                 </div>
               </div>
+
               <div class="p-4 bg-white dark:bg-navy-800 border-t border-navy-100 dark:border-navy-700">
-                <div class="flex gap-2">
+                <input type="file" id="chat-image-input" accept=".jpg,.jpeg,.png" class="hidden" onchange="handleChatImage(this.files)" />
+
+                <div class="flex gap-2 items-center">
+                  <button type="button" onclick="document.getElementById('chat-image-input').click()" class="w-10 h-10 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-full flex items-center justify-center transition-colors">
+                    <i class="fas fa-image"></i>
+                  </button>
+
                   <input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-2 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange" onkeypress="if(event.key==='Enter')sendMessage()" />
+
                   <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors">
                     <i class="fas fa-paper-plane"></i>
                   </button>
                 </div>
+
+                <div id="chat-image-preview" class="mt-2"></div>
               </div>
             </div>
           </div>
@@ -509,6 +523,7 @@
                 </div>
               </div>
             </div>
+
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
@@ -520,6 +535,7 @@
                 </div>
               </div>
             </div>
+
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
@@ -531,6 +547,7 @@
                 </div>
               </div>
             </div>
+
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
@@ -553,6 +570,13 @@
               <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
               <p class="text-navy-500 dark:text-navy-400">Anda belum ada produk. Tambah produk pertama anda!</p>
             </div>
+          </div>
+
+          <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden mt-6">
+            <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
+              <h2 class="font-semibold">Notifikasi Seller</h2>
+            </div>
+            <div id="seller-notifications" class="p-4 space-y-3"></div>
           </div>
         </div>
       </div>
@@ -612,6 +636,7 @@
     let currentChatWith = null;
     let currentPage = 'home';
     let uploadedImages = [];
+    let selectedChatImage = null;
 
     const defaultConfig = {
       site_title: 'S.O.P',
@@ -751,6 +776,34 @@
       }
     }
 
+    async function uploadChatImageToFirebase(file) {
+      if (!firebaseReady || !storage) {
+        throw new Error('Firebase Storage belum siap');
+      }
+
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Gambar terlalu besar (> 5MB).');
+      }
+
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const ext = file.name.split('.').pop();
+      const filepath = `chat_images/${timestamp}_${randomId}.${ext}`;
+
+      try {
+        const fileRef = window.firebase.ref(storage, filepath);
+        await window.firebase.uploadBytes(fileRef, file);
+        return await window.firebase.getDownloadURL(fileRef);
+      } catch (error) {
+        console.error('Chat image upload error:', error);
+        throw new Error('Ralat muat naik gambar chat: ' + error.message);
+      }
+    }
+
     async function initApp() {
       await initFirebase();
 
@@ -821,6 +874,15 @@
 
     function getOrders() {
       return allData.filter(d => d.type === 'order');
+    }
+
+    function getNotifications() {
+      if (!currentUser) return [];
+      return allData.filter(d => d.type === 'notification' && d.userEmail === currentUser.email);
+    }
+
+    function getUnreadNotificationsCount() {
+      return getNotifications().filter(n => !n.isRead).length;
     }
 
     function navigateTo(page) {
@@ -1307,10 +1369,26 @@
       }
 
       const cartItems = getCartItems();
+      const products = getProducts();
 
       try {
         const createdAt = new Date().toISOString();
         const orderCode = 'ORD-' + Date.now();
+
+        const orderItems = cartItems.map(item => {
+          const product = products.find(p =>
+            p.__firebaseId === item.cartProductId || p.id === item.cartProductId
+          );
+
+          return {
+            productId: item.cartProductId,
+            productName: product?.productName || 'Produk',
+            sellerId: product?.sellerId || '',
+            sellerName: product?.sellerName || '',
+            quantity: item.quantity || 1,
+            price: product?.price || 0
+          };
+        });
 
         const orderId = await saveToFirebase('orders', {
           type: 'order',
@@ -1321,6 +1399,7 @@
           customerDept: dept,
           codLocation: location,
           orderStatus: 'pending',
+          items: orderItems,
           createdAt
         });
 
@@ -1336,8 +1415,36 @@
           customerDept: dept,
           codLocation: location,
           orderStatus: 'pending',
+          items: orderItems,
           createdAt
         });
+
+        const uniqueSellers = [...new Set(orderItems.map(item => item.sellerId).filter(Boolean))];
+
+        for (const sellerEmail of uniqueSellers) {
+          const notificationId = await saveToFirebase('notifications', {
+            type: 'notification',
+            userEmail: sellerEmail,
+            title: 'Pesanan baru diterima',
+            message: `${name} telah membuat pesanan produk anda.`,
+            relatedOrderId: orderCode,
+            isRead: false,
+            createdAt
+          });
+
+          allData.push({
+            type: 'notification',
+            __firebaseId: notificationId,
+            id: notificationId,
+            __collection: 'notifications',
+            userEmail: sellerEmail,
+            title: 'Pesanan baru diterima',
+            message: `${name} telah membuat pesanan produk anda.`,
+            relatedOrderId: orderCode,
+            isRead: false,
+            createdAt
+          });
+        }
 
         for (const item of cartItems) {
           await deleteFromFirebase('cart', item.__firebaseId);
@@ -1358,6 +1465,8 @@
             </button>
           </div>
         `);
+
+        renderUI();
       } catch (error) {
         console.error('Checkout error:', error);
         showToast('Ralat membuat pesanan: ' + error.message, 'error');
@@ -1409,7 +1518,9 @@
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium truncate">${name}</p>
-                <p class="text-xs text-navy-500 dark:text-navy-400 truncate">${lastMsg?.messageText || ''}</p>
+                <p class="text-xs text-navy-500 dark:text-navy-400 truncate">
+                  ${lastMsg?.messageText || (lastMsg?.imageUrl ? '📷 Gambar' : '')}
+                </p>
               </div>
             </div>
           </div>
@@ -1452,7 +1563,8 @@
         return `
           <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
             <div class="max-w-[70%] px-4 py-2 ${isMe ? 'bg-accent-orange text-white chat-bubble-right' : 'bg-white dark:bg-navy-700 chat-bubble-left shadow'}">
-              <p class="text-sm">${m.messageText}</p>
+              ${m.messageText ? `<p class="text-sm ${m.imageUrl ? 'mb-2' : ''}">${m.messageText}</p>` : ''}
+              ${m.imageUrl ? `<img src="${m.imageUrl}" alt="Chat image" class="max-w-full rounded-lg mt-1 cursor-pointer" onclick="showChatImagePreview('${m.imageUrl}')">` : ''}
               <p class="text-xs ${isMe ? 'text-orange-200' : 'text-navy-400'} mt-1">${new Date(m.createdAt).toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
@@ -1467,7 +1579,8 @@
 
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
-      if (!text) return;
+
+      if (!text && !selectedChatImage) return;
 
       if (!firebaseReady) {
         showToast('Firebase belum siap.', 'error');
@@ -1475,12 +1588,22 @@
       }
 
       try {
+        let imageUrl = '';
+
+        if (selectedChatImage) {
+          imageUrl = await uploadChatImageToFirebase(selectedChatImage.file);
+        }
+
         const createdAt = new Date().toISOString();
+
         const messageId = await saveToFirebase('messages', {
           type: 'message',
           messageFrom: currentUser.email,
           messageTo: currentChatWith,
-          messageText: text,
+          messageText: text || '',
+          imageUrl: imageUrl || '',
+          messageType: imageUrl ? 'image' : 'text',
+          isRead: false,
           createdAt
         });
 
@@ -1491,11 +1614,15 @@
           __collection: 'messages',
           messageFrom: currentUser.email,
           messageTo: currentChatWith,
-          messageText: text,
+          messageText: text || '',
+          imageUrl: imageUrl || '',
+          messageType: imageUrl ? 'image' : 'text',
+          isRead: false,
           createdAt
         });
 
         input.value = '';
+        removeChatImage();
         renderChatMessages();
         renderChatList();
       } catch (error) {
@@ -1525,9 +1652,15 @@
       const myProducts = getProducts().filter(p => p.sellerId === currentUser.email);
       const messages = getMessages();
 
+      const myOrders = getOrders().filter(order =>
+        Array.isArray(order.items) && order.items.some(item => item.sellerId === currentUser.email)
+      );
+
       document.getElementById('seller-product-count').textContent = myProducts.length;
-      document.getElementById('seller-order-count').textContent = getOrders().length;
-      document.getElementById('seller-msg-count').textContent = messages.filter(m => m.messageTo === currentUser.email).length;
+      document.getElementById('seller-order-count').textContent = myOrders.length;
+      document.getElementById('seller-msg-count').textContent =
+        messages.filter(m => m.messageTo === currentUser.email && !m.isRead).length ||
+        messages.filter(m => m.messageTo === currentUser.email).length;
 
       const container = document.getElementById('seller-products');
       const noProducts = document.getElementById('seller-no-products');
@@ -1558,6 +1691,30 @@
           </div>
         `).join('');
       }
+
+      renderSellerNotifications();
+    }
+
+    function renderSellerNotifications() {
+      const container = document.getElementById('seller-notifications');
+      if (!container) return;
+
+      const notifications = getNotifications()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 10);
+
+      if (!notifications.length) {
+        container.innerHTML = `<p class="text-navy-500 dark:text-navy-400 text-sm">Tiada notifikasi</p>`;
+        return;
+      }
+
+      container.innerHTML = notifications.map(n => `
+        <div class="p-3 rounded-xl ${n.isRead ? 'bg-navy-50 dark:bg-navy-700' : 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'}">
+          <p class="font-semibold text-sm">${n.title}</p>
+          <p class="text-sm text-navy-600 dark:text-navy-300">${n.message}</p>
+          <p class="text-xs text-navy-400 mt-1">${new Date(n.createdAt).toLocaleString('ms-MY')}</p>
+        </div>
+      `).join('');
     }
 
     function handleFiles(files) {
@@ -1770,6 +1927,61 @@
       if (fileInput) fileInput.value = '';
     }
 
+    function handleChatImage(files) {
+      if (!files || !files.length) return;
+
+      const file = files[0];
+
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        showToast('Hanya JPG atau PNG dibenarkan', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Gambar terlalu besar. Maksimum 5MB.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        selectedChatImage = {
+          file,
+          preview: e.target.result
+        };
+
+        const preview = document.getElementById('chat-image-preview');
+        if (preview) {
+          preview.innerHTML = `
+            <div class="relative inline-block">
+              <img src="${selectedChatImage.preview}" class="w-24 h-24 object-cover rounded-lg border border-navy-200 dark:border-navy-600">
+              <button type="button" onclick="removeChatImage()" class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          `;
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    function removeChatImage() {
+      selectedChatImage = null;
+      const preview = document.getElementById('chat-image-preview');
+      if (preview) preview.innerHTML = '';
+
+      const input = document.getElementById('chat-image-input');
+      if (input) input.value = '';
+    }
+
+    function showChatImagePreview(imageUrl) {
+      showModal('Gambar', `
+        <div class="text-center">
+          <img src="${imageUrl}" class="max-w-full max-h-[70vh] mx-auto rounded-lg">
+        </div>
+      `);
+    }
+
     async function deleteProduct(productId) {
       const product = allData.find(d => d.type === 'product' && d.__firebaseId === productId);
       if (product) {
@@ -1815,7 +2027,13 @@
 
       document.getElementById('profile-name').textContent = currentUser.name;
       document.getElementById('profile-email').textContent = currentUser.email;
-      document.getElementById('profile-badge').textContent = currentUser.role === 'seller' ? 'Seller' : 'Buyer';
+
+      const unreadNotifications = getUnreadNotificationsCount();
+      if (currentUser.role === 'seller' && unreadNotifications > 0) {
+        document.getElementById('profile-badge').textContent = `Seller • ${unreadNotifications} notifikasi`;
+      } else {
+        document.getElementById('profile-badge').textContent = currentUser.role === 'seller' ? 'Seller' : 'Buyer';
+      }
 
       const sellerBtn = document.getElementById('seller-dashboard-btn');
       if (currentUser.role === 'seller') sellerBtn.classList.remove('hidden');
