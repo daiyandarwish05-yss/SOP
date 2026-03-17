@@ -123,32 +123,37 @@
   <div id="app" class="h-full w-full flex flex-col">
     <nav id="navbar" class="bg-white dark:bg-navy-800 shadow-lg sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
-            <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center">
-              <i class="fas fa-store text-white text-lg"></i>
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-8">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
+              <div class="w-10 h-10 bg-gradient-to-br from-navy-600 to-accent-orange rounded-xl flex items-center justify-center">
+                <i class="fas fa-store text-white text-lg"></i>
+              </div>
+              <span id="nav-title" class="font-bold text-xl text-navy-800 dark:text-white">S.O.P</span>
             </div>
-            <span id="nav-title" class="font-bold text-xl text-navy-800 dark:text-white">S.O.P</span>
+
+            <div class="hidden md:flex items-center space-x-6">
+              <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-home mr-1"></i> Home</a>
+              <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-shopping-bag mr-1"></i> Products</a>
+              <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative">
+                <i class="fas fa-shopping-cart mr-1"></i> Cart
+                <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+              </a>
+              <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-comments mr-1"></i> Chat</a>
+              <div id="auth-nav"></div>
+            </div>
           </div>
 
-          <div class="hidden md:flex items-center space-x-6">
-            <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-home mr-1"></i> Home</a>
-            <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-shopping-bag mr-1"></i> Products</a>
-            <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative">
-              <i class="fas fa-shopping-cart mr-1"></i> Cart
-              <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
-            </a>
-            <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-comments mr-1"></i> Chat</a>
-            <div id="auth-nav"></div>
+          <div class="flex items-center gap-3">
             <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-navy-100 dark:bg-navy-700 text-navy-600 dark:text-yellow-400 hover:bg-navy-200 dark:hover:bg-navy-600 transition-colors">
               <i class="fas fa-moon dark:hidden"></i>
               <i class="fas fa-sun hidden dark:block"></i>
             </button>
-          </div>
 
-          <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-navy-600 dark:text-white">
-            <i class="fas fa-bars text-xl"></i>
-          </button>
+            <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-navy-600 dark:text-white">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
         </div>
 
         <div id="mobile-menu" class="hidden md:hidden pb-4">
@@ -313,7 +318,7 @@
               <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
             </div>
             <button onclick="navigateTo('checkout')" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">
-              <i class="fas fa-truck mr-2"></i> Proceed COD Order
+              <i class="fas fa-paper-plane mr-2"></i> Proceed Hantar Offer
             </button>
           </div>
         </div>
@@ -321,7 +326,7 @@
 
       <div id="page-checkout" class="page">
         <div class="max-w-2xl mx-auto px-4 py-8">
-          <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Checkout COD</h1>
+          <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Checkout Offer</h1>
           <form id="checkout-form" class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg space-y-4">
             <div>
               <label class="block text-sm font-medium mb-2" for="cod-name">Nama Penuh</label>
@@ -346,20 +351,28 @@
                 <option value="Main Lobby">🏛️ Main Lobby</option>
               </select>
             </div>
+            <div>
+              <label class="block text-sm font-medium mb-2" for="offer-note">Nota / Offer Buyer</label>
+              <textarea id="offer-note" rows="3" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: Boleh COD petang? Boleh kurang harga kalau ambil 2?"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2" for="offer-price">Harga Offer Buyer (optional)</label>
+              <input type="number" id="offer-price" min="0" step="0.01" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 25.00" />
+            </div>
 
             <div id="checkout-summary" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mt-4">
               <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
               <div id="checkout-items" class="text-sm space-y-1 mb-2"></div>
               <div class="border-t border-navy-200 dark:border-navy-600 pt-2 mt-2">
                 <div class="flex justify-between font-bold">
-                  <span>Jumlah:</span>
+                  <span>Jumlah Asal:</span>
                   <span id="checkout-total" class="text-accent-orange">RM 0.00</span>
                 </div>
               </div>
             </div>
 
             <button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold mt-4">
-              <i class="fas fa-check-circle mr-2"></i> Confirm Order
+              <i class="fas fa-paper-plane mr-2"></i> Hantar Offer
             </button>
           </form>
         </div>
@@ -527,7 +540,7 @@
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-navy-500 dark:text-navy-400">Pesanan Aktif</p>
+                  <p class="text-sm text-navy-500 dark:text-navy-400">Offer Pending</p>
                   <p id="seller-order-count" class="text-2xl font-bold">0</p>
                 </div>
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
@@ -577,6 +590,13 @@
               <h2 class="font-semibold">Notifikasi Seller</h2>
             </div>
             <div id="seller-notifications" class="p-4 space-y-3"></div>
+          </div>
+
+          <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden mt-6">
+            <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
+              <h2 class="font-semibold">Offer dari Buyer</h2>
+            </div>
+            <div id="seller-offers" class="p-4 space-y-4"></div>
           </div>
         </div>
       </div>
@@ -874,6 +894,10 @@
 
     function getOrders() {
       return allData.filter(d => d.type === 'order');
+    }
+
+    function getOffers() {
+      return allData.filter(d => d.type === 'offer');
     }
 
     function getNotifications() {
@@ -1357,6 +1381,8 @@
       const phone = document.getElementById('cod-phone').value;
       const dept = document.getElementById('cod-dept').value;
       const location = document.getElementById('cod-location').value;
+      const offerNote = document.getElementById('offer-note')?.value || '';
+      const offerPrice = parseFloat(document.getElementById('offer-price')?.value || 0);
 
       if (!location) {
         showToast('Sila pilih lokasi COD', 'warning');
@@ -1371,11 +1397,16 @@
       const cartItems = getCartItems();
       const products = getProducts();
 
+      if (!cartItems.length) {
+        showToast('Troli kosong', 'warning');
+        return;
+      }
+
       try {
         const createdAt = new Date().toISOString();
-        const orderCode = 'ORD-' + Date.now();
+        const offerCode = 'OFF-' + Date.now();
 
-        const orderItems = cartItems.map(item => {
+        const offerItems = cartItems.map(item => {
           const product = products.find(p =>
             p.__firebaseId === item.cartProductId || p.id === item.cartProductId
           );
@@ -1386,48 +1417,60 @@
             sellerId: product?.sellerId || '',
             sellerName: product?.sellerName || '',
             quantity: item.quantity || 1,
-            price: product?.price || 0
+            originalPrice: product?.price || 0
           };
         });
 
-        const orderId = await saveToFirebase('orders', {
-          type: 'order',
-          orderId: orderCode,
-          orderUserId: currentUser.email,
-          customerName: name,
-          customerPhone: phone,
-          customerDept: dept,
+        const totalOriginal = offerItems.reduce((sum, item) => {
+          return sum + (Number(item.originalPrice) * Number(item.quantity));
+        }, 0);
+
+        const finalOfferPrice = offerPrice > 0 ? offerPrice : totalOriginal;
+
+        const offerId = await saveToFirebase('offers', {
+          type: 'offer',
+          offerId: offerCode,
+          buyerEmail: currentUser.email,
+          buyerName: name,
+          buyerPhone: phone,
+          buyerDept: dept,
           codLocation: location,
-          orderStatus: 'pending',
-          items: orderItems,
+          offerNote,
+          offerPrice: finalOfferPrice,
+          totalOriginal,
+          offerStatus: 'pending',
+          items: offerItems,
           createdAt
         });
 
         allData.push({
-          type: 'order',
-          __firebaseId: orderId,
-          id: orderId,
-          __collection: 'orders',
-          orderId: orderCode,
-          orderUserId: currentUser.email,
-          customerName: name,
-          customerPhone: phone,
-          customerDept: dept,
+          type: 'offer',
+          __firebaseId: offerId,
+          id: offerId,
+          __collection: 'offers',
+          offerId: offerCode,
+          buyerEmail: currentUser.email,
+          buyerName: name,
+          buyerPhone: phone,
+          buyerDept: dept,
           codLocation: location,
-          orderStatus: 'pending',
-          items: orderItems,
+          offerNote,
+          offerPrice: finalOfferPrice,
+          totalOriginal,
+          offerStatus: 'pending',
+          items: offerItems,
           createdAt
         });
 
-        const uniqueSellers = [...new Set(orderItems.map(item => item.sellerId).filter(Boolean))];
+        const uniqueSellers = [...new Set(offerItems.map(item => item.sellerId).filter(Boolean))];
 
         for (const sellerEmail of uniqueSellers) {
           const notificationId = await saveToFirebase('notifications', {
             type: 'notification',
             userEmail: sellerEmail,
-            title: 'Pesanan baru diterima',
-            message: `${name} telah membuat pesanan produk anda.`,
-            relatedOrderId: orderCode,
+            title: 'Offer baru diterima',
+            message: `${name} telah menghantar offer untuk produk anda.`,
+            relatedOfferId: offerCode,
             isRead: false,
             createdAt
           });
@@ -1438,9 +1481,9 @@
             id: notificationId,
             __collection: 'notifications',
             userEmail: sellerEmail,
-            title: 'Pesanan baru diterima',
-            message: `${name} telah membuat pesanan produk anda.`,
-            relatedOrderId: orderCode,
+            title: 'Offer baru diterima',
+            message: `${name} telah menghantar offer untuk produk anda.`,
+            relatedOfferId: offerCode,
             isRead: false,
             createdAt
           });
@@ -1452,13 +1495,13 @@
 
         allData = allData.filter(d => !cartItems.find(ci => ci.__firebaseId === d.__firebaseId));
 
-        showModal('Pesanan Berjaya!', `
+        showModal('Offer Berjaya Dihantar!', `
           <div class="text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-check text-green-600 text-3xl"></i>
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-paper-plane text-blue-600 text-3xl"></i>
             </div>
             <p class="text-navy-600 dark:text-navy-300 mb-4">
-              Pesanan anda telah direkodkan. Seller akan hubungi anda untuk urusan COD di <strong>${location}</strong>.
+              Offer anda telah dihantar kepada seller. Sila tunggu seller accept atau reject offer ini.
             </p>
             <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
               Kembali ke Home
@@ -1468,8 +1511,8 @@
 
         renderUI();
       } catch (error) {
-        console.error('Checkout error:', error);
-        showToast('Ralat membuat pesanan: ' + error.message, 'error');
+        console.error('Offer submit error:', error);
+        showToast('Ralat menghantar offer: ' + error.message, 'error');
       }
     });
 
@@ -1652,12 +1695,12 @@
       const myProducts = getProducts().filter(p => p.sellerId === currentUser.email);
       const messages = getMessages();
 
-      const myOrders = getOrders().filter(order =>
-        Array.isArray(order.items) && order.items.some(item => item.sellerId === currentUser.email)
+      const myOffers = getOffers().filter(offer =>
+        Array.isArray(offer.items) && offer.items.some(item => item.sellerId === currentUser.email)
       );
 
       document.getElementById('seller-product-count').textContent = myProducts.length;
-      document.getElementById('seller-order-count').textContent = myOrders.length;
+      document.getElementById('seller-order-count').textContent = myOffers.filter(o => o.offerStatus === 'pending').length;
       document.getElementById('seller-msg-count').textContent =
         messages.filter(m => m.messageTo === currentUser.email && !m.isRead).length ||
         messages.filter(m => m.messageTo === currentUser.email).length;
@@ -1693,6 +1736,7 @@
       }
 
       renderSellerNotifications();
+      renderSellerOffers();
     }
 
     function renderSellerNotifications() {
@@ -1715,6 +1759,158 @@
           <p class="text-xs text-navy-400 mt-1">${new Date(n.createdAt).toLocaleString('ms-MY')}</p>
         </div>
       `).join('');
+    }
+
+    function renderSellerOffers() {
+      const container = document.getElementById('seller-offers');
+      if (!container || !currentUser) return;
+
+      const offers = getOffers()
+        .filter(offer =>
+          Array.isArray(offer.items) &&
+          offer.items.some(item => item.sellerId === currentUser.email)
+        )
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      if (!offers.length) {
+        container.innerHTML = `<p class="text-navy-500 dark:text-navy-400 text-sm">Tiada offer setakat ini</p>`;
+        return;
+      }
+
+      container.innerHTML = offers.map(offer => `
+        <div class="border border-navy-200 dark:border-navy-700 rounded-xl p-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p class="font-semibold">${offer.buyerName}</p>
+              <p class="text-sm text-navy-500 dark:text-navy-400">${offer.buyerEmail}</p>
+              <p class="text-sm mt-1">Lokasi COD: <strong>${offer.codLocation}</strong></p>
+              <p class="text-sm">Offer Price: <strong class="text-accent-orange">RM ${Number(offer.offerPrice || 0).toFixed(2)}</strong></p>
+              <p class="text-sm">Status:
+                <span class="${
+                  offer.offerStatus === 'accepted' ? 'text-green-600' :
+                  offer.offerStatus === 'rejected' ? 'text-red-600' : 'text-yellow-600'
+                } font-semibold">
+                  ${offer.offerStatus}
+                </span>
+              </p>
+              ${offer.offerNote ? `<p class="text-sm mt-2 bg-navy-50 dark:bg-navy-700 p-2 rounded-lg">"${offer.offerNote}"</p>` : ''}
+            </div>
+
+            ${offer.offerStatus === 'pending' ? `
+              <div class="flex gap-2">
+                <button onclick="acceptOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm">
+                  <i class="fas fa-check mr-1"></i> Accept
+                </button>
+                <button onclick="rejectOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm">
+                  <i class="fas fa-times mr-1"></i> Reject
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function acceptOffer(offerFirebaseId) {
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+
+      const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
+      if (!offer) return;
+
+      try {
+        await updateInFirebase('offers', offerFirebaseId, {
+          offerStatus: 'accepted',
+          acceptedAt: new Date().toISOString()
+        });
+
+        offer.offerStatus = 'accepted';
+        offer.acceptedAt = new Date().toISOString();
+
+        const createdAt = new Date().toISOString();
+
+        const notificationId = await saveToFirebase('notifications', {
+          type: 'notification',
+          userEmail: offer.buyerEmail,
+          title: 'Offer anda diterima',
+          message: `Seller telah menerima offer anda. Sila teruskan urusan COD di ${offer.codLocation}.`,
+          relatedOfferId: offer.offerId,
+          isRead: false,
+          createdAt
+        });
+
+        allData.push({
+          type: 'notification',
+          __firebaseId: notificationId,
+          id: notificationId,
+          __collection: 'notifications',
+          userEmail: offer.buyerEmail,
+          title: 'Offer anda diterima',
+          message: `Seller telah menerima offer anda. Sila teruskan urusan COD di ${offer.codLocation}.`,
+          relatedOfferId: offer.offerId,
+          isRead: false,
+          createdAt
+        });
+
+        showToast('Offer berjaya diterima', 'success');
+        renderSellerDashboard();
+      } catch (error) {
+        console.error('Accept offer error:', error);
+        showToast('Ralat menerima offer: ' + error.message, 'error');
+      }
+    }
+
+    async function rejectOffer(offerFirebaseId) {
+      if (!firebaseReady) {
+        showToast('Firebase belum siap.', 'error');
+        return;
+      }
+
+      const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
+      if (!offer) return;
+
+      try {
+        await updateInFirebase('offers', offerFirebaseId, {
+          offerStatus: 'rejected',
+          rejectedAt: new Date().toISOString()
+        });
+
+        offer.offerStatus = 'rejected';
+        offer.rejectedAt = new Date().toISOString();
+
+        const createdAt = new Date().toISOString();
+
+        const notificationId = await saveToFirebase('notifications', {
+          type: 'notification',
+          userEmail: offer.buyerEmail,
+          title: 'Offer anda ditolak',
+          message: `Seller telah menolak offer anda untuk pesanan ${offer.offerId}.`,
+          relatedOfferId: offer.offerId,
+          isRead: false,
+          createdAt
+        });
+
+        allData.push({
+          type: 'notification',
+          __firebaseId: notificationId,
+          id: notificationId,
+          __collection: 'notifications',
+          userEmail: offer.buyerEmail,
+          title: 'Offer anda ditolak',
+          message: `Seller telah menolak offer anda untuk pesanan ${offer.offerId}.`,
+          relatedOfferId: offer.offerId,
+          isRead: false,
+          createdAt
+        });
+
+        showToast('Offer telah ditolak', 'warning');
+        renderSellerDashboard();
+      } catch (error) {
+        console.error('Reject offer error:', error);
+        showToast('Ralat menolak offer: ' + error.message, 'error');
+      }
     }
 
     function handleFiles(files) {
