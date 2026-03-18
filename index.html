@@ -110,8 +110,8 @@
       background: white;
       border-radius: 16px;
       padding: 24px;
-      max-width: 420px;
-      width: 90%;
+      max-width: 520px;
+      width: 92%;
       animation: fadeIn 0.3s ease;
     }
     .dark .modal-content { background: #1e293b; }
@@ -722,7 +722,6 @@
           });
         }
 
-        console.log('✅ Data loaded from Firebase:', allData.length, 'items');
         renderUI();
       } catch (error) {
         console.error('Error loading data from Firebase:', error);
@@ -732,42 +731,27 @@
 
     async function saveToFirebase(collection, data) {
       if (!firebaseReady || !database) throw new Error('Firebase belum siap');
-      try {
-        const collectionRef = window.firebase.dbRef(database, collection);
-        const newRef = window.firebase.push(collectionRef);
-        await window.firebase.set(newRef, data);
-        return newRef.key;
-      } catch (error) {
-        console.error('Error saving to Firebase:', error);
-        throw error;
-      }
+      const collectionRef = window.firebase.dbRef(database, collection);
+      const newRef = window.firebase.push(collectionRef);
+      await window.firebase.set(newRef, data);
+      return newRef.key;
     }
 
     async function updateInFirebase(collection, id, data) {
       if (!firebaseReady || !database) throw new Error('Firebase belum siap');
-      try {
-        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
-        await window.firebase.update(itemRef, data);
-      } catch (error) {
-        console.error('Error updating Firebase:', error);
-        throw error;
-      }
+      const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
+      await window.firebase.update(itemRef, data);
     }
 
     async function deleteFromFirebase(collection, id) {
       if (!firebaseReady || !database) throw new Error('Firebase belum siap');
-      try {
-        const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
-        await window.firebase.remove(itemRef);
-      } catch (error) {
-        console.error('Error deleting from Firebase:', error);
-        throw error;
-      }
+      const itemRef = window.firebase.dbRef(database, `${collection}/${id}`);
+      await window.firebase.remove(itemRef);
     }
 
     async function uploadImageToFirebase(imageData) {
       if (!firebaseReady || !storage) {
-        throw new Error('Firebase Storage belum siap. Periksa konfigurasi.');
+        throw new Error('Firebase Storage belum siap.');
       }
 
       if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
@@ -784,22 +768,13 @@
       const filename = `${timestamp}_${randomId}.${ext}`;
       const filepath = `products/${filename}`;
 
-      try {
-        const fileRef = window.firebase.ref(storage, filepath);
-        await window.firebase.uploadBytes(fileRef, imageData.file);
-        const downloadUrl = await window.firebase.getDownloadURL(fileRef);
-        console.log('✅ Image uploaded:', downloadUrl);
-        return downloadUrl;
-      } catch (error) {
-        console.error('Firebase Storage upload error:', error);
-        throw new Error('Ralat memuat naik gambar ke Firebase Storage: ' + error.message);
-      }
+      const fileRef = window.firebase.ref(storage, filepath);
+      await window.firebase.uploadBytes(fileRef, imageData.file);
+      return await window.firebase.getDownloadURL(fileRef);
     }
 
     async function uploadChatImageToFirebase(file) {
-      if (!firebaseReady || !storage) {
-        throw new Error('Firebase Storage belum siap');
-      }
+      if (!firebaseReady || !storage) throw new Error('Firebase Storage belum siap');
 
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
         throw new Error('Format tidak sah. Hanya JPG/PNG.');
@@ -814,14 +789,9 @@
       const ext = file.name.split('.').pop();
       const filepath = `chat_images/${timestamp}_${randomId}.${ext}`;
 
-      try {
-        const fileRef = window.firebase.ref(storage, filepath);
-        await window.firebase.uploadBytes(fileRef, file);
-        return await window.firebase.getDownloadURL(fileRef);
-      } catch (error) {
-        console.error('Chat image upload error:', error);
-        throw new Error('Ralat muat naik gambar chat: ' + error.message);
-      }
+      const fileRef = window.firebase.ref(storage, filepath);
+      await window.firebase.uploadBytes(fileRef, file);
+      return await window.firebase.getDownloadURL(fileRef);
     }
 
     async function initApp() {
@@ -1032,7 +1002,6 @@
         showToast('Pendaftaran berjaya! Sila log masuk.', 'success');
         navigateTo('login');
       } catch (error) {
-        console.error('Registration error:', error);
         showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
       }
     });
@@ -1242,7 +1211,6 @@
         showToast('Ditambah ke troli!', 'success');
         renderUI();
       } catch (error) {
-        console.error('Add to cart error:', error);
         showToast('Ralat menambah ke troli: ' + error.message, 'error');
       }
     }
@@ -1328,7 +1296,6 @@
         }
         renderUI();
       } catch (error) {
-        console.error('Update cart error:', error);
         showToast('Ralat mengemas kini troli: ' + error.message, 'error');
       }
     }
@@ -1345,7 +1312,6 @@
         showToast('Item dibuang dari troli', 'success');
         renderUI();
       } catch (error) {
-        console.error('Remove from cart error:', error);
         showToast('Ralat membuang item: ' + error.message, 'error');
       }
     }
@@ -1507,7 +1473,6 @@
 
         renderUI();
       } catch (error) {
-        console.error('Offer submit error:', error);
         showToast('Ralat menghantar offer: ' + error.message, 'error');
       }
     });
@@ -1558,7 +1523,7 @@
               <div class="flex-1 min-w-0">
                 <p class="font-medium truncate">${name}</p>
                 <p class="text-xs text-navy-500 dark:text-navy-400 truncate">
-                  ${lastMsg?.messageText || (lastMsg?.imageUrl ? '📷 Gambar' : '')}
+                  ${lastMsg?.messageText || (lastMsg?.imageUrl ? '📷 Gambar' : 'Mesej')}
                 </p>
               </div>
             </div>
@@ -1599,10 +1564,62 @@
 
       container.innerHTML = messages.map(m => {
         const isMe = m.messageFrom === currentUser.email;
+
+        if (m.messageType === 'offer_accepted') {
+          const offerItemsHtml = (m.offerItems || []).map(item => `
+            <div class="flex gap-3 items-start rounded-xl p-2 ${isMe ? 'bg-green-600/30' : 'bg-navy-100 dark:bg-navy-700'}">
+              <div class="w-14 h-14 rounded-lg overflow-hidden bg-white dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+                ${item.image_url
+                  ? `<img src="${item.image_url}" alt="${item.productName}" class="w-full h-full object-cover">`
+                  : `<i class="fas fa-box text-navy-400"></i>`
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-sm truncate">${item.productName}</p>
+                <div class="flex justify-between text-xs mt-1">
+                  <span>Kuantiti: x${item.quantity}</span>
+                  <span>RM ${Number(item.originalPrice || 0).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          `).join('');
+
+          return `
+            <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+              <div class="max-w-[88%] p-4 rounded-2xl shadow ${isMe ? 'bg-green-500 text-white' : 'bg-white dark:bg-navy-700'}">
+                <div class="flex items-center gap-2 mb-2">
+                  <i class="fas fa-check-circle ${isMe ? 'text-white' : 'text-green-500'}"></i>
+                  <p class="font-semibold">Offer Diterima</p>
+                </div>
+
+                <div class="rounded-xl p-3 ${isMe ? 'bg-green-600/40' : 'bg-navy-50 dark:bg-navy-800'}">
+                  <p class="font-medium mb-2">Produk dibeli:</p>
+                  <div class="space-y-2 mb-3">
+                    ${offerItemsHtml}
+                  </div>
+
+                  <div class="text-sm space-y-1">
+                    <p><strong>Harga Offer:</strong> RM ${Number(m.offerPrice || 0).toFixed(2)}</p>
+                    <p><strong>Lokasi COD:</strong> ${m.codLocation || '-'}</p>
+                  </div>
+                </div>
+
+                <p class="text-sm mt-3 ${isMe ? 'text-green-100' : 'text-navy-300'}">
+                  Sila teruskan perbincangan dalam chat ini.
+                </p>
+
+                <p class="text-xs mt-2 ${isMe ? 'text-green-100' : 'text-navy-400'}">
+                  ${new Date(m.createdAt).toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          `;
+        }
+
         return `
           <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
             <div class="max-w-[70%] px-4 py-2 ${isMe ? 'bg-accent-orange text-white chat-bubble-right' : 'bg-white dark:bg-navy-700 chat-bubble-left shadow'}">
-              ${m.messageText ? `<p class="text-sm ${m.imageUrl ? 'mb-2' : ''}">${m.messageText}</p>` : ''}
+              ${m.messageText ? `<p class="text-sm ${m.imageUrl ? 'mb-2' : ''} whitespace-pre-line">${m.messageText}</p>` : ''}
               ${m.imageUrl ? `<img src="${m.imageUrl}" alt="Chat image" class="max-w-full rounded-lg mt-1 cursor-pointer" onclick="showChatImagePreview('${m.imageUrl}')">` : ''}
               <p class="text-xs ${isMe ? 'text-orange-200' : 'text-navy-400'} mt-1">${new Date(m.createdAt).toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
@@ -1665,7 +1682,6 @@
         renderChatMessages();
         renderChatList();
       } catch (error) {
-        console.error('Send message error:', error);
         showToast('Ralat menghantar mesej: ' + error.message, 'error');
       }
     }
@@ -1775,7 +1791,7 @@
 
       container.innerHTML = offers.map(offer => `
         <div class="border border-navy-200 dark:border-navy-700 rounded-xl p-4">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="flex flex-col gap-3">
             <div>
               <p class="font-semibold">${offer.buyerName}</p>
               <p class="text-sm text-navy-500 dark:text-navy-400">${offer.buyerEmail}</p>
@@ -1792,19 +1808,34 @@
               ${offer.offerNote ? `<p class="text-sm mt-2 bg-navy-50 dark:bg-navy-700 p-2 rounded-lg">"${offer.offerNote}"</p>` : ''}
             </div>
 
-            ${offer.offerStatus === 'pending' ? `
-              <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
+              ${offer.offerStatus === 'pending' ? `
                 <button onclick="acceptOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm">
                   <i class="fas fa-check mr-1"></i> Accept
                 </button>
                 <button onclick="rejectOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm">
                   <i class="fas fa-times mr-1"></i> Reject
                 </button>
-              </div>
-            ` : ''}
+              ` : ''}
+
+              <button onclick="openBuyerChat('${offer.buyerEmail}')" class="px-4 py-2 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-lg text-sm">
+                <i class="fas fa-comments mr-1"></i> Chat Buyer
+              </button>
+            </div>
           </div>
         </div>
       `).join('');
+    }
+
+    function openBuyerChat(buyerEmail) {
+      if (!buyerEmail) {
+        showToast('Email buyer tidak dijumpai', 'error');
+        return;
+      }
+
+      currentChatWith = buyerEmail;
+      navigateTo('chat');
+      openChat(buyerEmail);
     }
 
     async function acceptOffer(offerFirebaseId) {
@@ -1814,27 +1845,92 @@
       }
 
       const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
-      if (!offer) return;
+      if (!offer) {
+        showToast('Offer tidak dijumpai', 'error');
+        return;
+      }
 
       try {
+        const acceptedAt = new Date().toISOString();
+
         await updateInFirebase('offers', offerFirebaseId, {
           offerStatus: 'accepted',
-          acceptedAt: new Date().toISOString()
+          acceptedAt: acceptedAt
         });
 
         offer.offerStatus = 'accepted';
-        offer.acceptedAt = new Date().toISOString();
+        offer.acceptedAt = acceptedAt;
 
-        const createdAt = new Date().toISOString();
+        const enrichedOfferItems = (offer.items || []).map(item => {
+          const product = allData.find(p =>
+            p.type === 'product' &&
+            ((p.__firebaseId === item.productId) || (p.id === item.productId))
+          );
+
+          return {
+            ...item,
+            image_url: product?.image_url || ''
+          };
+        });
+
+        const itemListText = enrichedOfferItems.map((item, index) => {
+          return `${index + 1}. ${item.productName} x${item.quantity}`;
+        }).join('\n');
+
+        const autoMessage =
+`✅ Offer diterima oleh seller
+
+Produk dibeli:
+${itemListText}
+
+Harga offer: RM ${Number(offer.offerPrice || 0).toFixed(2)}
+Lokasi COD: ${offer.codLocation}
+No telefon buyer: ${offer.buyerPhone}
+Jabatan/Kursus: ${offer.buyerDept}
+
+Sila teruskan perbincangan di chat ini untuk urusan COD.`;
+
+        const messageId = await saveToFirebase('messages', {
+          type: 'message',
+          messageFrom: currentUser.email,
+          messageTo: offer.buyerEmail,
+          messageText: autoMessage,
+          imageUrl: '',
+          messageType: 'offer_accepted',
+          relatedOfferId: offer.offerId,
+          offerItems: enrichedOfferItems,
+          offerPrice: offer.offerPrice || 0,
+          codLocation: offer.codLocation || '',
+          isRead: false,
+          createdAt: acceptedAt
+        });
+
+        allData.push({
+          type: 'message',
+          __firebaseId: messageId,
+          id: messageId,
+          __collection: 'messages',
+          messageFrom: currentUser.email,
+          messageTo: offer.buyerEmail,
+          messageText: autoMessage,
+          imageUrl: '',
+          messageType: 'offer_accepted',
+          relatedOfferId: offer.offerId,
+          offerItems: enrichedOfferItems,
+          offerPrice: offer.offerPrice || 0,
+          codLocation: offer.codLocation || '',
+          isRead: false,
+          createdAt: acceptedAt
+        });
 
         const notificationId = await saveToFirebase('notifications', {
           type: 'notification',
           userEmail: offer.buyerEmail,
           title: 'Offer anda diterima',
-          message: `Seller telah menerima offer anda. Sila teruskan urusan COD di ${offer.codLocation}.`,
+          message: 'Seller telah menerima offer anda. Sila semak chat untuk butiran pembelian.',
           relatedOfferId: offer.offerId,
           isRead: false,
-          createdAt
+          createdAt: acceptedAt
         });
 
         allData.push({
@@ -1844,16 +1940,18 @@
           __collection: 'notifications',
           userEmail: offer.buyerEmail,
           title: 'Offer anda diterima',
-          message: `Seller telah menerima offer anda. Sila teruskan urusan COD di ${offer.codLocation}.`,
+          message: 'Seller telah menerima offer anda. Sila semak chat untuk butiran pembelian.',
           relatedOfferId: offer.offerId,
           isRead: false,
-          createdAt
+          createdAt: acceptedAt
         });
 
-        showToast('Offer berjaya diterima', 'success');
-        renderSellerDashboard();
+        currentChatWith = offer.buyerEmail;
+        await loadDataFromFirebase();
+        navigateTo('chat');
+        openChat(offer.buyerEmail);
+        showToast('Offer berjaya diterima dan chat dibuka', 'success');
       } catch (error) {
-        console.error('Accept offer error:', error);
         showToast('Ralat menerima offer: ' + error.message, 'error');
       }
     }
@@ -1865,27 +1963,30 @@
       }
 
       const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
-      if (!offer) return;
+      if (!offer) {
+        showToast('Offer tidak dijumpai', 'error');
+        return;
+      }
 
       try {
+        const rejectedAt = new Date().toISOString();
+
         await updateInFirebase('offers', offerFirebaseId, {
           offerStatus: 'rejected',
-          rejectedAt: new Date().toISOString()
+          rejectedAt: rejectedAt
         });
 
         offer.offerStatus = 'rejected';
-        offer.rejectedAt = new Date().toISOString();
-
-        const createdAt = new Date().toISOString();
+        offer.rejectedAt = rejectedAt;
 
         const notificationId = await saveToFirebase('notifications', {
           type: 'notification',
           userEmail: offer.buyerEmail,
           title: 'Offer anda ditolak',
-          message: `Seller telah menolak offer anda untuk pesanan ${offer.offerId}.`,
+          message: 'Seller telah menolak offer anda.',
           relatedOfferId: offer.offerId,
           isRead: false,
-          createdAt
+          createdAt: rejectedAt
         });
 
         allData.push({
@@ -1895,16 +1996,16 @@
           __collection: 'notifications',
           userEmail: offer.buyerEmail,
           title: 'Offer anda ditolak',
-          message: `Seller telah menolak offer anda untuk pesanan ${offer.offerId}.`,
+          message: 'Seller telah menolak offer anda.',
           relatedOfferId: offer.offerId,
           isRead: false,
-          createdAt
+          createdAt: rejectedAt
         });
 
-        showToast('Offer telah ditolak', 'warning');
+        await loadDataFromFirebase();
         renderSellerDashboard();
+        showToast('Offer telah ditolak', 'warning');
       } catch (error) {
-        console.error('Reject offer error:', error);
         showToast('Ralat menolak offer: ' + error.message, 'error');
       }
     }
@@ -2074,11 +2175,10 @@
               });
 
               closeModal();
-              showToast('✅ Produk berjaya ditambah! Gambar telah dimuat naik.', 'success');
+              showToast('✅ Produk berjaya ditambah!', 'success');
               uploadedImages = [];
               renderUI();
             } catch (error) {
-              console.error('Error adding product:', error);
               showToast(`❌ Ralat: ${error.message}`, 'error');
             } finally {
               submitBtn.disabled = false;
@@ -2161,7 +2261,6 @@
       selectedChatImage = null;
       const preview = document.getElementById('chat-image-preview');
       if (preview) preview.innerHTML = '';
-
       const input = document.getElementById('chat-image-input');
       if (input) input.value = '';
     }
@@ -2197,16 +2296,12 @@
       }
 
       try {
-        const product = allData.find(d => d.__firebaseId === productId && d.type === 'product');
-        if (!product) return;
-
         await deleteFromFirebase('products', productId);
         allData = allData.filter(d => d.__firebaseId !== productId);
         closeModal();
         showToast('Produk telah dipadam', 'success');
         renderUI();
       } catch (error) {
-        console.error('Delete product error:', error);
         showToast('Ralat memadam produk: ' + error.message, 'error');
       }
     }
