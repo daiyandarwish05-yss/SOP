@@ -118,31 +118,6 @@
     }
     .dark .modal-content { background: #1e293b; }
     body { box-sizing: border-box; }
-    .chat-item-unread {
-      background: rgba(249,115,22,0.08);
-      border-left: 4px solid #ef4444;
-    }
-    .unread-badge {
-      min-width: 20px;
-      height: 20px;
-      padding: 0 6px;
-      border-radius: 9999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #ef4444;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 600;
-    }
   </style>
 </head>
 
@@ -160,14 +135,13 @@
             </div>
 
             <div class="hidden md:flex items-center space-x-6">
-              <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-home mr-1"></i> Utama</a>
-              <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-shopping-bag mr-1"></i> Produk</a>
+              <a href="#" onclick="navigateTo('home')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-home mr-1"></i> Home</a>
+              <a href="#" onclick="navigateTo('products')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-shopping-bag mr-1"></i> Products</a>
               <a href="#" onclick="navigateTo('cart')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors relative">
-                <i class="fas fa-shopping-cart mr-1"></i> Troli
+                <i class="fas fa-shopping-cart mr-1"></i> Cart
                 <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
               </a>
-              <a href="#" onclick="navigateTo('offers')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-receipt mr-1"></i> Tawaran Saya</a>
-              <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-comments mr-1"></i> Mesej</a>
+              <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-comments mr-1"></i> Chat</a>
               <div id="auth-nav"></div>
             </div>
           </div>
@@ -186,11 +160,10 @@
 
         <div id="mobile-menu" class="hidden md:hidden pb-4">
           <div class="flex flex-col space-y-3">
-            <a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-home mr-2"></i> Utama</a>
-            <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-shopping-bag mr-2"></i> Produk</a>
-            <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-shopping-cart mr-2"></i> Troli</a>
-            <a href="#" onclick="navigateTo('offers')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-receipt mr-2"></i> Tawaran Saya</a>
-            <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-comments mr-2"></i> Mesej</a>
+            <a href="#" onclick="navigateTo('home')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-home mr-2"></i> Home</a>
+            <a href="#" onclick="navigateTo('products')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-shopping-bag mr-2"></i> Products</a>
+            <a href="#" onclick="navigateTo('cart')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-shopping-cart mr-2"></i> Cart</a>
+            <a href="#" onclick="navigateTo('chat')" class="text-navy-600 dark:text-navy-200 py-2"><i class="fas fa-comments mr-2"></i> Chat</a>
             <div id="auth-nav-mobile"></div>
           </div>
         </div>
@@ -210,7 +183,7 @@
                     <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli
                   </button>
                   <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100">
-                    <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Penjual
+                    <i class="fas fa-user-plus mr-2"></i> Daftar Sebagai Seller
                   </button>
                 </div>
               </div>
@@ -252,7 +225,7 @@
 
         <div class="max-w-7xl mx-auto px-4 py-8">
           <h2 class="text-2xl font-bold mb-6">Kategori Produk</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4" id="categories-grid">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="categories-grid">
             <div onclick="filterByCategory('Akademik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
               <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-book text-blue-600 text-xl"></i>
@@ -277,16 +250,6 @@
               <div class="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-cookie-bite text-yellow-600 text-xl"></i>
               </div><span class="text-sm font-medium">Makanan</span>
-            </div>
-            <div onclick="filterByCategory('Perkhidmatan')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-              <div class="w-12 h-12 mx-auto bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mb-2">
-                <i class="fas fa-briefcase text-orange-600 text-xl"></i>
-              </div><span class="text-sm font-medium">Perkhidmatan</span>
-            </div>
-            <div onclick="filterByCategory('Lain-lain')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-              <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
-                <i class="fas fa-layer-group text-gray-600 dark:text-gray-300 text-xl"></i>
-              </div><span class="text-sm font-medium">Lain-lain</span>
             </div>
             <div onclick="filterByCategory('')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
               <div class="w-12 h-12 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
@@ -323,8 +286,6 @@
                 <option value="Asrama">🏠 Asrama</option>
                 <option value="Peribadi">👕 Peribadi</option>
                 <option value="Makanan">🍪 Makanan</option>
-                <option value="Perkhidmatan">🛠️ Perkhidmatan</option>
-                <option value="Lain-lain">📦 Lain-lain</option>
               </select>
 
               <select id="sort-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
@@ -359,7 +320,7 @@
               <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
             </div>
             <button onclick="navigateTo('checkout')" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">
-              <i class="fas fa-paper-plane mr-2"></i> Teruskan Hantar Tawaran
+              <i class="fas fa-paper-plane mr-2"></i> Proceed Hantar Offer
             </button>
           </div>
         </div>
@@ -367,10 +328,10 @@
 
       <div id="page-checkout" class="page">
         <div class="max-w-2xl mx-auto px-4 py-8">
-          <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Semak Tawaran</h1>
+          <h1 class="text-2xl font-bold mb-6"><i class="fas fa-clipboard-check mr-2 text-accent-orange"></i> Checkout Offer</h1>
           <form id="checkout-form" class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg space-y-4">
             <div>
-              <label class="block text-sm font-medium mb-2" for="cod-phone">Nombor Telefon</label>
+              <label class="block text-sm font-medium mb-2" for="cod-phone">No Telefon</label>
               <input type="tel" id="cod-phone" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 012-3456789" />
             </div>
 
@@ -383,21 +344,21 @@
               <label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label>
               <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
                 <option value="">Pilih lokasi</option>
-                <option value="Kafeteria">☕ Kafeteria</option>
-                <option value="Perpustakaan">📚 Perpustakaan</option>
+                <option value="Cafeteria">☕ Cafeteria</option>
+                <option value="Library">📚 Library</option>
                 <option value="Kolej Kediaman">🏠 Kolej Kediaman</option>
-                <option value="Pagar Parkir">🚗 Pagar Parkir</option>
-                <option value="Lobi Utama">🏛️ Lobi Utama</option>
+                <option value="Parking Gate">🚗 Parking Gate</option>
+                <option value="Main Lobby">🏛️ Main Lobby</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2" for="offer-note">Nota / Tawaran Pembeli</label>
+              <label class="block text-sm font-medium mb-2" for="offer-note">Nota / Offer Buyer</label>
               <textarea id="offer-note" rows="3" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: Boleh COD petang? Boleh kurang harga kalau ambil 2?"></textarea>
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2" for="offer-price">Harga Tawaran Pembeli (opsyenal)</label>
+              <label class="block text-sm font-medium mb-2" for="offer-price">Harga Offer Buyer (optional)</label>
               <input type="number" id="offer-price" min="0" step="0.01" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 25.00" />
             </div>
 
@@ -413,20 +374,9 @@
             </div>
 
             <button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold mt-4">
-              <i class="fas fa-paper-plane mr-2"></i> Hantar Tawaran
+              <i class="fas fa-paper-plane mr-2"></i> Hantar Offer
             </button>
           </form>
-        </div>
-      </div>
-
-      <div id="page-offers" class="page">
-        <div class="max-w-5xl mx-auto px-4 py-8">
-          <h1 class="text-2xl font-bold mb-6"><i class="fas fa-receipt mr-2 text-accent-orange"></i> Tawaran Saya</h1>
-          <div id="buyer-offers" class="space-y-4"></div>
-          <div id="buyer-offers-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg">
-            <i class="fas fa-file-circle-xmark text-6xl text-navy-300 mb-4"></i>
-            <p class="text-navy-500 dark:text-navy-400">Anda belum menghantar sebarang tawaran.</p>
-          </div>
         </div>
       </div>
 
@@ -493,7 +443,7 @@
             </div>
             <form id="login-form" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium mb-2" for="login-email">E-mel</label>
+                <label class="block text-sm font-medium mb-2" for="login-email">Email</label>
                 <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my" />
               </div>
               <div>
@@ -506,7 +456,7 @@
                 </div>
               </div>
               <button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">
-                <i class="fas fa-right-to-bracket mr-2"></i> Log Masuk
+                <i class="fas fa-sign-in-alt mr-2"></i> Log Masuk
               </button>
             </form>
             <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Belum ada akaun? <a href="#" onclick="navigateTo('register')" class="text-accent-orange hover:underline font-medium">Daftar sekarang</a></p>
@@ -530,7 +480,7 @@
                 <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda" />
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" for="reg-email">E-mel</label>
+                <label class="block text-sm font-medium mb-2" for="reg-email">Email</label>
                 <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my" />
               </div>
               <div>
@@ -549,14 +499,14 @@
                     <input type="radio" name="role" value="buyer" class="hidden peer" checked />
                     <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
                       <i class="fas fa-shopping-bag text-2xl mb-2"></i>
-                      <p class="font-medium">Pembeli</p>
+                      <p class="font-medium">Buyer</p>
                     </div>
                   </label>
                   <label class="cursor-pointer">
                     <input type="radio" name="role" value="seller" class="hidden peer" />
                     <div class="peer-checked:bg-accent-orange peer-checked:text-white bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center transition-colors border-2 border-transparent peer-checked:border-accent-orange">
                       <i class="fas fa-store text-2xl mb-2"></i>
-                      <p class="font-medium">Penjual</p>
+                      <p class="font-medium">Seller</p>
                     </div>
                   </label>
                 </div>
@@ -573,7 +523,7 @@
       <div id="page-seller" class="page">
         <div class="max-w-6xl mx-auto px-4 py-8">
           <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold"><i class="fas fa-store mr-2 text-accent-orange"></i> Papan Pemuka Penjual</h1>
+            <h1 class="text-2xl font-bold"><i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard</h1>
             <button onclick="showAddProductModal()" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-6 py-2 rounded-xl font-semibold">
               <i class="fas fa-plus mr-2"></i> Tambah Produk
             </button>
@@ -595,7 +545,7 @@
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-navy-500 dark:text-navy-400">Tawaran Menunggu</p>
+                  <p class="text-sm text-navy-500 dark:text-navy-400">Offer Pending</p>
                   <p id="seller-order-count" class="text-2xl font-bold">0</p>
                 </div>
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
@@ -607,7 +557,7 @@
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-navy-500 dark:text-navy-400">Mesej Baharu</p>
+                  <p class="text-sm text-navy-500 dark:text-navy-400">Mesej Baru</p>
                   <p id="seller-msg-count" class="text-2xl font-bold">0</p>
                 </div>
                 <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
@@ -642,7 +592,14 @@
 
           <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden mt-6">
             <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
-              <h2 class="font-semibold">Tawaran daripada Pembeli</h2>
+              <h2 class="font-semibold">Notifikasi Seller</h2>
+            </div>
+            <div id="seller-notifications" class="p-4 space-y-3"></div>
+          </div>
+
+          <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden mt-6">
+            <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
+              <h2 class="font-semibold">Offer dari Buyer</h2>
             </div>
             <div id="seller-offers" class="p-4 space-y-4"></div>
           </div>
@@ -658,14 +615,11 @@
               </div>
               <h1 id="profile-name" class="text-2xl font-bold">Nama Pengguna</h1>
               <p id="profile-email" class="text-navy-500 dark:text-navy-400">email@politeknik.edu.my</p>
-              <span id="profile-badge" class="inline-block mt-2 px-4 py-1 bg-accent-orange text-white text-sm rounded-full">Pembeli</span>
+              <span id="profile-badge" class="inline-block mt-2 px-4 py-1 bg-accent-orange text-white text-sm rounded-full">Buyer</span>
             </div>
             <div class="space-y-4">
               <button id="seller-dashboard-btn" onclick="navigateTo('seller')" class="hidden w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors">
-                <i class="fas fa-store mr-2 text-accent-orange"></i> Papan Pemuka Penjual
-              </button>
-              <button onclick="navigateTo('offers')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors">
-                <i class="fas fa-receipt mr-2 text-accent-orange"></i> Tawaran Saya
+                <i class="fas fa-store mr-2 text-accent-orange"></i> Seller Dashboard
               </button>
               <button onclick="navigateTo('cart')" class="w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors">
                 <i class="fas fa-shopping-cart mr-2 text-accent-orange"></i> Troli Saya
@@ -740,7 +694,7 @@
         await loadDataFromFirebase();
       } catch (error) {
         console.error('Firebase initialization error:', error);
-        showToast('⚠️ Firebase gagal disambungkan. Periksa konfigurasi dan rules.', 'warning');
+        showToast('⚠️ Firebase gagal disambungkan. Periksa config dan rules.', 'warning');
       }
     }
 
@@ -922,39 +876,6 @@
       return getNotifications().filter(n => !n.isRead).length;
     }
 
-    function formatDateTime(dateString) {
-      if (!dateString) return '-';
-      return new Date(dateString).toLocaleString('ms-MY', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    function formatChatTime(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      const now = new Date();
-      const sameDay = date.toDateString() === now.toDateString();
-      return sameDay
-        ? date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })
-        : date.toLocaleDateString('ms-MY', { day: '2-digit', month: '2-digit' });
-    }
-
-    function getStatusClass(status) {
-      if (status === 'accepted') return 'bg-green-100 text-green-700';
-      if (status === 'rejected') return 'bg-red-100 text-red-700';
-      return 'bg-yellow-100 text-yellow-700';
-    }
-
-    function getStatusLabel(status) {
-      if (status === 'accepted') return 'Diterima';
-      if (status === 'rejected') return 'Ditolak';
-      return 'Menunggu';
-    }
-
     function navigateTo(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const targetPage = document.getElementById(`page-${page}`);
@@ -965,7 +886,6 @@
         if (page === 'products') renderProducts();
         if (page === 'cart') renderCart();
         if (page === 'checkout') renderCheckout();
-        if (page === 'offers') renderBuyerOffers();
         if (page === 'chat') {
           renderChatList();
           const chatListBox = document.getElementById('chat-list-box');
@@ -1012,18 +932,18 @@
         `;
         authNavMobile.innerHTML = `
           <a href="#" onclick="navigateTo('profile')" class="text-navy-600 dark:text-navy-200 py-2">
-            <i class="fas fa-user mr-2"></i> Profil
+            <i class="fas fa-user mr-2"></i> ${currentUser.name}
           </a>
         `;
       } else {
         authNav.innerHTML = `
           <a href="#" onclick="navigateTo('login')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors">
-            <i class="fas fa-right-to-bracket mr-1"></i> Log Masuk
+            <i class="fas fa-sign-in-alt mr-1"></i> Login
           </a>
         `;
         authNavMobile.innerHTML = `
           <a href="#" onclick="navigateTo('login')" class="text-navy-600 dark:text-navy-200 py-2">
-            <i class="fas fa-right-to-bracket mr-2"></i> Log Masuk
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
           </a>
         `;
       }
@@ -1044,7 +964,7 @@
         showToast('Log masuk berjaya!', 'success');
         navigateTo('home');
       } else {
-        showToast('E-mel atau kata laluan tidak sah', 'error');
+        showToast('Email atau kata laluan tidak sah', 'error');
       }
     });
 
@@ -1057,7 +977,7 @@
 
       const users = getUsers();
       if (users.find(u => u.email === email)) {
-        showToast('E-mel sudah didaftarkan', 'error');
+        showToast('Email sudah didaftarkan', 'error');
         return;
       }
 
@@ -1116,7 +1036,6 @@
       updateCartBadge();
 
       if (currentPage === 'seller') renderSellerDashboard();
-      if (currentPage === 'offers') renderBuyerOffers();
       if (currentPage === 'chat') renderChatList();
     }
 
@@ -1181,47 +1100,25 @@
     }
 
     function createProductCard(product) {
-  const rating = product.rating || Math.floor(Math.random() * 2) + 4;
-  const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  const categoryIcons = {
-    'Akademik': 'fa-book',
-    'Elektronik': 'fa-laptop',
-    'Asrama': 'fa-bed',
-    'Peribadi': 'fa-tshirt',
-    'Makanan': 'fa-cookie-bite',
-    'Perkhidmatan': 'fa-briefcase',
-    'Lain-lain': 'fa-layer-group'
-  };
-  const icon = categoryIcons[product.category] || 'fa-box';
-  const imageUrl = product.image_url || null;
+      const rating = product.rating || Math.floor(Math.random() * 2) + 4;
+      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const categoryIcons = {
+        'Akademik': 'fa-book',
+        'Elektronik': 'fa-laptop',
+        'Asrama': 'fa-bed',
+        'Peribadi': 'fa-tshirt',
+        'Makanan': 'fa-cookie-bite'
+      };
+      const icon = categoryIcons[product.category] || 'fa-box';
+      const imageUrl = product.image_url || null;
 
-  return `
-    <div class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in">
-      <div class="h-48 bg-navy-100 dark:bg-navy-700 flex items-center justify-center relative overflow-hidden">
-        ${imageUrl
-          ? `<img src="${imageUrl}" alt="${product.productName}" class="max-h-full max-w-full object-contain" loading="lazy">`
-          : `<i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i>`
-        }
-      </div>
-      <div class="p-4">
-        <h3 class="font-semibold text-sm mb-1 truncate">${product.productName}</h3>
-        <p class="text-accent-orange font-bold text-lg">RM ${Number(product.price).toFixed(2)}</p>
-        <div class="flex items-center justify-between mt-2">
-          <span class="text-xs text-navy-500 dark:text-navy-400 truncate max-w-[60%]">${product.sellerName}</span>
-          <span class="text-yellow-500 text-xs">${stars}</span>
-        </div>
-        <div class="flex gap-2 mt-3">
-          <button onclick="addToCart('${product.__firebaseId || product.id}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
-            <i class="fas fa-cart-plus mr-1"></i> Tambah
-          </button>
-          <button onclick="startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
-            <i class="fas fa-comment"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-}
+      return `
+        <div class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in">
+          <div class="aspect-square bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-700 dark:to-navy-600 flex items-center justify-center relative group overflow-hidden">
+            ${imageUrl
+              ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i>';">`
+              : `<i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i>`
+            }
           </div>
           <div class="p-4">
             <h3 class="font-semibold text-sm mb-1 truncate">${product.productName}</h3>
@@ -1452,12 +1349,7 @@
     document.getElementById('checkout-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      if (!currentUser) {
-        showToast('Sila log masuk dahulu', 'warning');
-        return;
-      }
-
-      const name = currentUser?.name || 'Pembeli';
+      const name = currentUser?.name || 'Buyer';
       const phone = document.getElementById('cod-phone').value;
       const dept = document.getElementById('cod-dept').value;
       const location = document.getElementById('cod-location').value;
@@ -1519,7 +1411,6 @@
           offerPrice: finalOfferPrice,
           totalOriginal,
           offerStatus: 'pending',
-          rejectReason: '',
           items: offerItems,
           createdAt
         });
@@ -1539,7 +1430,6 @@
           offerPrice: finalOfferPrice,
           totalOriginal,
           offerStatus: 'pending',
-          rejectReason: '',
           items: offerItems,
           createdAt
         });
@@ -1550,8 +1440,8 @@
           const notificationId = await saveToFirebase('notifications', {
             type: 'notification',
             userEmail: sellerEmail,
-            title: 'Tawaran baharu diterima',
-            message: `${name} telah menghantar tawaran untuk produk anda.`,
+            title: 'Offer baru diterima',
+            message: `${name} telah menghantar offer untuk produk anda.`,
             relatedOfferId: offerCode,
             isRead: false,
             createdAt
@@ -1563,8 +1453,8 @@
             id: notificationId,
             __collection: 'notifications',
             userEmail: sellerEmail,
-            title: 'Tawaran baharu diterima',
-            message: `${name} telah menghantar tawaran untuk produk anda.`,
+            title: 'Offer baru diterima',
+            message: `${name} telah menghantar offer untuk produk anda.`,
             relatedOfferId: offerCode,
             isRead: false,
             createdAt
@@ -1577,222 +1467,82 @@
 
         allData = allData.filter(d => !cartItems.find(ci => ci.__firebaseId === d.__firebaseId));
 
-        showModal('Tawaran Berjaya Dihantar!', `
+        showModal('Offer Berjaya Dihantar!', `
           <div class="text-center">
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <i class="fas fa-paper-plane text-blue-600 text-3xl"></i>
             </div>
             <p class="text-navy-600 dark:text-navy-300 mb-4">
-              Tawaran anda telah dihantar kepada penjual. Sila tunggu penjual menerima atau menolak tawaran ini.
+              Offer anda telah dihantar kepada seller. Sila tunggu seller accept atau reject offer ini.
             </p>
-            <button onclick="closeModal(); navigateTo('offers')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
-              Lihat Tawaran Saya
+            <button onclick="closeModal(); navigateTo('home')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
+              Kembali ke Home
             </button>
           </div>
         `);
 
         renderUI();
       } catch (error) {
-        showToast('Ralat menghantar tawaran: ' + error.message, 'error');
+        showToast('Ralat menghantar offer: ' + error.message, 'error');
       }
     });
-
-    function renderBuyerOffers() {
-      const container = document.getElementById('buyer-offers');
-      const empty = document.getElementById('buyer-offers-empty');
-
-      if (!currentUser) {
-        container.innerHTML = '';
-        empty.classList.add('hidden');
-        navigateTo('login');
-        return;
-      }
-
-      const offers = getOffers()
-        .filter(o => o.buyerEmail === currentUser.email)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      if (!offers.length) {
-        container.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-      }
-
-      empty.classList.add('hidden');
-      container.innerHTML = offers.map(offer => {
-        const sellerNames = [...new Set((offer.items || []).map(item => item.sellerName).filter(Boolean))].join(', ') || '-';
-        const sellerEmail = (offer.items || []).find(item => item.sellerId)?.sellerId || '';
-
-        return `
-          <div class="bg-white dark:bg-navy-800 rounded-2xl p-5 shadow-lg border border-navy-100 dark:border-navy-700">
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-              <div>
-                <p class="font-semibold text-lg">Kod Tawaran: ${offer.offerId}</p>
-                <p class="text-sm text-navy-500 dark:text-navy-400">Penjual: ${sellerNames}</p>
-                <p class="text-sm text-navy-500 dark:text-navy-400">Dihantar: ${formatDateTime(offer.createdAt)}</p>
-              </div>
-              <span class="status-pill ${getStatusClass(offer.offerStatus)}">${getStatusLabel(offer.offerStatus)}</span>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-              <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
-                <p class="text-sm text-navy-500 dark:text-navy-300 mb-1">Lokasi COD</p>
-                <p class="font-semibold">${offer.codLocation || '-'}</p>
-              </div>
-              <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
-                <p class="text-sm text-navy-500 dark:text-navy-300 mb-1">Harga Tawaran</p>
-                <p class="font-bold text-accent-orange text-lg">RM ${Number(offer.offerPrice || 0).toFixed(2)}</p>
-              </div>
-            </div>
-
-            <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mb-4">
-              <p class="text-sm text-navy-500 dark:text-navy-300 mb-2">Item Tawaran</p>
-              <div class="flex flex-wrap gap-2">
-                ${(offer.items || []).map(item => `
-                  <span class="px-3 py-2 bg-white dark:bg-navy-800 rounded-full text-sm border border-navy-200 dark:border-navy-600">
-                    ${item.productName} x${item.quantity}
-                  </span>
-                `).join('')}
-              </div>
-            </div>
-
-            <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mb-4">
-              <p class="text-sm text-navy-500 dark:text-navy-300 mb-2">Mesej Pembeli</p>
-              <p class="text-sm">${offer.offerNote ? offer.offerNote : 'Tiada mesej.'}</p>
-            </div>
-
-            ${offer.offerStatus === 'rejected' ? `
-              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
-                <p class="font-semibold text-red-600 mb-1">Tawaran Ditolak</p>
-                <p class="text-sm mb-2">Tarikh Keputusan: ${formatDateTime(offer.rejectedAt || offer.updatedAt || offer.createdAt)}</p>
-                <p class="text-sm"><strong>Sebab penolakan:</strong> ${offer.rejectReason ? offer.rejectReason : 'Tiada sebab diberi.'}</p>
-              </div>
-            ` : ''}
-
-            ${offer.offerStatus === 'accepted' ? `
-              <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-4">
-                <p class="font-semibold text-green-600 mb-1">Tawaran Diterima</p>
-                <p class="text-sm">Tarikh Keputusan: ${formatDateTime(offer.acceptedAt || offer.createdAt)}</p>
-              </div>
-            ` : ''}
-
-            <div class="flex flex-wrap gap-2">
-              ${sellerEmail ? `
-                <button onclick="openOfferSellerChat('${sellerEmail}')" class="px-4 py-2 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-lg text-sm">
-                  <i class="fas fa-comments mr-1"></i> Chat Penjual
-                </button>
-              ` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function openOfferSellerChat(sellerEmail) {
-      if (!sellerEmail) {
-        showToast('Penjual tidak dijumpai', 'error');
-        return;
-      }
-      currentChatWith = sellerEmail;
-      navigateTo('chat');
-      openChat(sellerEmail);
-    }
-
-    function getMessagePreview(message) {
-      if (!message) return 'Belum ada mesej';
-      if (message.messageType === 'offer_accepted') return '✅ Tawaran diterima oleh penjual';
-      if (message.messageType === 'offer_rejected') return '❌ Tawaran ditolak oleh penjual';
-      if (message.imageUrl && message.messageText) return `📷 ${message.messageText}`;
-      if (message.imageUrl) return '📷 Gambar';
-      return message.messageText || 'Mesej';
-    }
-
-    async function markMessagesAsRead(partnerEmail) {
-      if (!currentUser || !firebaseReady) return;
-
-      const unreadMessages = allData.filter(
-        d =>
-          d.type === 'message' &&
-          d.messageFrom === partnerEmail &&
-          d.messageTo === currentUser.email &&
-          !d.isRead
-      );
-
-      for (const msg of unreadMessages) {
-        await updateInFirebase('messages', msg.__firebaseId, { isRead: true });
-        msg.isRead = true;
-      }
-    }
 
     function renderChatList() {
       if (!currentUser) {
         document.getElementById('chat-list').innerHTML = `
           <div class="p-4 text-center text-navy-500">
             <i class="fas fa-lock text-2xl mb-2"></i>
-            <p>Sila log masuk untuk mesej</p>
+            <p>Sila log masuk untuk chat</p>
           </div>
         `;
         return;
       }
 
-      const messages = getMessages().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const messages = getMessages();
       const users = getUsers();
-      const partnerEmails = [...new Set(messages.map(m => m.messageFrom === currentUser.email ? m.messageTo : m.messageFrom).filter(Boolean))];
-      const container = document.getElementById('chat-list');
+      const chatPartners = new Set();
 
-      if (partnerEmails.length === 0) {
+      messages.forEach(m => {
+        if (m.messageFrom !== currentUser.email) chatPartners.add(m.messageFrom);
+        if (m.messageTo !== currentUser.email) chatPartners.add(m.messageTo);
+      });
+
+      const container = document.getElementById('chat-list');
+      if (chatPartners.size === 0) {
         container.innerHTML = `
           <div class="p-4 text-center text-navy-500">
             <i class="fas fa-comments text-2xl mb-2"></i>
             <p class="text-sm">Tiada perbualan</p>
-            <p class="text-xs mt-1">Chat dengan penjual melalui halaman produk</p>
+            <p class="text-xs mt-1">Chat dengan seller melalui halaman produk</p>
           </div>
         `;
         return;
       }
 
-      const conversations = partnerEmails.map(email => {
-        const related = messages.filter(m =>
-          (m.messageFrom === currentUser.email && m.messageTo === email) ||
-          (m.messageFrom === email && m.messageTo === currentUser.email)
-        ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-
-        const lastMsg = related[related.length - 1];
-        const unreadCount = related.filter(m => m.messageFrom === email && m.messageTo === currentUser.email && !m.isRead).length;
+      container.innerHTML = Array.from(chatPartners).map(email => {
         const user = users.find(u => u.email === email);
+        const name = user ? user.name : email.split('@')[0];
+        const lastMsg = messages.filter(m => m.messageFrom === email || m.messageTo === email).pop();
 
-        return {
-          email,
-          name: user ? user.name : email.split('@')[0],
-          lastMsg,
-          unreadCount
-        };
-      }).sort((a, b) => new Date(b.lastMsg?.createdAt || 0) - new Date(a.lastMsg?.createdAt || 0));
-
-      container.innerHTML = conversations.map(c => `
-        <div onclick="openChat('${c.email}')" class="p-4 hover:bg-navy-50 dark:hover:bg-navy-700 cursor-pointer border-b border-navy-100 dark:border-navy-700 transition-colors ${currentChatWith === c.email ? 'bg-navy-100 dark:bg-navy-700' : ''} ${c.unreadCount ? 'chat-item-unread' : ''}">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold">
-              ${c.name.charAt(0).toUpperCase()}
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between gap-2">
-                <p class="font-medium truncate">${c.name}</p>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                  <span class="text-[11px] text-navy-400">${formatChatTime(c.lastMsg?.createdAt)}</span>
-                  ${c.unreadCount ? `<span class="unread-badge">${c.unreadCount}</span>` : ''}
-                </div>
+        return `
+          <div onclick="openChat('${email}')" class="p-4 hover:bg-navy-50 dark:hover:bg-navy-700 cursor-pointer border-b border-navy-100 dark:border-navy-700 transition-colors ${currentChatWith === email ? 'bg-navy-100 dark:bg-navy-700' : ''}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold">
+                ${name.charAt(0).toUpperCase()}
               </div>
-              <p class="text-xs ${c.unreadCount ? 'text-navy-700 dark:text-white font-medium' : 'text-navy-500 dark:text-navy-400'} truncate">
-                ${getMessagePreview(c.lastMsg)}
-              </p>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium truncate">${name}</p>
+                <p class="text-xs text-navy-500 dark:text-navy-400 truncate">
+                  ${lastMsg?.messageText || (lastMsg?.imageUrl ? '📷 Gambar' : 'Mesej')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    async function openChat(email) {
+    function openChat(email) {
       currentChatWith = email;
       const users = getUsers();
       const user = users.find(u => u.email === email);
@@ -1812,7 +1562,6 @@
         `;
       }
 
-      await markMessagesAsRead(email);
       renderChatMessages();
       renderChatList();
 
@@ -1888,7 +1637,7 @@
               <div class="max-w-[88%] p-4 rounded-2xl shadow ${isMe ? 'bg-green-500 text-white' : 'bg-white dark:bg-navy-700'}">
                 <div class="flex items-center gap-2 mb-2">
                   <i class="fas fa-check-circle ${isMe ? 'text-white' : 'text-green-500'}"></i>
-                  <p class="font-semibold">Tawaran Diterima</p>
+                  <p class="font-semibold">Offer Diterima</p>
                 </div>
 
                 <div class="rounded-xl p-3 ${isMe ? 'bg-green-600/40' : 'bg-navy-50 dark:bg-navy-800'}">
@@ -1898,7 +1647,7 @@
                   </div>
 
                   <div class="text-sm space-y-1">
-                    <p><strong>Harga Tawaran:</strong> RM ${Number(m.offerPrice || 0).toFixed(2)}</p>
+                    <p><strong>Harga Offer:</strong> RM ${Number(m.offerPrice || 0).toFixed(2)}</p>
                     <p><strong>Lokasi COD:</strong> ${m.codLocation || '-'}</p>
                   </div>
                 </div>
@@ -1915,28 +1664,11 @@
           `;
         }
 
-        if (m.messageType === 'offer_rejected') {
-          return `
-            <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-              <div class="max-w-[88%] p-4 rounded-2xl shadow ${isMe ? 'bg-red-500 text-white' : 'bg-white dark:bg-navy-700'}">
-                <div class="flex items-center gap-2 mb-2">
-                  <i class="fas fa-circle-xmark ${isMe ? 'text-white' : 'text-red-500'}"></i>
-                  <p class="font-semibold">Tawaran Ditolak</p>
-                </div>
-                <p class="text-sm whitespace-pre-line">${m.messageText || 'Tawaran anda telah ditolak.'}</p>
-                <p class="text-xs mt-2 ${isMe ? 'text-red-100' : 'text-navy-400'}">
-                  ${new Date(m.createdAt).toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          `;
-        }
-
         return `
           <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
             <div class="max-w-[70%] px-4 py-2 ${isMe ? 'bg-accent-orange text-white chat-bubble-right' : 'bg-white dark:bg-navy-700 chat-bubble-left shadow'}">
               ${m.messageText ? `<p class="text-sm ${m.imageUrl ? 'mb-2' : ''} whitespace-pre-line">${m.messageText}</p>` : ''}
-              ${m.imageUrl ? `<img src="${m.imageUrl}" alt="Gambar chat" class="max-w-full rounded-lg mt-1 cursor-pointer" onclick="showChatImagePreview('${m.imageUrl}')">` : ''}
+              ${m.imageUrl ? `<img src="${m.imageUrl}" alt="Chat image" class="max-w-full rounded-lg mt-1 cursor-pointer" onclick="showChatImagePreview('${m.imageUrl}')">` : ''}
               <p class="text-xs ${isMe ? 'text-orange-200' : 'text-navy-400'} mt-1">${new Date(m.createdAt).toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
@@ -2004,7 +1736,7 @@
 
     function startChat(sellerId) {
       if (!currentUser) {
-        showToast('Sila log masuk untuk mesej', 'warning');
+        showToast('Sila log masuk untuk chat', 'warning');
         navigateTo('login');
         return;
       }
@@ -2029,7 +1761,9 @@
 
       document.getElementById('seller-product-count').textContent = myProducts.length;
       document.getElementById('seller-order-count').textContent = myOffers.filter(o => o.offerStatus === 'pending').length;
-      document.getElementById('seller-msg-count').textContent = messages.filter(m => m.messageTo === currentUser.email && !m.isRead).length;
+      document.getElementById('seller-msg-count').textContent =
+        messages.filter(m => m.messageTo === currentUser.email && !m.isRead).length ||
+        messages.filter(m => m.messageTo === currentUser.email).length;
 
       const container = document.getElementById('seller-products');
       const noProducts = document.getElementById('seller-no-products');
@@ -2061,7 +1795,30 @@
         `).join('');
       }
 
+      renderSellerNotifications();
       renderSellerOffers();
+    }
+
+    function renderSellerNotifications() {
+      const container = document.getElementById('seller-notifications');
+      if (!container) return;
+
+      const notifications = getNotifications()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 10);
+
+      if (!notifications.length) {
+        container.innerHTML = `<p class="text-navy-500 dark:text-navy-400 text-sm">Tiada notifikasi</p>`;
+        return;
+      }
+
+      container.innerHTML = notifications.map(n => `
+        <div class="p-3 rounded-xl ${n.isRead ? 'bg-navy-50 dark:bg-navy-700' : 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'}">
+          <p class="font-semibold text-sm">${n.title}</p>
+          <p class="text-sm text-navy-600 dark:text-navy-300">${n.message}</p>
+          <p class="text-xs text-navy-400 mt-1">${new Date(n.createdAt).toLocaleString('ms-MY')}</p>
+        </div>
+      `).join('');
     }
 
     function renderSellerOffers() {
@@ -2076,79 +1833,57 @@
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       if (!offers.length) {
-        container.innerHTML = `<p class="text-navy-500 dark:text-navy-400 text-sm">Tiada tawaran setakat ini</p>`;
+        container.innerHTML = `<p class="text-navy-500 dark:text-navy-400 text-sm">Tiada offer setakat ini</p>`;
         return;
       }
 
-      container.innerHTML = offers.map(offer => {
-        const myItems = (offer.items || []).filter(item => item.sellerId === currentUser.email);
-        return `
-          <div class="border border-navy-200 dark:border-navy-700 rounded-xl p-4">
-            <div class="flex flex-col gap-3">
-              <div>
-                <div class="flex items-center gap-3 flex-wrap mb-1">
-                  <p class="font-semibold">${offer.buyerName}</p>
-                  <span class="status-pill ${getStatusClass(offer.offerStatus)}">${getStatusLabel(offer.offerStatus)}</span>
-                </div>
-                <p class="text-sm text-navy-500 dark:text-navy-400">${offer.buyerEmail}</p>
-                <p class="text-sm mt-1">Lokasi COD: <strong>${offer.codLocation}</strong></p>
-                <p class="text-sm">Harga Tawaran: <strong class="text-accent-orange">RM ${Number(offer.offerPrice || 0).toFixed(2)}</strong></p>
-                <p class="text-sm">Tarikh & Masa: <strong>${formatDateTime(offer.createdAt)}</strong></p>
-                ${offer.offerNote ? `<p class="text-sm mt-2 bg-navy-50 dark:bg-navy-700 p-2 rounded-lg">&quot;${offer.offerNote}&quot;</p>` : ''}
-                <div class="mt-3 flex flex-wrap gap-2">
-                  ${myItems.map(item => `<span class="px-3 py-1 bg-white dark:bg-navy-800 rounded-full text-xs border border-navy-200 dark:border-navy-600">${item.productName} x${item.quantity}</span>`).join('')}
-                </div>
-                ${offer.offerStatus === 'rejected' && offer.rejectReason ? `<p class="text-sm mt-3 text-red-500"><strong>Sebab tolak:</strong> ${offer.rejectReason}</p>` : ''}
-              </div>
+      container.innerHTML = offers.map(offer => `
+        <div class="border border-navy-200 dark:border-navy-700 rounded-xl p-4">
+          <div class="flex flex-col gap-3">
+            <div>
+              <p class="font-semibold">${offer.buyerName}</p>
+              <p class="text-sm text-navy-500 dark:text-navy-400">${offer.buyerEmail}</p>
+              <p class="text-sm mt-1">Lokasi COD: <strong>${offer.codLocation}</strong></p>
+              <p class="text-sm">Offer Price: <strong class="text-accent-orange">RM ${Number(offer.offerPrice || 0).toFixed(2)}</strong></p>
+              <p class="text-sm">Status:
+                <span class="${
+                  offer.offerStatus === 'accepted' ? 'text-green-600' :
+                  offer.offerStatus === 'rejected' ? 'text-red-600' : 'text-yellow-600'
+                } font-semibold">
+                  ${offer.offerStatus}
+                </span>
+              </p>
+              ${offer.offerNote ? `<p class="text-sm mt-2 bg-navy-50 dark:bg-navy-700 p-2 rounded-lg">"${offer.offerNote}"</p>` : ''}
+            </div>
 
-              <div class="flex flex-wrap gap-2">
-                ${offer.offerStatus === 'pending' ? `
-                  <button onclick="acceptOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm">
-                    <i class="fas fa-check mr-1"></i> Terima
-                  </button>
-                  <button onclick="promptRejectOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm">
-                    <i class="fas fa-times mr-1"></i> Tolak
-                  </button>
-                ` : ''}
-
-                <button onclick="openBuyerChat('${offer.buyerEmail}')" class="px-4 py-2 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-lg text-sm">
-                  <i class="fas fa-comments mr-1"></i> Chat Pembeli
+            <div class="flex flex-wrap gap-2">
+              ${offer.offerStatus === 'pending' ? `
+                <button onclick="acceptOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm">
+                  <i class="fas fa-check mr-1"></i> Accept
                 </button>
-              </div>
+                <button onclick="rejectOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm">
+                  <i class="fas fa-times mr-1"></i> Reject
+                </button>
+              ` : ''}
+
+              <button onclick="openBuyerChat('${offer.buyerEmail}')" class="px-4 py-2 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-lg text-sm">
+                <i class="fas fa-comments mr-1"></i> Chat Buyer
+              </button>
             </div>
           </div>
-        `;
-      }).join('');
+        </div>
+      `).join('');
     }
 
     function openBuyerChat(buyerEmail) {
       if (!buyerEmail) {
-        showToast('E-mel pembeli tidak dijumpai', 'error');
+        showToast('Email buyer tidak dijumpai', 'error');
         return;
       }
 
       currentChatWith = buyerEmail;
       navigateTo('chat');
       openChat(buyerEmail);
-    }
-
-    function promptRejectOffer(offerFirebaseId) {
-      const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
-      if (!offer) {
-        showToast('Tawaran tidak dijumpai', 'error');
-        return;
-      }
-
-      showModal('Tolak Tawaran', `
-        <div class="space-y-4">
-          <p class="text-sm text-navy-600 dark:text-navy-300">Sila masukkan sebab penolakan supaya pembeli boleh melihat alasan pada platform mereka.</p>
-          <textarea id="reject-reason-input" rows="4" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-red-400" placeholder="Contoh: Harga terlalu rendah atau item sudah tiada stok."></textarea>
-          <div class="flex justify-end gap-2">
-            <button onclick="closeModal()" class="px-4 py-2 bg-navy-200 dark:bg-navy-700 rounded-lg">Batal</button>
-            <button onclick="submitRejectOffer('${offerFirebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg">Hantar Penolakan</button>
-          </div>
-        </div>
-      `);
     }
 
     async function acceptOffer(offerFirebaseId) {
@@ -2159,7 +1894,7 @@
 
       const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
       if (!offer) {
-        showToast('Tawaran tidak dijumpai', 'error');
+        showToast('Offer tidak dijumpai', 'error');
         return;
       }
 
@@ -2168,13 +1903,11 @@
 
         await updateInFirebase('offers', offerFirebaseId, {
           offerStatus: 'accepted',
-          acceptedAt: acceptedAt,
-          rejectReason: ''
+          acceptedAt: acceptedAt
         });
 
         offer.offerStatus = 'accepted';
         offer.acceptedAt = acceptedAt;
-        offer.rejectReason = '';
 
         const enrichedOfferItems = (offer.items || []).map(item => {
           const product = allData.find(p =>
@@ -2190,18 +1923,17 @@
 
         const itemListText = enrichedOfferItems.map((item, index) => {
           return `${index + 1}. ${item.productName} x${item.quantity}`;
-        }).join('
-');
+        }).join('\n');
 
         const autoMessage =
-`✅ Tawaran diterima oleh penjual
+`✅ Offer diterima oleh seller
 
 Produk dibeli:
 ${itemListText}
 
-Harga tawaran: RM ${Number(offer.offerPrice || 0).toFixed(2)}
+Harga offer: RM ${Number(offer.offerPrice || 0).toFixed(2)}
 Lokasi COD: ${offer.codLocation}
-Nombor telefon pembeli: ${offer.buyerPhone}
+No telefon buyer: ${offer.buyerPhone}
 Jabatan/Kursus: ${offer.buyerDept}
 
 Sila teruskan perbincangan di chat ini untuk urusan COD.`;
@@ -2242,8 +1974,8 @@ Sila teruskan perbincangan di chat ini untuk urusan COD.`;
         const notificationId = await saveToFirebase('notifications', {
           type: 'notification',
           userEmail: offer.buyerEmail,
-          title: 'Tawaran anda diterima',
-          message: 'Penjual telah menerima tawaran anda. Sila semak chat untuk butiran pembelian.',
+          title: 'Offer anda diterima',
+          message: 'Seller telah menerima offer anda. Sila semak chat untuk butiran pembelian.',
           relatedOfferId: offer.offerId,
           isRead: false,
           createdAt: acceptedAt
@@ -2255,8 +1987,8 @@ Sila teruskan perbincangan di chat ini untuk urusan COD.`;
           id: notificationId,
           __collection: 'notifications',
           userEmail: offer.buyerEmail,
-          title: 'Tawaran anda diterima',
-          message: 'Penjual telah menerima tawaran anda. Sila semak chat untuk butiran pembelian.',
+          title: 'Offer anda diterima',
+          message: 'Seller telah menerima offer anda. Sila semak chat untuk butiran pembelian.',
           relatedOfferId: offer.offerId,
           isRead: false,
           createdAt: acceptedAt
@@ -2266,25 +1998,13 @@ Sila teruskan perbincangan di chat ini untuk urusan COD.`;
         await loadDataFromFirebase();
         navigateTo('chat');
         openChat(offer.buyerEmail);
-        showToast('Tawaran berjaya diterima dan chat dibuka', 'success');
+        showToast('Offer berjaya diterima dan chat dibuka', 'success');
       } catch (error) {
-        showToast('Ralat menerima tawaran: ' + error.message, 'error');
+        showToast('Ralat menerima offer: ' + error.message, 'error');
       }
     }
 
-    async function submitRejectOffer(offerFirebaseId) {
-      const reasonInput = document.getElementById('reject-reason-input');
-      const rejectReason = reasonInput ? reasonInput.value.trim() : '';
-
-      if (!rejectReason) {
-        showToast('Sila masukkan sebab penolakan', 'warning');
-        return;
-      }
-
-      await rejectOffer(offerFirebaseId, rejectReason);
-    }
-
-    async function rejectOffer(offerFirebaseId, rejectReason = '') {
+    async function rejectOffer(offerFirebaseId) {
       if (!firebaseReady) {
         showToast('Firebase belum siap.', 'error');
         return;
@@ -2292,7 +2012,7 @@ Sila teruskan perbincangan di chat ini untuk urusan COD.`;
 
       const offer = allData.find(d => d.type === 'offer' && d.__firebaseId === offerFirebaseId);
       if (!offer) {
-        showToast('Tawaran tidak dijumpai', 'error');
+        showToast('Offer tidak dijumpai', 'error');
         return;
       }
 
@@ -2301,50 +2021,17 @@ Sila teruskan perbincangan di chat ini untuk urusan COD.`;
 
         await updateInFirebase('offers', offerFirebaseId, {
           offerStatus: 'rejected',
-          rejectedAt: rejectedAt,
-          rejectReason: rejectReason
+          rejectedAt: rejectedAt
         });
 
         offer.offerStatus = 'rejected';
         offer.rejectedAt = rejectedAt;
-        offer.rejectReason = rejectReason;
-
-        const rejectionText = `❌ Tawaran ditolak oleh penjual
-
-Sebab penolakan: ${rejectReason}`;
-
-        const messageId = await saveToFirebase('messages', {
-          type: 'message',
-          messageFrom: currentUser.email,
-          messageTo: offer.buyerEmail,
-          messageText: rejectionText,
-          imageUrl: '',
-          messageType: 'offer_rejected',
-          relatedOfferId: offer.offerId,
-          isRead: false,
-          createdAt: rejectedAt
-        });
-
-        allData.push({
-          type: 'message',
-          __firebaseId: messageId,
-          id: messageId,
-          __collection: 'messages',
-          messageFrom: currentUser.email,
-          messageTo: offer.buyerEmail,
-          messageText: rejectionText,
-          imageUrl: '',
-          messageType: 'offer_rejected',
-          relatedOfferId: offer.offerId,
-          isRead: false,
-          createdAt: rejectedAt
-        });
 
         const notificationId = await saveToFirebase('notifications', {
           type: 'notification',
           userEmail: offer.buyerEmail,
-          title: 'Tawaran anda ditolak',
-          message: `Penjual telah menolak tawaran anda. Sebab: ${rejectReason}`,
+          title: 'Offer anda ditolak',
+          message: 'Seller telah menolak offer anda.',
           relatedOfferId: offer.offerId,
           isRead: false,
           createdAt: rejectedAt
@@ -2356,19 +2043,18 @@ Sebab penolakan: ${rejectReason}`;
           id: notificationId,
           __collection: 'notifications',
           userEmail: offer.buyerEmail,
-          title: 'Tawaran anda ditolak',
-          message: `Penjual telah menolak tawaran anda. Sebab: ${rejectReason}`,
+          title: 'Offer anda ditolak',
+          message: 'Seller telah menolak offer anda.',
           relatedOfferId: offer.offerId,
           isRead: false,
           createdAt: rejectedAt
         });
 
-        closeModal();
         await loadDataFromFirebase();
         renderSellerDashboard();
-        showToast('Tawaran telah ditolak', 'warning');
+        showToast('Offer telah ditolak', 'warning');
       } catch (error) {
-        showToast('Ralat menolak tawaran: ' + error.message, 'error');
+        showToast('Ralat menolak offer: ' + error.message, 'error');
       }
     }
 
@@ -2431,8 +2117,6 @@ Sebab penolakan: ${rejectReason}`;
               <option value="Asrama">🏠 Asrama</option>
               <option value="Peribadi">👕 Peribadi</option>
               <option value="Makanan">🍪 Makanan</option>
-              <option value="Perkhidmatan">🛠️ Perkhidmatan</option>
-              <option value="Lain-lain">📦 Lain-lain</option>
             </select>
           </div>
           <div>
@@ -2487,12 +2171,12 @@ Sebab penolakan: ${rejectReason}`;
             e.preventDefault();
 
             if (!firebaseReady) {
-              showToast('❌ Firebase belum dikonfigurasi. Sila periksa butiran Firebase.', 'error');
+              showToast('❌ Firebase belum dikonfig. Sila periksa Firebase credentials.', 'error');
               return;
             }
 
             if (!currentUser || currentUser.role !== 'seller') {
-              showToast('Hanya penjual boleh tambah produk', 'error');
+              showToast('Hanya seller boleh tambah produk', 'error');
               return;
             }
 
@@ -2681,9 +2365,9 @@ Sebab penolakan: ${rejectReason}`;
 
       const unreadNotifications = getUnreadNotificationsCount();
       if (currentUser.role === 'seller' && unreadNotifications > 0) {
-        document.getElementById('profile-badge').textContent = `Penjual • ${unreadNotifications} notifikasi`;
+        document.getElementById('profile-badge').textContent = `Seller • ${unreadNotifications} notifikasi`;
       } else {
-        document.getElementById('profile-badge').textContent = currentUser.role === 'seller' ? 'Penjual' : 'Pembeli';
+        document.getElementById('profile-badge').textContent = currentUser.role === 'seller' ? 'Seller' : 'Buyer';
       }
 
       const sellerBtn = document.getElementById('seller-dashboard-btn');
