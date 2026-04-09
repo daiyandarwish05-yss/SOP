@@ -110,7 +110,7 @@
       background: white;
       border-radius: 16px;
       padding: 24px;
-      max-width: 520px;
+      max-width: 760px;
       width: 92%;
       animation: fadeIn 0.3s ease;
       max-height: 90vh;
@@ -667,6 +667,8 @@
     let currentPage = 'home';
     let uploadedImages = [];
     let selectedChatImage = null;
+    let currentProductModalId = null;
+    let currentProductModalIndex = 0;
 
     const defaultConfig = {
       site_title: 'S.O.P',
@@ -777,6 +779,35 @@
       const fileRef = window.firebase.ref(storage, filepath);
       await window.firebase.uploadBytes(fileRef, imageData.file);
       return await window.firebase.getDownloadURL(fileRef);
+    }
+
+    function getProductImages(product) {
+      if (!product) return [];
+      const multipleImages = Array.isArray(product.image_urls)
+        ? product.image_urls.filter(Boolean)
+        : [];
+
+      if (multipleImages.length) return multipleImages;
+      if (product.image_url) return [product.image_url];
+      return [];
+    }
+
+    function updateUploadStatus() {
+      const statusEl = document.getElementById('upload-status');
+      if (!statusEl) return;
+
+      if (!uploadedImages.length) {
+        statusEl.innerHTML = '';
+        return;
+      }
+
+      const totalMb = uploadedImages
+        .reduce((sum, img) => sum + Number(img.size || 0), 0)
+        .toFixed(2);
+
+      statusEl.innerHTML = `
+        <p class="text-green-600">✅ ${uploadedImages.length}/5 gambar dipilih (${totalMb}MB)</p>
+      `;
     }
 
     async function uploadChatImageToFirebase(file) {
@@ -1117,34 +1148,168 @@
         'Lain-lain': 'fa-layer-group'
       };
       const icon = categoryIcons[product.category] || 'fa-box';
-      const imageUrl = product.image_url || null;
+      const productId = product.__firebaseId || product.id;
+      const images = getProductImages(product);
+      const imageUrl = images[0] || null;
+      const imageCount = images.length;
+      const shortDescription = (product.description || 'Tekan untuk lihat maklumat penuh produk.')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .slice(0, 65);
 
       return `
-        <div class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in">
+        <div onclick="showProductDetailModal('${productId}')" class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in cursor-pointer">
           <div class="aspect-square bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-700 dark:to-navy-600 flex items-center justify-center relative group overflow-hidden">
             ${imageUrl
-              ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i>';">`
+              ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i>';'>`
               : `<i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i>`
             }
+            ${imageCount > 1 ? `<div class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full"><i class="fas fa-images mr-1"></i>${imageCount}</div>` : ''}
           </div>
           <div class="p-4">
             <h3 class="font-semibold text-sm mb-1 truncate">${product.productName}</h3>
             <p class="text-accent-orange font-bold text-lg">RM ${Number(product.price).toFixed(2)}</p>
+            <p class="text-xs text-navy-500 dark:text-navy-400 mt-1 min-h-[32px]">${shortDescription}${(product.description || '').length > 65 ? '...' : ''}</p>
             <div class="flex items-center justify-between mt-2">
               <span class="text-xs text-navy-500 dark:text-navy-400 truncate max-w-[60%]">${product.sellerName}</span>
               <span class="text-yellow-500 text-xs">${stars}</span>
             </div>
             <div class="flex gap-2 mt-3">
-              <button onclick="addToCart('${product.__firebaseId || product.id}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
+              <button onclick="event.stopPropagation(); addToCart('${productId}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
                 <i class="fas fa-cart-plus mr-1"></i> Tambah
               </button>
-              <button onclick="startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
+              <button onclick="event.stopPropagation(); startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
                 <i class="fas fa-comment"></i>
               </button>
             </div>
           </div>
         </div>
       `;
+    }
+
+    function showProductDetailModal(productId) {
+      const product = allData.find(d => d.type === 'product' && (d.__firebaseId === productId || d.id === productId));
+      if (!product) {
+        showToast('Produk tidak dijumpai', 'error');
+        return;
+      }
+
+      const images = getProductImages(product);
+      const fallbackIcon = {
+        'Akademik': 'fa-book',
+        'Elektronik': 'fa-laptop',
+        'Asrama': 'fa-bed',
+        'Peribadi': 'fa-tshirt',
+        'Makanan': 'fa-cookie-bite',
+        'Perkhidmatan': 'fa-briefcase',
+        'Lain-lain': 'fa-layer-group'
+      }[product.category] || 'fa-box';
+
+      currentProductModalId = productId;
+      currentProductModalIndex = 0;
+
+      const mainImage = images[0]
+        ? `<img id="product-detail-main-image" src="${images[0]}" alt="${product.productName}" class="w-full h-full object-cover">`
+        : `<div id="product-detail-main-image" class="w-full h-full flex items-center justify-center"><i class="fas ${fallbackIcon} text-6xl text-navy-400 dark:text-navy-300"></i></div>`;
+
+      showModal(product.productName, `
+        <div class="space-y-4">
+          <div class="rounded-2xl overflow-hidden bg-navy-100 dark:bg-navy-700">
+            <div class="relative aspect-square md:aspect-[4/3] bg-navy-100 dark:bg-navy-700 flex items-center justify-center overflow-hidden">
+              ${mainImage}
+              ${images.length > 1 ? `
+                <button type="button" onclick="changeProductSlide(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 text-white hover:bg-black/75">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" onclick="changeProductSlide(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 text-white hover:bg-black/75">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+                <div id="product-detail-counter" class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">1 / ${images.length}</div>
+              ` : ''}
+            </div>
+            ${images.length > 1 ? `
+              <div class="grid grid-cols-5 gap-2 p-3 bg-white dark:bg-navy-800">
+                ${images.map((img, index) => `
+                  <button type="button" onclick="setProductSlide(${index})" class="rounded-lg overflow-hidden border-2 ${index === 0 ? 'border-accent-orange' : 'border-transparent'}" id="product-thumb-${index}">
+                    <img src="${img}" alt="gambar ${index + 1}" class="w-full h-16 object-cover">
+                  </button>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+              <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Harga</p>
+              <p class="text-2xl font-bold text-accent-orange">RM ${Number(product.price).toFixed(2)}</p>
+            </div>
+            <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+              <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Kategori</p>
+              <p class="font-semibold">${product.category || '-'}</p>
+            </div>
+            <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+              <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Penjual</p>
+              <p class="font-semibold">${product.sellerName || '-'}</p>
+            </div>
+            <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+              <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Bilangan Gambar</p>
+              <p class="font-semibold">${images.length || 0} gambar</p>
+            </div>
+          </div>
+
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
+            <p class="text-sm font-semibold mb-2">Keterangan Produk</p>
+            <p class="text-sm text-navy-600 dark:text-navy-200 leading-6 whitespace-pre-line">${product.description || 'Tiada keterangan produk.'}</p>
+          </div>
+
+          <div class="flex gap-2 pt-1">
+            <button onclick="addToCart('${productId}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">
+              <i class="fas fa-cart-plus mr-2"></i> Tambah ke Troli
+            </button>
+            <button onclick="startChat('${product.sellerId}')" class="px-4 py-3 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-xl font-semibold transition-colors">
+              <i class="fas fa-comment mr-2"></i> Chat
+            </button>
+          </div>
+        </div>
+      `);
+    }
+
+    function setProductSlide(index) {
+      const product = allData.find(d => d.type === 'product' && (d.__firebaseId === currentProductModalId || d.id === currentProductModalId));
+      if (!product) return;
+
+      const images = getProductImages(product);
+      if (!images.length) return;
+
+      currentProductModalIndex = index;
+      const mainImageEl = document.getElementById('product-detail-main-image');
+      const counterEl = document.getElementById('product-detail-counter');
+
+      if (mainImageEl && images[index]) {
+        mainImageEl.src = images[index];
+      }
+
+      if (counterEl) {
+        counterEl.textContent = `${index + 1} / ${images.length}`;
+      }
+
+      images.forEach((_, thumbIndex) => {
+        const thumb = document.getElementById(`product-thumb-${thumbIndex}`);
+        if (!thumb) return;
+        thumb.classList.toggle('border-accent-orange', thumbIndex === index);
+        thumb.classList.toggle('border-transparent', thumbIndex !== index);
+      });
+    }
+
+    function changeProductSlide(step) {
+      const product = allData.find(d => d.type === 'product' && (d.__firebaseId === currentProductModalId || d.id === currentProductModalId));
+      if (!product) return;
+
+      const images = getProductImages(product);
+      if (!images.length) return;
+
+      const nextIndex = (currentProductModalIndex + step + images.length) % images.length;
+      setProductSlide(nextIndex);
     }
 
     function searchProducts() {
@@ -1880,15 +2045,15 @@ function renderChatMessages() {
           <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 fade-in">
             <div class="flex items-start gap-4">
               <div class="w-16 h-16 bg-navy-200 dark:bg-navy-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                ${p.image_url
-                  ? `<img src="${p.image_url}" alt="${p.productName}" class="w-full h-full object-cover">`
+                ${getProductImages(p)[0]
+                  ? `<img src="${getProductImages(p)[0]}" alt="${p.productName}" class="w-full h-full object-cover">`
                   : `<i class="fas fa-box text-xl text-navy-400"></i>`
                 }
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold truncate">${p.productName}</h3>
                 <p class="text-accent-orange font-bold">RM ${Number(p.price).toFixed(2)}</p>
-                <span class="text-xs text-navy-500 dark:text-navy-400">${p.category}</span>
+                <span class="text-xs text-navy-500 dark:text-navy-400">${p.category} • ${getProductImages(p).length || 0} gambar</span>
               </div>
               <button onclick="deleteProduct('${p.__firebaseId}')" class="text-red-500 hover:text-red-600 p-2">
                 <i class="fas fa-trash"></i>
@@ -2213,47 +2378,69 @@ Sebab penolakan: ${reason}`;
 
     function handleFiles(files) {
       const statusEl = document.getElementById('upload-status');
-      if (!files.length) return;
+      if (!files || !files.length) return;
 
-      const file = files[0];
+      const incomingFiles = Array.from(files);
+      const remainingSlots = 5 - uploadedImages.length;
 
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        showToast('❌ Format gambar tidak sah. Gunakan JPG atau PNG.', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">❌ Format tidak sah (JPG/PNG sahaja)</p>';
+      if (remainingSlots <= 0) {
+        showToast('Maksimum 5 gambar sahaja untuk satu produk', 'warning');
+        if (statusEl) statusEl.innerHTML = '<p class="text-red-500">❌ Maksimum 5 gambar sahaja</p>';
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ Gambar terlalu besar (> 5MB).', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">❌ Saiz > 5MB</p>';
-        return;
-      }
+      const selectedFiles = incomingFiles.slice(0, remainingSlots);
+      const rejectedFiles = [];
+      const readPromises = [];
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        uploadedImages = [{
-          file,
-          preview: e.target.result,
-          name: file.name,
-          size: (file.size / 1024 / 1024).toFixed(2)
-        }];
+      selectedFiles.forEach((file) => {
+        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+          rejectedFiles.push(`${file.name} (format tidak sah)`);
+          return;
+        }
 
-        renderImagePreviews();
-        statusEl.innerHTML = `<p class="text-green-600">✅ Gambar bersedia untuk dimuat naik (${uploadedImages[0].size}MB)</p>`;
-      };
+        if (file.size > 5 * 1024 * 1024) {
+          rejectedFiles.push(`${file.name} (>5MB)`);
+          return;
+        }
 
-      reader.onerror = () => {
-        showToast('❌ Ralat membaca fail gambar', 'error');
-        statusEl.innerHTML = '<p class="text-red-500">❌ Ralat membaca fail</p>';
-      };
+        readPromises.push(new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve({
+            file,
+            preview: e.target.result,
+            name: file.name,
+            size: (file.size / 1024 / 1024).toFixed(2)
+          });
+          reader.onerror = () => reject(new Error(`Ralat membaca ${file.name}`));
+          reader.readAsDataURL(file);
+        }));
+      });
 
-      reader.readAsDataURL(file);
+      Promise.all(readPromises)
+        .then((loadedImages) => {
+          uploadedImages = [...uploadedImages, ...loadedImages].slice(0, 5);
+          renderImagePreviews();
+          updateUploadStatus();
+
+          if (incomingFiles.length > remainingSlots) {
+            showToast('Hanya 5 gambar pertama sahaja akan digunakan', 'warning');
+          }
+
+          if (rejectedFiles.length) {
+            showToast(`Sebahagian gambar ditolak: ${rejectedFiles.join(', ')}`, 'warning');
+          }
+        })
+        .catch((error) => {
+          showToast(error.message || 'Ralat membaca fail gambar', 'error');
+          if (statusEl) statusEl.innerHTML = '<p class="text-red-500">❌ Ralat membaca fail</p>';
+        });
     }
 
     function showAddProductModal() {
       uploadedImages = [];
       showModal('Tambah Produk', `
-        <form id="add-product-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+        <form id="add-product-form" class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
           <div>
             <label class="block text-sm font-medium mb-1">Nama Produk</label>
             <input type="text" id="prod-name" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
@@ -2276,15 +2463,15 @@ Sebab penolakan: ${reason}`;
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Keterangan</label>
-            <textarea id="prod-desc" rows="2" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0"></textarea>
+            <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Masukkan detail produk seperti keadaan barang, saiz, warna, atau maklumat tambahan."></textarea>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maks 5MB)</span></label>
+            <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maks 5MB setiap gambar)</span></label>
             <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
               <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
               <p class="text-sm font-medium">Klik untuk pilih gambar atau seret & lepas</p>
-              <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">1 gambar sahaja per produk</p>
-              <input type="file" id="file-input" accept=".jpg,.jpeg,.png" style="display:none;">
+              <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar bagi satu produk</p>
+              <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
             </div>
             <div id="image-preview" class="mt-3"></div>
             <div id="upload-status" class="mt-2 text-sm"></div>
@@ -2318,6 +2505,7 @@ Sebab penolakan: ${reason}`;
 
         fileInput.addEventListener('change', (e) => {
           handleFiles(e.target.files);
+          fileInput.value = '';
         });
 
         const addForm = document.getElementById('add-product-form');
@@ -2335,8 +2523,8 @@ Sebab penolakan: ${reason}`;
               return;
             }
 
-            if (!uploadedImages[0]) {
-              showToast('Sila muat naik gambar produk', 'warning');
+            if (!uploadedImages.length) {
+              showToast('Sila muat naik sekurang-kurangnya 1 gambar produk', 'warning');
               return;
             }
 
@@ -2345,36 +2533,34 @@ Sebab penolakan: ${reason}`;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sedang memproses...';
 
             try {
-              const imageUrl = await uploadImageToFirebase(uploadedImages[0]);
-              const createdAt = new Date().toISOString();
+              const imageUrls = [];
+              for (const image of uploadedImages) {
+                const uploadedUrl = await uploadImageToFirebase(image);
+                imageUrls.push(uploadedUrl);
+              }
 
-              const productId = await saveToFirebase('products', {
+              const createdAt = new Date().toISOString();
+              const productPayload = {
                 type: 'product',
                 productName: document.getElementById('prod-name').value,
                 price: parseFloat(document.getElementById('prod-price').value),
                 category: document.getElementById('prod-category').value,
                 description: document.getElementById('prod-desc').value,
-                image_url: imageUrl,
+                image_url: imageUrls[0] || '',
+                image_urls: imageUrls,
                 sellerId: currentUser.email,
                 sellerName: currentUser.name,
                 rating: 5,
                 createdAt
-              });
+              };
+
+              const productId = await saveToFirebase('products', productPayload);
 
               allData.push({
                 id: productId,
                 __firebaseId: productId,
                 __collection: 'products',
-                type: 'product',
-                productName: document.getElementById('prod-name').value,
-                price: parseFloat(document.getElementById('prod-price').value),
-                category: document.getElementById('prod-category').value,
-                description: document.getElementById('prod-desc').value,
-                image_url: imageUrl,
-                sellerId: currentUser.email,
-                sellerName: currentUser.name,
-                rating: 5,
-                createdAt
+                ...productPayload
               });
 
               closeModal();
@@ -2394,32 +2580,38 @@ Sebab penolakan: ${reason}`;
 
     function renderImagePreviews() {
       const container = document.getElementById('image-preview');
+      if (!container) return;
+
       if (uploadedImages.length === 0) {
         container.innerHTML = '';
         return;
       }
 
-      const img = uploadedImages[0];
       container.innerHTML = `
-        <div class="relative group">
-          <img src="${img.preview}" alt="Pratonton" class="w-full max-w-48 aspect-square object-cover rounded-lg border border-navy-200 dark:border-navy-600 mx-auto">
-          <button type="button" onclick="removeImage()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <i class="fas fa-trash text-sm"></i>
-          </button>
-          <div class="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-            ${img.size}MB
-          </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          ${uploadedImages.map((img, index) => `
+            <div class="relative group rounded-lg overflow-hidden border border-navy-200 dark:border-navy-600 bg-white dark:bg-navy-800">
+              <img src="${img.preview}" alt="Pratonton ${index + 1}" class="w-full h-28 object-cover">
+              <button type="button" onclick="removeImage(${index})" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-trash text-sm"></i>
+              </button>
+              <div class="p-2 text-xs">
+                <p class="truncate font-medium">${img.name}</p>
+                <p class="text-navy-500 dark:text-navy-400">${img.size}MB</p>
+              </div>
+            </div>
+          `).join('')}
         </div>
       `;
     }
 
-    function removeImage() {
-      uploadedImages = [];
+    function removeImage(index) {
+      uploadedImages.splice(index, 1);
       renderImagePreviews();
-      const statusEl = document.getElementById('upload-status');
-      if (statusEl) statusEl.innerHTML = '';
+      updateUploadStatus();
+
       const fileInput = document.getElementById('file-input');
-      if (fileInput) fileInput.value = '';
+      if (fileInput && uploadedImages.length === 0) fileInput.value = '';
     }
 
     function handleChatImage(files) {
