@@ -309,7 +309,7 @@
             </div>
           </div>
 
-          <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
           <div id="no-products" class="hidden text-center py-12">
             <i class="fas fa-box-open text-6xl text-navy-300 mb-4"></i>
             <p class="text-navy-500 dark:text-navy-400">Tiada produk dijumpai</p>
@@ -1168,8 +1168,6 @@
     }
 
     function createProductCard(product) {
-      const rating = product.rating || Math.floor(Math.random() * 2) + 4;
-      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
       const categoryIcons = {
         'Akademik': 'fa-book',
         'Elektronik': 'fa-laptop',
@@ -1183,37 +1181,18 @@
       const productId = product.__firebaseId || product.id;
       const images = getProductImages(product);
       const imageUrl = images[0] || null;
-      const imageCount = images.length;
-      const shortDescription = (product.description || 'Tekan untuk lihat maklumat penuh produk.')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .slice(0, 65);
 
       return `
-        <div onclick="showProductDetailModal('${productId}')" class="bg-white dark:bg-navy-800 rounded-xl shadow-md overflow-hidden card-hover fade-in cursor-pointer">
-          <div class="aspect-square bg-gradient-to-br from-navy-100 to-navy-200 dark:from-navy-700 dark:to-navy-600 flex items-center justify-center relative group overflow-hidden">
+        <div onclick="showProductDetailModal('${productId}')" class="group relative bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer fade-in">
+          <div class="aspect-[4/5] bg-navy-100 dark:bg-navy-700 overflow-hidden">
             ${imageUrl
-              ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i>';'>`
-              : `<i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i>`
+              ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700&quot;><i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i></div>'">`
+              : `<div class="w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700"><i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i></div>`
             }
-            ${imageCount > 1 ? `<div class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full"><i class="fas fa-images mr-1"></i>${imageCount}</div>` : ''}
           </div>
-          <div class="p-4">
-            <h3 class="font-semibold text-sm mb-1 truncate">${product.productName}</h3>
-            <p class="text-accent-orange font-bold text-lg">RM ${Number(product.price).toFixed(2)}</p>
-            <p class="text-xs text-navy-500 dark:text-navy-400 mt-1 min-h-[32px]">${shortDescription}${(product.description || '').length > 65 ? '...' : ''}</p>
-            <div class="flex items-center justify-between mt-2">
-              <span class="text-xs text-navy-500 dark:text-navy-400 truncate max-w-[60%]">${product.sellerName}</span>
-              <span class="text-yellow-500 text-xs">${stars}</span>
-            </div>
-            <div class="flex gap-2 mt-3">
-              <button onclick="event.stopPropagation(); addToCart('${productId}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-2 rounded-lg text-xs font-medium">
-                <i class="fas fa-cart-plus mr-1"></i> Tambah
-              </button>
-              <button onclick="event.stopPropagation(); startChat('${product.sellerId}')" class="px-3 py-2 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-lg text-xs transition-colors">
-                <i class="fas fa-comment"></i>
-              </button>
-            </div>
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-10 pb-4">
+            <h3 class="text-white font-semibold text-sm md:text-base leading-tight line-clamp-2">${product.productName}</h3>
+            <p class="text-orange-300 font-bold text-lg md:text-xl mt-1">RM ${Number(product.price).toFixed(2)}</p>
           </div>
         </div>
       `;
