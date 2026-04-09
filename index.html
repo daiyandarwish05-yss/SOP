@@ -276,7 +276,7 @@
               Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
             </button>
           </div>
-          <div id="trending-products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+          <div id="trending-products" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
         </div>
       </div>
 
@@ -1089,7 +1089,7 @@
         return;
       }
 
-      container.innerHTML = products.map(p => createProductCard(p)).join('');
+      container.innerHTML = products.map(p => createTrendingProductCard(p)).join('');
     }
 
     function renderProducts() {
@@ -1133,6 +1133,38 @@
         noProducts.classList.add('hidden');
         container.innerHTML = products.map(p => createProductCard(p)).join('');
       }
+    }
+
+
+    function createTrendingProductCard(product) {
+      const categoryIcons = {
+        'Akademik': 'fa-book',
+        'Elektronik': 'fa-laptop',
+        'Asrama': 'fa-bed',
+        'Peribadi': 'fa-tshirt',
+        'Makanan': 'fa-cookie-bite',
+        'Perkhidmatan': 'fa-briefcase',
+        'Lain-lain': 'fa-layer-group'
+      };
+      const icon = categoryIcons[product.category] || 'fa-box';
+      const productId = product.__firebaseId || product.id;
+      const images = getProductImages(product);
+      const imageUrl = images[0] || null;
+
+      return `
+        <div onclick="showProductDetailModal('${productId}')" class="group relative bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer fade-in">
+          <div class="aspect-[4/5] bg-navy-100 dark:bg-navy-700 overflow-hidden">
+            ${imageUrl
+              ? `<img src="${imageUrl}" alt="${product.productName}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700&quot;><i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i></div>'">`
+              : `<div class="w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700"><i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i></div>`
+            }
+          </div>
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-10 pb-4">
+            <h3 class="text-white font-semibold text-sm md:text-base leading-tight line-clamp-2">${product.productName}</h3>
+            <p class="text-orange-300 font-bold text-lg md:text-xl mt-1">RM ${Number(product.price).toFixed(2)}</p>
+          </div>
+        </div>
+      `;
     }
 
     function createProductCard(product) {
