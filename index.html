@@ -4871,5 +4871,132 @@ function renderProfile() {
 
 </script>
 
+
+<style>
+@media (max-width: 767px) {
+  body.chat-page-active,
+  body.chat-page-active #app,
+  body.chat-page-active main {
+    overflow: hidden !important;
+  }
+
+  body.chat-page-active #page-chat {
+    height: calc(100dvh - 64px);
+    overflow: hidden;
+  }
+
+  body.chat-page-active #page-chat > .max-w-6xl {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.chat-page-active #page-chat .chat-marketplace-shell {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  body.chat-page-active #chat-list-box,
+  body.chat-page-active #chat-room-box {
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  body.chat-page-active #chat-room-box {
+    overflow: hidden;
+  }
+
+  body.chat-page-active #chat-messages {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    padding-bottom: 12px;
+  }
+
+  body.chat-page-active #chat-composer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+</style>
+
+<script>
+(function () {
+  function updateChatViewport() {
+    if (!(window.innerWidth < 768) || currentPage !== 'chat') return;
+
+    const nav = document.getElementById('navbar');
+    const page = document.getElementById('page-chat');
+    const wrapper = page ? page.querySelector('.max-w-6xl') : null;
+    const shell = page ? page.querySelector('.chat-marketplace-shell') : null;
+    const title = wrapper ? wrapper.querySelector('h1') : null;
+    if (!page || !wrapper || !shell) return;
+
+    const navHeight = nav ? nav.offsetHeight : 64;
+    const wrapperStyle = window.getComputedStyle(wrapper);
+    const titleStyle = title ? window.getComputedStyle(title) : null;
+    const paddingTop = parseFloat(wrapperStyle.paddingTop || '0') || 0;
+    const paddingBottom = parseFloat(wrapperStyle.paddingBottom || '0') || 0;
+    const titleHeight = title ? title.offsetHeight : 0;
+    const titleMarginBottom = titleStyle ? (parseFloat(titleStyle.marginBottom || '0') || 0) : 0;
+    const available = window.innerHeight - navHeight - paddingTop - paddingBottom - titleHeight - titleMarginBottom;
+    const finalHeight = Math.max(available, 420);
+
+    shell.style.height = finalHeight + 'px';
+    shell.style.minHeight = finalHeight + 'px';
+  }
+
+  function syncAdminFloatingVisibilityV16() {
+    const wrap = document.getElementById('admin-floating-actions');
+    const isChatPage = currentPage === 'chat';
+
+    document.body.classList.toggle('chat-page-active', isChatPage && window.innerWidth < 768);
+
+    if (wrap) {
+      wrap.style.display = isChatPage ? 'none' : 'flex';
+    }
+
+    if (isChatPage) {
+      updateChatViewport();
+    }
+  }
+
+  const previousNavigateToV16 = window.navigateTo;
+  window.navigateTo = function (page) {
+    const result = previousNavigateToV16.apply(this, arguments);
+    requestAnimationFrame(syncAdminFloatingVisibilityV16);
+    return result;
+  };
+
+  const previousOpenChatV16 = window.openChat;
+  window.openChat = function (email) {
+    const result = previousOpenChatV16.apply(this, arguments);
+    requestAnimationFrame(syncAdminFloatingVisibilityV16);
+    return result;
+  };
+
+  const previousShowChatListMobileV16 = window.showChatListMobile;
+  window.showChatListMobile = function () {
+    const result = previousShowChatListMobileV16.apply(this, arguments);
+    requestAnimationFrame(syncAdminFloatingVisibilityV16);
+    return result;
+  };
+
+  window.addEventListener('resize', syncAdminFloatingVisibilityV16);
+  window.addEventListener('orientationchange', function () {
+    setTimeout(syncAdminFloatingVisibilityV16, 120);
+  });
+  window.addEventListener('focusin', function () {
+    if (currentPage === 'chat') {
+      setTimeout(updateChatViewport, 120);
+    }
+  });
+
+  requestAnimationFrame(syncAdminFloatingVisibilityV16);
+})();
+</script>
+
 </body>
 </html>
