@@ -598,10 +598,11 @@
             </div>
 
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between gap-3">
                 <div>
                   <p class="text-sm text-navy-500 dark:text-navy-400">Penilaian</p>
-                  <p class="text-2xl font-bold">⭐ 4.8</p>
+                  <p id="seller-rating-score" class="text-2xl font-bold">⭐ 0.0</p>
+                  <p id="seller-rating-count" class="text-xs text-navy-400 mt-1">Belum ada ulasan</p>
                 </div>
                 <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
                   <i class="fas fa-star text-yellow-600"></i>
@@ -4995,6 +4996,177 @@ function renderProfile() {
   });
 
   requestAnimationFrame(syncAdminFloatingVisibilityV16);
+})();
+</script>
+
+
+<script>
+(function(){
+  function getSellerReviewSummary(sellerEmail){
+    if(!sellerEmail) return {average:0,count:0};
+    const sellerProductIds = (typeof getProducts === 'function' ? getProducts() : [])
+      .filter(product => product && product.sellerId === sellerEmail)
+      .map(product => (typeof getProductIdSafe === 'function' ? getProductIdSafe(product) : (product.__firebaseId || product.id)))
+      .filter(Boolean);
+    if(!sellerProductIds.length) return {average:0,count:0};
+    const reviews = (allData || []).filter(item => item.type === 'review' && sellerProductIds.includes(item.productId));
+    if(!reviews.length) return {average:0,count:0};
+    const total = reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0);
+    return {average: total / reviews.length, count: reviews.length};
+  }
+
+  function updateSellerRatingCard(){
+    if(!currentUser) return;
+    const scoreEl = document.getElementById('seller-rating-score');
+    const countEl = document.getElementById('seller-rating-count');
+    if(!scoreEl || !countEl) return;
+    const summary = getSellerReviewSummary(currentUser.email);
+    if(summary.count){
+      scoreEl.textContent = `⭐ ${summary.average.toFixed(1)}`;
+      countEl.textContent = `${summary.count} ulasan pengguna`;
+    } else {
+      scoreEl.textContent = '⭐ 0.0';
+      countEl.textContent = 'Belum ada ulasan';
+    }
+  }
+
+  const previousRenderSellerDashboardV17 = window.renderSellerDashboard;
+  window.renderSellerDashboard = function(){
+    const result = typeof previousRenderSellerDashboardV17 === 'function'
+      ? previousRenderSellerDashboardV17.apply(this, arguments)
+      : undefined;
+    updateSellerRatingCard();
+    return result;
+  };
+
+  function getViewportHeight(){
+    return (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+  }
+
+  function fixChatMobileSizing(scrollToBottom = false){
+    if(currentPage !== 'chat') return;
+    const page = document.getElementById('page-chat');
+    const wrapper = page ? page.querySelector('.max-w-6xl') : null;
+    const shell = page ? page.querySelector('.chat-marketplace-shell') : null;
+    const room = document.getElementById('chat-room-box');
+    const list = document.getElementById('chat-list-box');
+    const header = document.getElementById('chat-header');
+    const composer = document.getElementById('chat-composer');
+    const messages = document.getElementById('chat-messages');
+    const nav = document.getElementById('navbar');
+    const title = wrapper ? wrapper.querySelector('h1') : null;
+    if(!page || !wrapper || !shell || !room || !messages) return;
+
+    const mobile = window.innerWidth < 768;
+    if(!mobile){
+      shell.style.height = '';
+      shell.style.minHeight = '';
+      room.style.height = '';
+      room.style.minHeight = '';
+      messages.style.height = '';
+      messages.style.maxHeight = '';
+      messages.style.overflowY = 'auto';
+      messages.style.webkitOverflowScrolling = 'touch';
+      if(scrollToBottom){
+        requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; });
+      }
+      return;
+    }
+
+    const viewportHeight = getViewportHeight();
+    const navHeight = nav ? nav.offsetHeight : 64;
+    const wrapperStyle = window.getComputedStyle(wrapper);
+    const titleStyle = title ? window.getComputedStyle(title) : null;
+    const padTop = parseFloat(wrapperStyle.paddingTop || '0') || 0;
+    const padBottom = parseFloat(wrapperStyle.paddingBottom || '0') || 0;
+    const titleHeight = title ? title.offsetHeight : 0;
+    const titleMarginBottom = titleStyle ? (parseFloat(titleStyle.marginBottom || '0') || 0) : 0;
+    const shellHeight = Math.max(viewportHeight - navHeight - padTop - padBottom - titleHeight - titleMarginBottom - 6, 430);
+
+    shell.style.height = shellHeight + 'px';
+    shell.style.minHeight = shellHeight + 'px';
+    if(list) {
+      list.style.height = shellHeight + 'px';
+      list.style.minHeight = shellHeight + 'px';
+    }
+    room.style.height = shellHeight + 'px';
+    room.style.minHeight = shellHeight + 'px';
+
+    const headerHeight = header ? header.offsetHeight : 0;
+    const composerHeight = composer ? composer.offsetHeight : 0;
+    const safeBottom = 12 + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0);
+    const messagesHeight = Math.max(shellHeight - headerHeight - composerHeight, 180);
+    messages.style.height = messagesHeight + 'px';
+    messages.style.maxHeight = messagesHeight + 'px';
+    messages.style.overflowY = 'auto';
+    messages.style.webkitOverflowScrolling = 'touch';
+    messages.style.overscrollBehavior = 'contain';
+    messages.style.touchAction = 'pan-y';
+    messages.style.paddingBottom = '18px';
+    if(composer){
+      composer.style.position = 'sticky';
+      composer.style.bottom = '0';
+      composer.style.zIndex = '12';
+      composer.style.paddingBottom = `calc(12px + env(safe-area-inset-bottom))`;
+      composer.style.background = composer.style.background || '';
+    }
+
+    if(scrollToBottom){
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+      });
+    }
+  }
+
+  const previousNavigateToV17 = window.navigateTo;
+  window.navigateTo = function(page){
+    const result = previousNavigateToV17.apply(this, arguments);
+    requestAnimationFrame(() => fixChatMobileSizing(page === 'chat'));
+    return result;
+  };
+
+  const previousOpenChatV17 = window.openChat;
+  window.openChat = function(){
+    const result = previousOpenChatV17.apply(this, arguments);
+    requestAnimationFrame(() => fixChatMobileSizing(true));
+    return result;
+  };
+
+  const previousRenderChatMessagesV17 = window.renderChatMessages;
+  window.renderChatMessages = function(){
+    const result = previousRenderChatMessagesV17.apply(this, arguments);
+    requestAnimationFrame(() => fixChatMobileSizing(true));
+    return result;
+  };
+
+  const previousShowChatListMobileV17 = window.showChatListMobile;
+  window.showChatListMobile = function(){
+    const result = previousShowChatListMobileV17 ? previousShowChatListMobileV17.apply(this, arguments) : undefined;
+    requestAnimationFrame(() => fixChatMobileSizing(false));
+    return result;
+  };
+
+  const previousSendMessageV17 = window.sendMessage;
+  if(typeof previousSendMessageV17 === 'function'){
+    window.sendMessage = async function(){
+      const result = await previousSendMessageV17.apply(this, arguments);
+      requestAnimationFrame(() => fixChatMobileSizing(true));
+      return result;
+    };
+  }
+
+  window.addEventListener('resize', () => fixChatMobileSizing(false));
+  window.addEventListener('orientationchange', () => setTimeout(() => fixChatMobileSizing(false), 120));
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', () => fixChatMobileSizing(true));
+    window.visualViewport.addEventListener('scroll', () => fixChatMobileSizing(false));
+  }
+  window.addEventListener('focusin', () => setTimeout(() => fixChatMobileSizing(true), 120));
+
+  requestAnimationFrame(() => {
+    updateSellerRatingCard();
+    fixChatMobileSizing(false);
+  });
 })();
 </script>
 
