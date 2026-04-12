@@ -118,6 +118,33 @@
     }
     .dark .modal-content { background: #1e293b; }
     body { box-sizing: border-box; }
+
+    .conversation-item { transition: all 0.2s ease; }
+    .conversation-item:hover { transform: translateY(-1px); }
+    .chat-message-bubble { word-break: break-word; }
+    @media (max-width: 767px) {
+      .chat-marketplace-shell {
+        height: calc(100vh - 180px);
+        min-height: calc(100vh - 180px);
+      }
+      #chat-list-box, #chat-room-box {
+        height: 100%;
+        min-height: 100%;
+      }
+      #chat-room-box.chat-room-visible {
+        display: flex !important;
+      }
+      #chat-list-box.chat-list-hidden {
+        display: none !important;
+      }
+      #chat-messages {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      #chat-composer {
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 
@@ -388,46 +415,56 @@
         </div>
       </div>
 
+
       <div id="page-chat" class="page">
-        <div class="max-w-5xl mx-auto px-4 py-6 md:py-8">
-          <h1 class="text-2xl font-bold mb-4 md:mb-6">
+        <div class="max-w-6xl mx-auto px-3 md:px-4 py-4 md:py-8">
+          <h1 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6">
             <i class="fas fa-comments mr-2 text-accent-orange"></i> Mesej
           </h1>
 
-          <div class="flex flex-col md:flex-row gap-4 h-[78vh] md:h-[500px]">
-            <div id="chat-list-box" class="w-full md:w-1/3 bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden flex flex-col h-[220px] md:h-full">
-              <div class="p-4 bg-navy-100 dark:bg-navy-700">
-                <h3 class="font-semibold">Perbualan</h3>
+          <div class="chat-marketplace-shell flex flex-col md:flex-row gap-4 md:h-[640px]">
+            <div id="chat-list-box" class="w-full md:w-[360px] bg-white dark:bg-navy-800 rounded-[26px] shadow-lg overflow-hidden flex flex-col">
+              <div class="px-5 py-4 border-b border-navy-100 dark:border-navy-700 bg-white dark:bg-navy-800">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 class="font-semibold text-lg">Perbualan</h3>
+                    <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Tekan pengguna untuk buka ruang mesej</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center text-accent-orange">
+                    <i class="fas fa-comment-dots"></i>
+                  </div>
+                </div>
               </div>
-              <div id="chat-list" class="overflow-y-auto flex-1"></div>
+              <div id="chat-list" class="overflow-y-auto flex-1 px-2 py-2"></div>
             </div>
 
-            <div id="chat-room-box" class="flex-1 bg-white dark:bg-navy-800 rounded-2xl shadow-lg flex flex-col overflow-hidden min-h-[420px] md:min-h-0">
-              <div id="chat-header" class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center">
-                <div class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white font-bold mr-3">
-                  <i class="fas fa-user"></i>
+            <div id="chat-room-box" class="hidden md:flex flex-1 bg-white dark:bg-navy-800 rounded-[26px] shadow-lg overflow-hidden flex-col">
+              <div id="chat-header" class="px-4 py-4 border-b border-navy-100 dark:border-navy-700 bg-white dark:bg-navy-800">
+                <div class="flex items-center justify-between gap-3 w-full">
+                  <p id="chat-with" class="font-semibold truncate">Pilih perbualan</p>
                 </div>
-                <span id="chat-with" class="font-semibold">Pilih perbualan</span>
               </div>
 
-              <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-navy-50 dark:bg-navy-900 min-h-[260px] md:min-h-0">
-                <div class="text-center text-navy-400 py-8">
-                  <i class="fas fa-comments text-4xl mb-2"></i>
+              <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-5 space-y-3 bg-navy-50 dark:bg-navy-900 min-h-[320px] md:min-h-0">
+                <div class="text-center text-navy-400 py-10">
+                  <i class="fas fa-comments text-4xl mb-3"></i>
                   <p>Pilih perbualan untuk mula mesej</p>
                 </div>
               </div>
 
-              <div class="p-3 md:p-4 bg-white dark:bg-navy-800 border-t border-navy-100 dark:border-navy-700">
+              <div id="chat-composer" class="p-3 md:p-4 bg-white dark:bg-navy-800 border-t border-navy-100 dark:border-navy-700">
                 <input type="file" id="chat-image-input" accept=".jpg,.jpeg,.png" class="hidden" onchange="handleChatImage(this.files)" />
 
-                <div class="flex gap-2 items-center">
-                  <button type="button" onclick="document.getElementById('chat-image-input').click()" class="w-10 h-10 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                <div class="flex items-end gap-2 md:gap-3">
+                  <button type="button" onclick="document.getElementById('chat-image-input').click()" class="w-11 h-11 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
                     <i class="fas fa-image"></i>
                   </button>
 
-                  <input type="text" id="chat-input" placeholder="Taip mesej..." class="flex-1 px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-full border-0 focus:ring-2 focus:ring-accent-orange text-sm md:text-base" onkeypress="if(event.key==='Enter')sendMessage()" />
+                  <div class="flex-1 bg-navy-50 dark:bg-navy-700 rounded-[22px] px-3 py-2">
+                    <input type="text" id="chat-input" placeholder="Taip mesej..." class="w-full bg-transparent border-0 focus:ring-0 text-sm md:text-base py-2" onkeypress="if(event.key==='Enter')sendMessage()" />
+                  </div>
 
-                  <button onclick="sendMessage()" class="w-10 h-10 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                  <button onclick="sendMessage()" class="w-11 h-11 md:w-12 md:h-12 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full flex items-center justify-center transition-colors flex-shrink-0 shadow-md">
                     <i class="fas fa-paper-plane"></i>
                   </button>
                 </div>
@@ -438,6 +475,7 @@
           </div>
         </div>
       </div>
+
 
       <div id="page-login" class="page">
         <div class="max-w-md mx-auto px-4 py-12">
@@ -1985,6 +2023,11 @@ function renderChatMessages() {
         removeChatImage();
         renderChatMessages();
         renderChatList();
+
+        requestAnimationFrame(() => {
+          const chatBox = document.getElementById('chat-messages');
+          if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        });
       } catch (error) {
         showToast('Ralat menghantar mesej: ' + error.message, 'error');
       }
@@ -3128,21 +3171,14 @@ function renderProfile() {
           <p class="text-sm text-navy-600 dark:text-navy-200 leading-6 whitespace-pre-line">${escapeHtml(product.description || 'Tiada keterangan produk.')}</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
-            <div class="flex items-center justify-between gap-3 mb-3">
-              <div>
-                <p class="text-base font-semibold">Ulasan Pengguna</p>
-                <p class="text-xs text-navy-500 dark:text-navy-300">Hanya pembeli yang telah membeli produk ini boleh memberi penilaian dan komen.</p>
-              </div>
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <p class="text-base font-semibold">Ulasan Pengguna</p>
+              <p class="text-xs text-navy-500 dark:text-navy-300">Ulasan produk boleh dibuat melalui sejarah pembelian di bahagian profil.</p>
             </div>
-            <div class="space-y-3 max-h-72 overflow-y-auto pr-1">${reviewsHtml}</div>
           </div>
-          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
-            <p class="text-base font-semibold mb-2">Beri Ulasan</p>
-            <p class="text-xs text-navy-500 dark:text-navy-300 mb-3">Ulasan hanya dibuka selepas pembelian berjaya.</p>
-            ${reviewFormHtml}
-          </div>
+          <div class="space-y-3 max-h-72 overflow-y-auto pr-1">${reviewsHtml}</div>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-2 pt-1">
@@ -4106,18 +4142,7 @@ function renderProfile() {
       </div>
     `;
 
-    if (actionContainer) {
-      const profilePublicBtnId = 'public-profile-shortcut-btn';
-      if (!document.getElementById(profilePublicBtnId)) {
-        const shortcut = document.createElement('button');
-        shortcut.id = profilePublicBtnId;
-        shortcut.type = 'button';
-        shortcut.onclick = () => showUserProfileModal(liveUser.email);
-        shortcut.className = 'w-full bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 py-3 rounded-xl font-medium transition-colors';
-        shortcut.innerHTML = '<i class="fas fa-address-card mr-2 text-accent-orange"></i> Profil Umum Saya';
-        actionContainer.insertBefore(shortcut, actionContainer.lastElementChild);
-      }
-    }
+
   };
 
   window.showProductDetailModal = function (productId) {
@@ -4172,6 +4197,678 @@ function renderProfile() {
     if (currentChatWith) openChat(currentChatWith);
   }
 })();
+
+(function () {
+  if (typeof getUserAvatarHtml !== 'function' || typeof escapeHtml !== 'function') return;
+
+  function formatChatListTime(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const now = new Date();
+    const sameDay = now.toDateString() === date.toDateString();
+    if (sameDay) {
+      return date.toLocaleTimeString('ms-MY', { hour: 'numeric', minute: '2-digit' });
+    }
+    return date.toLocaleDateString('ms-MY', { day: 'numeric', month: 'short' });
+  }
+
+  function syncChatMobileLayout(forceList = false) {
+    const chatListBox = document.getElementById('chat-list-box');
+    const chatRoomBox = document.getElementById('chat-room-box');
+    if (!chatListBox || !chatRoomBox) return;
+
+    if (window.innerWidth >= 768) {
+      chatListBox.classList.remove('hidden', 'chat-list-hidden');
+      chatRoomBox.classList.remove('hidden', 'chat-room-visible');
+      return;
+    }
+
+    if (forceList || !currentChatWith) {
+      chatListBox.classList.remove('hidden', 'chat-list-hidden');
+      chatRoomBox.classList.remove('chat-room-visible');
+      chatRoomBox.classList.add('hidden');
+      return;
+    }
+
+    chatListBox.classList.add('hidden', 'chat-list-hidden');
+    chatRoomBox.classList.remove('hidden');
+    chatRoomBox.classList.add('chat-room-visible');
+  }
+
+  function getConversationPreview(lastMsg, email) {
+    if (!lastMsg) return 'Belum ada mesej';
+    let previewText = 'Mesej';
+    if (lastMsg.messageType === 'offer_accepted') previewText = '✅ Tawaran diterima';
+    else if (lastMsg.messageType === 'offer_rejected') previewText = '❌ Tawaran ditolak';
+    else if (lastMsg.messageText) previewText = lastMsg.messageText;
+    else if (lastMsg.imageUrl) previewText = '📷 Gambar';
+    if (lastMsg.messageFrom === currentUser?.email && lastMsg.messageType !== 'offer_accepted' && lastMsg.messageType !== 'offer_rejected') {
+      previewText = `Anda: ${previewText}`;
+    }
+    return previewText;
+  }
+
+  function resetChatHeader() {
+    const chatHeader = document.getElementById('chat-header');
+    if (!chatHeader) return;
+    chatHeader.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full bg-accent-orange text-white flex items-center justify-center shadow-md">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="min-w-0">
+          <p id="chat-with" class="font-semibold truncate">Pilih perbualan</p>
+        </div>
+      </div>
+    `;
+  }
+
+  window.renderChatList = function () {
+    const container = document.getElementById('chat-list');
+    if (!container) return;
+
+    if (!currentUser) {
+      container.innerHTML = `
+        <div class="p-5 text-center text-navy-500">
+          <i class="fas fa-lock text-2xl mb-2"></i>
+          <p>Sila log masuk untuk mesej</p>
+        </div>
+      `;
+      requestAnimationFrame(() => syncChatMobileLayout(true));
+      return;
+    }
+
+    const messages = getMessages();
+    const users = getUsers();
+    const partnerEmails = new Set();
+
+    messages.forEach(message => {
+      if (message.messageFrom && message.messageFrom !== currentUser.email) partnerEmails.add(message.messageFrom);
+      if (message.messageTo && message.messageTo !== currentUser.email) partnerEmails.add(message.messageTo);
+    });
+
+    if (partnerEmails.size === 0) {
+      container.innerHTML = `
+        <div class="px-4 py-8 text-center text-navy-500">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center text-accent-orange">
+            <i class="fas fa-comments text-xl"></i>
+          </div>
+          <p class="text-sm font-medium">Tiada perbualan lagi</p>
+          <p class="text-xs mt-1 text-navy-400">Tekan butang chat pada produk untuk mula mesej</p>
+        </div>
+      `;
+      requestAnimationFrame(() => syncChatMobileLayout(true));
+      return;
+    }
+
+    const conversations = Array.from(partnerEmails).map(email => {
+      const user = users.find(item => item.email === email) || { email, name: email.split('@')[0] };
+      const name = user.name || email.split('@')[0];
+      const convoMessages = messages.filter(message =>
+        (message.messageFrom === currentUser.email && message.messageTo === email) ||
+        (message.messageFrom === email && message.messageTo === currentUser.email)
+      ).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      const lastMsg = convoMessages[0] || null;
+      const unreadCount = convoMessages.filter(message => message.messageFrom === email && !message.isRead).length;
+
+      return {
+        email,
+        user,
+        name,
+        lastMsg,
+        unreadCount,
+        previewText: getConversationPreview(lastMsg, email)
+      };
+    }).sort((a, b) => new Date(b.lastMsg?.createdAt || 0) - new Date(a.lastMsg?.createdAt || 0));
+
+    container.innerHTML = conversations.map(({ email, user, name, lastMsg, unreadCount, previewText }) => `
+      <button type="button" onclick="openChat('${email}')" class="conversation-item w-full text-left rounded-2xl px-3 py-3 mb-2 border ${(currentChatWith === email) ? 'border-accent-orange bg-orange-50 dark:bg-navy-700/70 shadow-md' : 'border-transparent bg-transparent hover:bg-navy-50 dark:hover:bg-navy-700/60'}">
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="event.stopPropagation(); showUserProfileModal('${email}')" class="flex-shrink-0 rounded-full">
+            ${getUserAvatarHtml(user, { sizeClass: 'w-14 h-14', textClass: 'text-base' })}
+          </button>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <button type="button" onclick="event.stopPropagation(); showUserProfileModal('${email}')" class="font-semibold text-sm md:text-base truncate hover:text-accent-orange transition-colors text-left max-w-full">
+                  ${escapeHtml(name)}
+                </button>
+                <p class="text-xs md:text-sm text-navy-500 dark:text-navy-400 truncate mt-1">${escapeHtml(previewText)}</p>
+              </div>
+
+              <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                ${lastMsg?.createdAt ? `<span class="text-[11px] md:text-xs text-navy-400 whitespace-nowrap">${formatChatListTime(lastMsg.createdAt)}</span>` : ''}
+                ${unreadCount > 0 ? `
+                  <span class="min-w-[22px] h-[22px] px-1 rounded-full bg-accent-orange text-white text-[11px] font-semibold inline-flex items-center justify-center">
+                    ${unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>
+    `).join('');
+
+    requestAnimationFrame(() => syncChatMobileLayout(false));
+  };
+
+  window.openChat = function (email) {
+    currentChatWith = email;
+    const user = getUserByEmailSafe(email) || { email, name: email.split('@')[0] };
+    const name = user.name || email.split('@')[0];
+    const chatHeader = document.getElementById('chat-header');
+
+    if (chatHeader) {
+      chatHeader.innerHTML = `
+        <div class="flex items-center justify-between gap-3 w-full">
+          <div class="flex items-center gap-3 min-w-0">
+            ${window.innerWidth < 768 ? `
+              <button type="button" onclick="showChatListMobile()" class="w-9 h-9 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-arrow-left text-sm"></i>
+              </button>
+            ` : ''}
+            <button type="button" onclick="showUserProfileModal('${email}')" class="flex-shrink-0 rounded-full">
+              ${getUserAvatarHtml(user, { sizeClass: 'w-11 h-11', textClass: 'text-sm' })}
+            </button>
+            <div class="min-w-0">
+              <button type="button" onclick="showUserProfileModal('${email}')" class="font-semibold hover:text-accent-orange transition-colors text-left truncate block max-w-full">
+                ${escapeHtml(name)}
+              </button>
+            </div>
+          </div>
+
+          <button type="button" onclick="showUserProfileModal('${email}')" class="hidden md:inline-flex px-3 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 text-sm font-medium transition-colors">
+            <i class="fas fa-user mr-2 text-accent-orange"></i>Profil
+          </button>
+        </div>
+      `;
+    }
+
+    markChatAsRead(email);
+    renderChatMessages();
+    renderChatList();
+    requestAnimationFrame(() => syncChatMobileLayout(false));
+  };
+
+  window.showChatListMobile = function () {
+    resetChatHeader();
+    syncChatMobileLayout(true);
+  };
+
+  window.renderChatMessages = function () {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    if (!currentChatWith || !currentUser) {
+      container.innerHTML = `
+        <div class="text-center text-navy-400 py-10">
+          <i class="fas fa-comments text-4xl mb-3"></i>
+          <p>Pilih perbualan untuk mula mesej</p>
+        </div>
+      `;
+      return;
+    }
+
+    const partnerUser = getUserByEmailSafe(currentChatWith) || { email: currentChatWith, name: currentChatWith.split('@')[0] };
+    const partnerAvatar = getUserAvatarHtml(partnerUser, { sizeClass: 'w-8 h-8', textClass: 'text-xs' });
+
+    const messages = getMessages().filter(message =>
+      (message.messageFrom === currentUser.email && message.messageTo === currentChatWith) ||
+      (message.messageFrom === currentChatWith && message.messageTo === currentUser.email)
+    ).sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+    if (messages.length === 0) {
+      container.innerHTML = `
+        <div class="text-center text-navy-400 py-10">
+          <i class="fas fa-comments text-4xl mb-3"></i>
+          <p>Mulakan perbualan dengan pengguna ini</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = messages.map(message => {
+      const isMe = message.messageFrom === currentUser.email;
+      const timeText = formatDateTime(message.createdAt);
+
+      if (message.messageType === 'offer_accepted' || message.messageType === 'offer_rejected') {
+        const isAccepted = message.messageType === 'offer_accepted';
+        const toneClass = isAccepted
+          ? (isMe ? 'bg-green-500 text-white' : 'bg-white dark:bg-navy-700')
+          : (isMe ? 'bg-red-500 text-white' : 'bg-white dark:bg-navy-700');
+        const iconClass = isAccepted ? 'fa-check-circle' : 'fa-circle-xmark';
+        const titleText = isAccepted ? 'Tawaran Diterima' : 'Tawaran Ditolak';
+        const helperText = isAccepted
+          ? 'Sila teruskan perbincangan dalam ruang mesej ini.'
+          : 'Anda boleh teruskan perbincangan dalam ruang mesej ini jika perlu.';
+        const innerTone = isAccepted
+          ? (isMe ? 'bg-green-600/40' : 'bg-navy-50 dark:bg-navy-800')
+          : (isMe ? 'bg-red-600/40' : 'bg-navy-50 dark:bg-navy-800');
+
+        const itemsHtml = (message.offerItems || []).map(item => `
+          <div class="flex gap-3 items-start rounded-xl p-2 ${isMe ? (isAccepted ? 'bg-green-600/30' : 'bg-red-600/30') : 'bg-navy-100 dark:bg-navy-700'}">
+            <div class="w-14 h-14 rounded-lg overflow-hidden bg-white dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+              ${item.image_url
+                ? `<img src="${item.image_url}" alt="${escapeHtml(item.productName || 'Produk')}" class="w-full h-full object-cover">`
+                : `<i class="fas fa-box text-navy-400"></i>`
+              }
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-sm truncate">${escapeHtml(item.productName || 'Produk')}</p>
+              <div class="flex justify-between text-xs mt-1">
+                <span>Kuantiti: x${Number(item.quantity || 1)}</span>
+                <span>RM ${Number(item.originalPrice || 0).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
+            ${!isMe ? `<button type="button" onclick="showUserProfileModal('${message.messageFrom}')" class="flex-shrink-0 rounded-full mb-1">${partnerAvatar}</button>` : ''}
+            <div class="max-w-[92%] md:max-w-[80%] p-4 rounded-2xl shadow ${toneClass}">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fas ${iconClass} ${isMe ? 'text-white' : (isAccepted ? 'text-green-500' : 'text-red-500')}"></i>
+                <p class="font-semibold">${titleText}</p>
+              </div>
+
+              <div class="rounded-xl p-3 ${innerTone}">
+                ${(message.offerItems && message.offerItems.length) ? `
+                  <p class="font-medium mb-2">${isAccepted ? 'Produk dibeli:' : 'Produk dalam tawaran:'}</p>
+                  <div class="space-y-2 mb-3">${itemsHtml}</div>
+                ` : ''}
+                <div class="text-sm space-y-1">
+                  <p><strong>Harga Tawaran:</strong> RM ${Number(message.offerPrice || 0).toFixed(2)}</p>
+                  <p><strong>Lokasi COD:</strong> ${escapeHtml(message.codLocation || '-')}</p>
+                  ${!isAccepted ? `<p><strong>Sebab penolakan:</strong> ${escapeHtml(message.rejectionReason || 'Tiada sebab diberikan.')}</p>` : ''}
+                </div>
+              </div>
+
+              <p class="text-sm mt-3 ${isMe ? (isAccepted ? 'text-green-100' : 'text-red-100') : 'text-navy-300'}">${helperText}</p>
+              <p class="text-xs mt-2 ${isMe ? (isAccepted ? 'text-green-100' : 'text-red-100') : 'text-navy-400'}">${escapeHtml(timeText)}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
+          ${!isMe ? `<button type="button" onclick="showUserProfileModal('${message.messageFrom}')" class="flex-shrink-0 rounded-full mb-1">${partnerAvatar}</button>` : ''}
+          ${isMe ? `
+            <button type="button" onclick="deleteChatMessage('${message.__firebaseId || message.id}')" class="w-8 h-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60 transition-colors flex items-center justify-center flex-shrink-0 mb-1" title="Padam mesej">
+              <i class="fas fa-trash text-xs"></i>
+            </button>
+          ` : ''}
+          <div class="chat-message-bubble max-w-[88%] md:max-w-[72%] px-4 py-3 rounded-2xl shadow-sm ${isMe ? 'bg-accent-orange text-white rounded-br-md' : 'bg-white dark:bg-navy-700 text-navy-900 dark:text-white rounded-bl-md'}">
+            ${message.messageText ? `<p class="text-sm leading-6 ${message.imageUrl ? 'mb-2' : ''} whitespace-pre-line">${escapeHtml(message.messageText)}</p>` : ''}
+            ${message.imageUrl ? `<img src="${message.imageUrl}" alt="Gambar mesej" class="max-w-full rounded-xl mt-1 cursor-pointer" onclick="showChatImagePreview('${message.imageUrl}')">` : ''}
+            <p class="text-[11px] mt-2 ${isMe ? 'text-orange-100' : 'text-navy-400'}">${escapeHtml(timeText)}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+  };
+
+  window.deleteChatMessage = async function (messageId) {
+    if (!currentUser || !messageId) return;
+
+    const targetMessage = allData.find(item => item.type === 'message' && (item.__firebaseId === messageId || item.id === messageId));
+    if (!targetMessage) {
+      showToast('Mesej tidak dijumpai', 'error');
+      return;
+    }
+
+    if (targetMessage.messageFrom !== currentUser.email) {
+      showToast('Anda hanya boleh padam mesej sendiri', 'warning');
+      return;
+    }
+
+    if (targetMessage.messageType === 'offer_accepted' || targetMessage.messageType === 'offer_rejected') {
+      showToast('Mesej sistem tidak boleh dipadam', 'warning');
+      return;
+    }
+
+    if (!confirm('Padam mesej ini?')) return;
+
+    try {
+      await deleteFromFirebase('messages', targetMessage.__firebaseId || targetMessage.id);
+      allData = allData.filter(item => !(item.type === 'message' && (item.__firebaseId === messageId || item.id === messageId)));
+      renderChatMessages();
+      renderChatList();
+      requestAnimationFrame(() => {
+        const chatBox = document.getElementById('chat-messages');
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+      });
+      showToast('Mesej berjaya dipadam', 'success');
+    } catch (error) {
+      showToast('Ralat memadam mesej: ' + error.message, 'error');
+    }
+  };
+
+  window.startChat = function (targetEmail) {
+    if (!currentUser) {
+      showToast('Sila log masuk untuk mesej', 'warning');
+      navigateTo('login');
+      return;
+    }
+
+    if (!targetEmail || targetEmail === currentUser.email) {
+      showToast('Anda tidak boleh mesej akaun sendiri', 'warning');
+      return;
+    }
+
+    currentChatWith = targetEmail;
+    navigateTo('chat');
+    requestAnimationFrame(() => openChat(targetEmail));
+  };
+
+  window.addEventListener('resize', () => syncChatMobileLayout(false));
+
+  if (currentPage === 'chat') {
+    requestAnimationFrame(() => syncChatMobileLayout(!currentChatWith));
+  }
+})();
+
+
+(function () {
+  if (typeof escapeHtml !== 'function' || typeof formatDateTime !== 'function') return;
+
+  let chatDeleteHoldTimer = null;
+  let chatDeleteHoldTriggered = false;
+
+  function getSafeChatUser(email) {
+    if (typeof getUserByEmailSafe === 'function') {
+      return getUserByEmailSafe(email) || { email, name: (email || '').split('@')[0] || 'Pengguna' };
+    }
+    return { email, name: (email || '').split('@')[0] || 'Pengguna' };
+  }
+
+  function resetChatHeaderV2() {
+    const chatHeader = document.getElementById('chat-header');
+    if (!chatHeader) return;
+    chatHeader.innerHTML = `
+      <div class="flex items-center justify-between gap-3 w-full">
+        <p id="chat-with" class="font-semibold truncate">Pilih perbualan</p>
+      </div>
+    `;
+  }
+
+  function renderChatHeaderV2(email) {
+    const chatHeader = document.getElementById('chat-header');
+    if (!chatHeader) return;
+
+    const user = getSafeChatUser(email);
+    const name = escapeHtml(user.name || (email || '').split('@')[0] || 'Pengguna');
+
+    chatHeader.innerHTML = `
+      <div class="flex items-center justify-between gap-3 w-full">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          ${window.innerWidth < 768 ? `
+            <button type="button" onclick="showChatListMobile()" class="w-9 h-9 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+          ` : ''}
+          <button type="button" onclick="showUserProfileModal('${email}')" class="font-semibold hover:text-accent-orange transition-colors text-left truncate block max-w-full">
+            ${name}
+          </button>
+        </div>
+
+        <button type="button" onclick="showUserProfileModal('${email}')" class="hidden md:inline-flex px-3 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 text-sm font-medium transition-colors">
+          <i class="fas fa-user mr-2 text-accent-orange"></i>Profil
+        </button>
+      </div>
+    `;
+  }
+
+  function getDeleteInteractionAttrs(message) {
+    const messageId = message.__firebaseId || message.id;
+    if (!messageId) return '';
+    if (message.messageType === 'offer_accepted' || message.messageType === 'offer_rejected') return '';
+    return [
+      `oncontextmenu="handleChatMessageContextMenu(event, '${messageId}')"` ,
+      `ontouchstart="handleChatMessageTouchStart(event, '${messageId}')"` ,
+      `ontouchend="handleChatMessageTouchEnd()"`,
+      `ontouchmove="handleChatMessageTouchEnd()"`,
+      `ontouchcancel="handleChatMessageTouchEnd()"`,
+      `data-message-id="${messageId}"`
+    ].join(' ');
+  }
+
+  window.openChat = function (email) {
+    currentChatWith = email;
+    renderChatHeaderV2(email);
+    if (typeof markChatAsRead === 'function') markChatAsRead(email);
+    if (typeof renderChatMessages === 'function') renderChatMessages();
+    if (typeof renderChatList === 'function') renderChatList();
+    if (typeof syncChatMobileLayout === 'function') {
+      requestAnimationFrame(() => syncChatMobileLayout(false));
+    } else {
+      const chatListBox = document.getElementById('chat-list-box');
+      const chatRoomBox = document.getElementById('chat-room-box');
+      if (window.innerWidth < 768 && chatListBox && chatRoomBox) {
+        chatListBox.classList.add('hidden');
+        chatRoomBox.classList.remove('hidden');
+      }
+    }
+  };
+
+  window.showChatListMobile = function () {
+    resetChatHeaderV2();
+    if (typeof syncChatMobileLayout === 'function') {
+      syncChatMobileLayout(true);
+      return;
+    }
+    const chatListBox = document.getElementById('chat-list-box');
+    const chatRoomBox = document.getElementById('chat-room-box');
+    if (chatListBox && chatRoomBox) {
+      chatListBox.classList.remove('hidden');
+      chatRoomBox.classList.add('hidden');
+    }
+  };
+
+  window.renderChatMessages = function () {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    if (!currentChatWith || !currentUser) {
+      container.innerHTML = `
+        <div class="text-center text-navy-400 py-10">
+          <i class="fas fa-comments text-4xl mb-3"></i>
+          <p>Pilih perbualan untuk mula mesej</p>
+        </div>
+      `;
+      resetChatHeaderV2();
+      return;
+    }
+
+    const partnerUser = getSafeChatUser(currentChatWith);
+    const partnerAvatar = (typeof getUserAvatarHtml === 'function')
+      ? getUserAvatarHtml(partnerUser, { sizeClass: 'w-8 h-8', textClass: 'text-xs' })
+      : `<div class="w-8 h-8 rounded-full bg-accent-orange text-white flex items-center justify-center text-xs font-semibold">${escapeHtml((partnerUser.name || 'P').charAt(0).toUpperCase())}</div>`;
+
+    const messages = getMessages().filter(message =>
+      (message.messageFrom === currentUser.email && message.messageTo === currentChatWith) ||
+      (message.messageFrom === currentChatWith && message.messageTo === currentUser.email)
+    ).sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+    if (messages.length === 0) {
+      container.innerHTML = `
+        <div class="text-center text-navy-400 py-10">
+          <i class="fas fa-comments text-4xl mb-3"></i>
+          <p>Mulakan perbualan dengan pengguna ini</p>
+        </div>
+      `;
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+      });
+      return;
+    }
+
+    container.innerHTML = messages.map(message => {
+      const isMe = message.messageFrom === currentUser.email;
+      const timeText = formatDateTime(message.createdAt);
+
+      if (message.messageType === 'offer_accepted' || message.messageType === 'offer_rejected') {
+        const isAccepted = message.messageType === 'offer_accepted';
+        const toneClass = isAccepted
+          ? (isMe ? 'bg-green-500 text-white' : 'bg-white dark:bg-navy-700')
+          : (isMe ? 'bg-red-500 text-white' : 'bg-white dark:bg-navy-700');
+        const iconClass = isAccepted ? 'fa-check-circle' : 'fa-circle-xmark';
+        const titleText = isAccepted ? 'Tawaran Diterima' : 'Tawaran Ditolak';
+        const helperText = isAccepted
+          ? 'Sila teruskan perbincangan dalam ruang mesej ini.'
+          : 'Anda boleh teruskan perbincangan dalam ruang mesej ini jika perlu.';
+        const innerTone = isAccepted
+          ? (isMe ? 'bg-green-600/40' : 'bg-navy-50 dark:bg-navy-800')
+          : (isMe ? 'bg-red-600/40' : 'bg-navy-50 dark:bg-navy-800');
+
+        const itemsHtml = (message.offerItems || []).map(item => `
+          <div class="flex gap-3 items-start rounded-xl p-2 ${isMe ? (isAccepted ? 'bg-green-600/30' : 'bg-red-600/30') : 'bg-navy-100 dark:bg-navy-700'}">
+            <div class="w-14 h-14 rounded-lg overflow-hidden bg-white dark:bg-navy-800 flex items-center justify-center flex-shrink-0">
+              ${item.image_url
+                ? `<img src="${item.image_url}" alt="${escapeHtml(item.productName || 'Produk')}" class="w-full h-full object-cover">`
+                : `<i class="fas fa-box text-navy-400"></i>`
+              }
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-sm truncate">${escapeHtml(item.productName || 'Produk')}</p>
+              <div class="flex justify-between text-xs mt-1">
+                <span>Kuantiti: x${Number(item.quantity || 1)}</span>
+                <span>RM ${Number(item.originalPrice || 0).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
+            ${!isMe ? `<button type="button" onclick="showUserProfileModal('${message.messageFrom}')" class="flex-shrink-0 rounded-full mb-1">${partnerAvatar}</button>` : ''}
+            <div class="max-w-[92%] md:max-w-[80%] p-4 rounded-2xl shadow ${toneClass}">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fas ${iconClass} ${isMe ? 'text-white' : (isAccepted ? 'text-green-500' : 'text-red-500')}"></i>
+                <p class="font-semibold">${titleText}</p>
+              </div>
+
+              <div class="rounded-xl p-3 ${innerTone}">
+                ${(message.offerItems && message.offerItems.length) ? `
+                  <p class="font-medium mb-2">${isAccepted ? 'Produk dibeli:' : 'Produk dalam tawaran:'}</p>
+                  <div class="space-y-2 mb-3">${itemsHtml}</div>
+                ` : ''}
+                <div class="text-sm space-y-1">
+                  <p><strong>Harga Tawaran:</strong> RM ${Number(message.offerPrice || 0).toFixed(2)}</p>
+                  <p><strong>Lokasi COD:</strong> ${escapeHtml(message.codLocation || '-')}</p>
+                  ${!isAccepted ? `<p><strong>Sebab penolakan:</strong> ${escapeHtml(message.rejectionReason || 'Tiada sebab diberikan.')}</p>` : ''}
+                </div>
+              </div>
+
+              <p class="text-sm mt-3 ${isMe ? (isAccepted ? 'text-green-100' : 'text-red-100') : 'text-navy-300'}">${helperText}</p>
+              <p class="text-xs mt-2 ${isMe ? (isAccepted ? 'text-green-100' : 'text-red-100') : 'text-navy-400'}">${escapeHtml(timeText)}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      const interactionAttrs = isMe ? getDeleteInteractionAttrs(message) : '';
+
+      return `
+        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
+          ${!isMe ? `<button type="button" onclick="showUserProfileModal('${message.messageFrom}')" class="flex-shrink-0 rounded-full mb-1">${partnerAvatar}</button>` : ''}
+          <div class="chat-message-bubble max-w-[88%] md:max-w-[72%] px-4 py-3 rounded-2xl shadow-sm select-none ${isMe ? 'bg-accent-orange text-white rounded-br-md' : 'bg-white dark:bg-navy-700 text-navy-900 dark:text-white rounded-bl-md'}" ${interactionAttrs}>
+            ${message.messageText ? `<p class="text-sm leading-6 ${message.imageUrl ? 'mb-2' : ''} whitespace-pre-line">${escapeHtml(message.messageText)}</p>` : ''}
+            ${message.imageUrl ? `<img src="${message.imageUrl}" alt="Gambar mesej" class="max-w-full rounded-xl mt-1 cursor-pointer" onclick="showChatImagePreview('${message.imageUrl}')">` : ''}
+            <p class="text-[11px] mt-2 ${isMe ? 'text-orange-100' : 'text-navy-400'}">${escapeHtml(timeText)}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+  };
+
+  window.deleteChatMessage = async function (messageId) {
+    if (!currentUser || !messageId) return;
+
+    const targetMessage = allData.find(item => item.type === 'message' && (item.__firebaseId === messageId || item.id === messageId));
+    if (!targetMessage) {
+      showToast('Mesej tidak dijumpai', 'error');
+      return;
+    }
+
+    if (targetMessage.messageFrom !== currentUser.email) {
+      showToast('Anda hanya boleh padam mesej sendiri', 'warning');
+      return;
+    }
+
+    if (targetMessage.messageType === 'offer_accepted' || targetMessage.messageType === 'offer_rejected') {
+      showToast('Mesej sistem tidak boleh dipadam', 'warning');
+      return;
+    }
+
+    if (!confirm('Padam mesej ini untuk semua orang?')) return;
+
+    try {
+      await deleteFromFirebase('messages', targetMessage.__firebaseId || targetMessage.id);
+      allData = allData.filter(item => !(item.type === 'message' && (item.__firebaseId === messageId || item.id === messageId)));
+      renderChatMessages();
+      renderChatList();
+      requestAnimationFrame(() => {
+        const chatBox = document.getElementById('chat-messages');
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+      });
+      showToast('Mesej berjaya dipadam untuk semua orang', 'success');
+    } catch (error) {
+      showToast('Ralat memadam mesej: ' + error.message, 'error');
+    }
+  };
+
+  window.handleChatMessageContextMenu = function (event, messageId) {
+    if (!messageId) return false;
+    event.preventDefault();
+    window.handleChatMessageTouchEnd();
+    deleteChatMessage(messageId);
+    return false;
+  };
+
+  window.handleChatMessageTouchStart = function (event, messageId) {
+    if (!messageId) return;
+    chatDeleteHoldTriggered = false;
+    window.handleChatMessageTouchEnd();
+    chatDeleteHoldTimer = window.setTimeout(() => {
+      chatDeleteHoldTriggered = true;
+      if (navigator.vibrate) navigator.vibrate(30);
+      deleteChatMessage(messageId);
+    }, 550);
+  };
+
+  window.handleChatMessageTouchEnd = function () {
+    if (chatDeleteHoldTimer) {
+      clearTimeout(chatDeleteHoldTimer);
+      chatDeleteHoldTimer = null;
+    }
+  };
+
+  resetChatHeaderV2();
+
+  if (currentPage === 'chat') {
+    if (currentChatWith) {
+      requestAnimationFrame(() => renderChatHeaderV2(currentChatWith));
+    } else {
+      requestAnimationFrame(() => resetChatHeaderV2());
+    }
+  }
+})();
+
 </script>
 
 </body>
