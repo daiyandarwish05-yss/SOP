@@ -188,6 +188,10 @@
 
     .conversation-item { transition: all 0.2s ease; }
     .conversation-item:hover { transform: translateY(-1px); }
+    .conversation-item.active-chat-item { border-color: rgba(249, 115, 22, 0.95); }
+    #chat-list { padding: 10px; }
+    .sop-chat-search { padding: 14px 14px 6px; }
+    .sop-chat-search input { font-size: 0.98rem; }
     .chat-message-bubble { word-break: break-word; }
     @media (max-width: 767px) {
       .modal-content.modal-fullscreen {
@@ -4207,10 +4211,10 @@ function renderProfile() {
       <span id="profile-badge" class="inline-block mt-2 px-4 py-1 bg-accent-orange text-white text-sm rounded-full">Pengguna S.O.P</span>
       <div class="flex flex-wrap justify-center gap-2 mt-4">
         <button type="button" onclick="openProfileImagePicker()" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 font-medium text-sm transition-colors">
-          <i class="fas fa-image mr-2 text-accent-orange"></i>Tukar Gambar Profil
+          <i class="fas fa-image mr-2 text-accent-orange"></i>Change My Profile Photo
         </button>
         <button type="button" onclick="showUserProfileModal('${liveUser.email}')" class="px-4 py-2 rounded-xl bg-white dark:bg-navy-800 border border-navy-200 dark:border-navy-600 hover:bg-navy-50 dark:hover:bg-navy-700 font-medium text-sm transition-colors">
-          <i class="fas fa-eye mr-2 text-accent-orange"></i>Lihat Profil Saya
+          <i class="fas fa-eye mr-2 text-accent-orange"></i>See My Profile
         </button>
       </div>
     `;
@@ -8660,7 +8664,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     "Gambar profil berjaya dikemas kini": "Profile image updated successfully",
     "Pengguna ini belum menambah produk.": "This user has not added any products yet.",
     "Klik produk untuk lihat maklumat penuh.": "Click a product to view full details.",
-    "Lihat Profil Saya": "View My Profile",
+    "See My Profile": "View My Profile",
     "Chat Pengguna": "Chat User",
     "Masih Tersedia": "Available",
     "Sudah Dijual": "Sold",
@@ -9207,20 +9211,103 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
   };
   window.renderTrendingProducts = renderTrendingProducts;
 
+  window.setProductSlide = function(index){
+    const product = getProductsSafe().find(item => String(getProductIdSafe(item)) === String(currentProductModalId));
+    if (!product) return;
+    const images = getProductImagesSafe(product);
+    if (!images.length) return;
+
+    if (index < 0) index = 0;
+    if (index >= images.length) index = images.length - 1;
+
+    currentProductModalIndex = index;
+
+    const mainImageEl = document.getElementById('product-detail-main-image');
+    const counterEl = document.getElementById('product-detail-counter');
+
+    if (mainImageEl) {
+      mainImageEl.src = images[index];
+    }
+
+    if (counterEl) {
+      counterEl.textContent = `${index + 1} / ${images.length}`;
+    }
+
+    images.forEach((_, thumbIndex) => {
+      const thumb = document.getElementById(`product-thumb-${thumbIndex}`);
+      if (!thumb) return;
+      thumb.classList.toggle('border-accent-orange', thumbIndex === index);
+      thumb.classList.toggle('border-transparent', thumbIndex !== index);
+      thumb.classList.toggle('opacity-100', thumbIndex === index);
+      thumb.classList.toggle('opacity-70', thumbIndex !== index);
+    });
+  };
+
+  window.changeProductSlide = function(step){
+    const product = getProductsSafe().find(item => String(getProductIdSafe(item)) === String(currentProductModalId));
+    if (!product) return;
+    const images = getProductImagesSafe(product);
+    if (!images.length) return;
+    const nextIndex = (currentProductModalIndex + step + images.length) % images.length;
+    window.setProductSlide(nextIndex);
+  };
+
   showProductDetailModal = function(productId){
     const product = getProductsSafe().find(item => String(getProductIdSafe(item)) === String(productId));
     if (!product) { showToast('Product not found', 'error'); return; }
+
     const images = getProductImagesSafe(product);
-    const mainImage = images[0] ? `<img src="${esc(images[0])}" alt="${esc(product.productName)}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-box text-6xl text-navy-400 dark:text-navy-300"></i></div>`;
     const stock = getProductStockSafe(product);
     const status = getProductStatusMeta(product);
     const sellerUser = getUserByEmailSafe(product?.sellerId || '');
     const sellerBadge = getVerificationBadgeHtml(sellerUser || product?.sellerId || '');
     const sellerType = inferUserType(sellerUser);
     const sellerTypeLabel = sellerType === 'student' ? 'Student seller' : sellerType === 'lecturer' ? 'Lecturer seller' : sellerType === 'staff' ? 'Staff seller' : 'Campus seller';
+
+    currentProductModalId = String(productId);
+    currentProductModalIndex = 0;
+
+    const mainImage = images[0]
+      ? `<img id="product-detail-main-image" src="${esc(images[0])}" alt="${esc(product.productName)}" class="w-full h-full object-cover">`
+      : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-box text-6xl text-navy-400 dark:text-navy-300"></i></div>`;
+
     showModal(esc(product.productName || 'Product'), `
       <div class="space-y-5">
-        <div class="rounded-2xl overflow-hidden bg-navy-100 dark:bg-navy-700 aspect-[4/3]">${mainImage}</div>
+        <div class="rounded-2xl overflow-hidden bg-navy-100 dark:bg-navy-700">
+          <div class="relative aspect-[4/3] bg-navy-100 dark:bg-navy-700 flex items-center justify-center overflow-hidden">
+            ${mainImage}
+            <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold shadow-md ${getProductAvailabilityBadgeClass(status)}">${getProductAvailabilityLabel(status)}</div>
+            ${images.length > 1 ? `
+              <button
+                type="button"
+                onclick="event.stopPropagation(); changeProductSlide(-1)"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 text-white hover:bg-black/75">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <button
+                type="button"
+                onclick="event.stopPropagation(); changeProductSlide(1)"
+                class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 text-white hover:bg-black/75">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              <div id="product-detail-counter" class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">1 / ${images.length}</div>
+            ` : ''}
+          </div>
+          ${images.length > 1 ? `
+            <div class="grid grid-cols-5 gap-2 p-3 bg-white dark:bg-navy-800">
+              ${images.map((img, index) => `
+                <button
+                  type="button"
+                  onclick="event.stopPropagation(); setProductSlide(${index})"
+                  class="rounded-lg overflow-hidden border-2 transition ${index === 0 ? 'border-accent-orange opacity-100' : 'border-transparent opacity-70'}"
+                  id="product-thumb-${index}">
+                  <img src="${esc(img)}" alt="Product image ${index + 1}" class="w-full h-16 object-cover">
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Price</p><p class="text-2xl font-bold text-accent-orange">RM ${Number(product.price || 0).toFixed(2)}</p></div>
           <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Status</p><p class="font-semibold">${status.label}</p></div>
@@ -9497,6 +9584,1993 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
   setTimeout(runFinalUpgrade, 700);
 })();
 </script>
+
+
+<style id="admin-v4-style">
+  .admin-v4-shell{display:flex;flex-direction:column;gap:22px}
+  .admin-v4-header{display:flex;flex-direction:column;gap:14px}
+  .admin-v4-title{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .admin-v4-title h2{font-size:28px;font-weight:800;line-height:1.1;margin:0}
+  .admin-v4-sub{color:rgb(100 116 139);font-size:14px}
+  .dark .admin-v4-sub{color:rgb(203 213 225)}
+  .admin-v4-tabs{display:flex;gap:10px;flex-wrap:wrap}
+  .admin-v4-tab{border:none;border-radius:999px;padding:11px 16px;font-size:13px;font-weight:700;background:rgba(15,23,42,.08);color:inherit;cursor:pointer;transition:all .2s ease}
+  .admin-v4-tab:hover{transform:translateY(-1px);background:rgba(15,23,42,.12)}
+  .admin-v4-tab.active{background:#f97316;color:#fff;box-shadow:0 10px 24px rgba(249,115,22,.25)}
+  .admin-v4-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+  .admin-v4-col-12{grid-column:span 12/span 12}
+  .admin-v4-col-8{grid-column:span 8/span 8}
+  .admin-v4-col-7{grid-column:span 7/span 7}
+  .admin-v4-col-6{grid-column:span 6/span 6}
+  .admin-v4-col-5{grid-column:span 5/span 5}
+  .admin-v4-col-4{grid-column:span 4/span 4}
+  .admin-v4-card{border:1px solid rgba(148,163,184,.16);border-radius:22px;padding:18px;background:rgba(255,255,255,.92);box-shadow:0 14px 40px rgba(15,23,42,.08)}
+  .dark .admin-v4-card{background:rgba(15,23,42,.45);border-color:rgba(148,163,184,.14)}
+  .admin-v4-card h3{margin:0;font-size:20px;font-weight:700}
+  .admin-v4-card p{margin:0}
+  .admin-v4-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .admin-v4-meta-copy{display:flex;flex-direction:column;gap:4px}
+  .admin-v4-meta-copy p{font-size:13px;color:rgb(100 116 139)}
+  .dark .admin-v4-meta-copy p{color:rgb(203 213 225)}
+  .admin-v4-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+  .admin-v4-kpi{border-radius:20px;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(241,245,249,.95));border:1px solid rgba(148,163,184,.14)}
+  .dark .admin-v4-kpi{background:linear-gradient(180deg,rgba(30,41,59,.88),rgba(15,23,42,.82));border-color:rgba(148,163,184,.14)}
+  .admin-v4-kpi-top{display:flex;align-items:start;justify-content:space-between;gap:10px}
+  .admin-v4-kpi .label{font-size:12px;font-weight:700;color:rgb(100 116 139);text-transform:uppercase;letter-spacing:.05em}
+  .dark .admin-v4-kpi .label{color:rgb(203 213 225)}
+  .admin-v4-kpi .value{font-size:32px;font-weight:800;margin-top:8px}
+  .admin-v4-icon{width:44px;height:44px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:rgba(249,115,22,.12);color:#f97316}
+  .admin-v4-toolbar{display:grid;grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(170px,.65fr)) auto auto;gap:10px;align-items:center}
+  .admin-v4-input,.admin-v4-select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.96)}
+  .dark .admin-v4-input,.dark .admin-v4-select{background:rgba(15,23,42,.72);border-color:rgba(148,163,184,.22);color:#fff}
+  .admin-v4-btn{border:none;border-radius:14px;padding:12px 14px;font-weight:700;cursor:pointer;transition:all .2s ease}
+  .admin-v4-btn:hover{transform:translateY(-1px)}
+  .admin-v4-btn-primary{background:#f97316;color:#fff}
+  .admin-v4-btn-soft{background:rgba(15,23,42,.08);color:inherit}
+  .dark .admin-v4-btn-soft{background:rgba(148,163,184,.12)}
+  .admin-v4-list{display:flex;flex-direction:column;gap:12px;max-height:560px;overflow:auto;padding-right:4px}
+  .admin-v4-item{border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:14px;background:rgba(248,250,252,.95)}
+  .dark .admin-v4-item{background:rgba(30,41,59,.65);border-color:rgba(148,163,184,.12)}
+  .admin-v4-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .admin-v4-item-title{font-size:16px;font-weight:700}
+  .admin-v4-small{font-size:12px;color:rgb(100 116 139)}
+  .dark .admin-v4-small{color:rgb(203 213 225)}
+  .admin-v4-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .admin-v4-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(15,23,42,.08)}
+  .dark .admin-v4-badge{background:rgba(148,163,184,.12)}
+  .admin-v4-badge.success{background:rgba(34,197,94,.12);color:#15803d}
+  .dark .admin-v4-badge.success{background:rgba(34,197,94,.18);color:#86efac}
+  .admin-v4-badge.warn{background:rgba(249,115,22,.12);color:#c2410c}
+  .dark .admin-v4-badge.warn{background:rgba(249,115,22,.18);color:#fdba74}
+  .admin-v4-badge.danger{background:rgba(239,68,68,.12);color:#b91c1c}
+  .dark .admin-v4-badge.danger{background:rgba(239,68,68,.18);color:#fca5a5}
+  .admin-v4-badge.info{background:rgba(59,130,246,.12);color:#1d4ed8}
+  .dark .admin-v4-badge.info{background:rgba(59,130,246,.18);color:#93c5fd}
+  .admin-v4-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .admin-v4-empty{border:1px dashed rgba(148,163,184,.3);border-radius:18px;padding:28px 16px;text-align:center;color:rgb(100 116 139)}
+  .dark .admin-v4-empty{color:rgb(203 213 225);border-color:rgba(148,163,184,.18)}
+  .admin-v4-table-note{font-size:12px;color:rgb(100 116 139);margin-top:8px}
+  .dark .admin-v4-table-note{color:rgb(203 213 225)}
+  .admin-v4-section-stack{display:flex;flex-direction:column;gap:16px}
+  .admin-v4-mini-list{display:flex;flex-direction:column;gap:10px;max-height:260px;overflow:auto;padding-right:4px}
+  .admin-v4-mini-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .admin-v4-divider{height:1px;background:rgba(148,163,184,.16);margin:2px 0}
+  @media (max-width: 1280px){
+    .admin-v4-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .admin-v4-col-8,.admin-v4-col-7,.admin-v4-col-6,.admin-v4-col-5,.admin-v4-col-4{grid-column:span 12/span 12}
+  }
+  @media (max-width: 900px){
+    .admin-v4-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .admin-v4-toolbar{grid-template-columns:1fr}
+  }
+  @media (max-width: 640px){
+    .admin-v4-kpis{grid-template-columns:1fr}
+    .admin-v4-title h2{font-size:24px}
+  }
+</style>
+<script id="admin-v4-script">
+(function(){
+  const state = {
+    tab: 'overview',
+    reportQuery: '',
+    reportStatus: 'all',
+    reportTarget: 'all',
+    userQuery: '',
+    userStatus: 'all',
+    productQuery: '',
+    productStock: 'all',
+    orderQuery: '',
+    orderStatus: 'all',
+    logQuery: ''
+  };
+
+  function esc(value){
+    const fn = window.escapeHtmlV2 || window.escapeHtmlSafe || window.escapeHtml;
+    if (typeof fn === 'function') return fn(String(value ?? ''));
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function num(value){ return Number(value || 0); }
+  function norm(value){ return String(value || '').trim().toLowerCase(); }
+  function includes(text, query){ return norm(text).includes(norm(query)); }
+  function money(value){ return `RM ${num(value).toFixed(2)}`; }
+  function fmt(value){
+    const fn = window.formatDateTimeV2 || window.formatDateTime || window.formatDateSafe;
+    if (typeof fn === 'function') return fn(value);
+    try { return new Date(value).toLocaleString('en-MY'); } catch { return '-'; }
+  }
+  function getUsers(){ return typeof window.getUsersV2 === 'function' ? window.getUsersV2() : (typeof window.getUsers === 'function' ? window.getUsers() : []); }
+  function getProducts(){ return typeof window.getProductsV2 === 'function' ? window.getProductsV2() : (typeof window.getProducts === 'function' ? window.getProducts() : []); }
+  function getOffers(){ return typeof window.getOffersV2 === 'function' ? window.getOffersV2() : (typeof window.getOffers === 'function' ? window.getOffers() : []); }
+  function getReports(){ return typeof window.getReportsV2 === 'function' ? window.getReportsV2() : (Array.isArray(window.allData) ? window.allData.filter(item => item && item.type === 'report') : []); }
+  function getProductId(product){
+    const fn = window.getProductSafeId || window.getProductIdV2 || window.getProductIdSafe;
+    return typeof fn === 'function' ? fn(product) : (product?.__firebaseId || product?.id || '');
+  }
+  function getProductStock(product){
+    const fn = window.getProductStockV2 || window.getProductStock;
+    return typeof fn === 'function' ? fn(product) : Number(product?.quantity || product?.stock || 0);
+  }
+  function isAdmin(user){
+    const fn = window.isAdminUserV2 || window.isAdminUser;
+    return !!(typeof fn === 'function' ? fn(user) : false);
+  }
+  function getUserType(user){
+    const raw = String(user?.userType || user?.roleLabel || '').trim();
+    if (raw) return raw;
+    if (user?.matricCardNumber) return 'Student';
+    if (user?.staffId) return 'Staff';
+    return isAdmin(user) ? 'Admin' : 'User';
+  }
+  function isVerified(user){
+    const email = String(user?.email || '').trim().toLowerCase();
+    const official = email.endsWith('@polinilai.edu.my');
+    return official && (!!user?.matricCardNumber || !!user?.staffId || isAdmin(user) || getUserType(user) !== 'User');
+  }
+  function getOrderTotal(offer){
+    return (offer?.items || []).reduce((sum, item) => sum + (num(item.originalPrice || item.price) * num(item.quantity || 1)), 0);
+  }
+  function getOrderItemSummary(offer){
+    const items = Array.isArray(offer?.items) ? offer.items : [];
+    if (!items.length) return 'No item details';
+    return items.map(item => `${item.productName || 'Item'} × ${num(item.quantity || 1)}`).join(', ');
+  }
+  function getOrderSellerSummary(offer){
+    const sellers = [...new Set((offer?.items || []).map(item => item.sellerName || item.sellerId).filter(Boolean))];
+    if (!sellers.length) return '-';
+    return sellers.join(', ');
+  }
+  function getOrderStatusLabel(status){
+    return ({
+      pending: 'Pending',
+      accepted: 'Accepted',
+      rejected: 'Rejected',
+      cancelled: 'Cancelled',
+      completed: 'Completed'
+    })[status] || 'Unknown';
+  }
+  function getOrderStatusBadge(status){
+    if (status === 'completed') return 'success';
+    if (status === 'accepted') return 'info';
+    if (status === 'pending') return 'warn';
+    if (status === 'rejected' || status === 'cancelled') return 'danger';
+    return '';
+  }
+  function getProductAvailability(product){
+    const stock = getProductStock(product);
+    if (product?.isSold || norm(product?.status) === 'sold') return { label:'Sold', cls:'danger' };
+    if (stock <= 0) return { label:'Out of Stock', cls:'danger' };
+    if (stock <= 3) return { label:'Low Stock', cls:'warn' };
+    return { label:'Available', cls:'success' };
+  }
+  function readLogs(){
+    const remote = Array.isArray(window.allData) ? window.allData.filter(item => item && (item.__collection === 'admin_logs' || item.type === 'admin_log')) : [];
+    let local = [];
+    try { local = JSON.parse(localStorage.getItem('sop_admin_logs_local_v3') || '[]'); } catch(e){}
+    const merged = [...remote];
+    local.forEach(entry => {
+      const exists = remote.some(item => (item.__firebaseId && item.__firebaseId === entry.__firebaseId) || (item.createdAt === entry.createdAt && item.action === entry.action && item.targetValue === entry.targetValue));
+      if (!exists) merged.push(entry);
+    });
+    return merged.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+
+  function filteredReports(reports){
+    return reports.filter(report => {
+      const q = state.reportQuery;
+      const matchesQuery = !q || [report.category, report.note, report.reporterEmail, report.relatedProductName, report.relatedUserEmail, report.reportTargetType].some(v => includes(v, q));
+      const matchesStatus = state.reportStatus === 'all' || (state.reportStatus === 'open' ? report.status !== 'resolved' : report.status === 'resolved');
+      const matchesTarget = state.reportTarget === 'all' || norm(report.reportTargetType) === norm(state.reportTarget);
+      return matchesQuery && matchesStatus && matchesTarget;
+    }).sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+
+  function filteredUsers(users){
+    return users.filter(user => {
+      const q = state.userQuery;
+      const matchesQuery = !q || [user.name, user.email, user.staffId, user.matricCardNumber, getUserType(user)].some(v => includes(v, q));
+      let matchesStatus = true;
+      if (state.userStatus === 'active') matchesStatus = !user.isSuspended && !isAdmin(user);
+      if (state.userStatus === 'suspended') matchesStatus = !!user.isSuspended;
+      if (state.userStatus === 'admin') matchesStatus = isAdmin(user);
+      if (state.userStatus === 'verified') matchesStatus = isVerified(user);
+      return matchesQuery && matchesStatus;
+    }).sort((a,b) => String(a.name || '').localeCompare(String(b.name || ''), 'en'));
+  }
+
+  function filteredProducts(products){
+    return products.filter(product => {
+      const q = state.productQuery;
+      const stock = getProductStock(product);
+      const matchesQuery = !q || [product.productName, product.category, product.sellerId, product.sellerName, product.condition, product.codLocation].some(v => includes(v, q));
+      let matchesStock = true;
+      if (state.productStock === 'available') matchesStock = stock > 3 && !product?.isSold;
+      if (state.productStock === 'low') matchesStock = stock > 0 && stock <= 3 && !product?.isSold;
+      if (state.productStock === 'out') matchesStock = stock <= 0 || !!product?.isSold;
+      return matchesQuery && matchesStock;
+    }).sort((a,b) => String(a.productName || '').localeCompare(String(b.productName || ''), 'en'));
+  }
+
+  function filteredOrders(offers){
+    return offers.filter(offer => {
+      const q = state.orderQuery;
+      const matchesQuery = !q || [offer.offerId, offer.buyerName, offer.buyerEmail, getOrderSellerSummary(offer), getOrderItemSummary(offer)].some(v => includes(v, q));
+      const matchesStatus = state.orderStatus === 'all' || norm(offer.offerStatus) === norm(state.orderStatus);
+      return matchesQuery && matchesStatus;
+    }).sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+
+  function filteredLogs(logs){
+    return logs.filter(log => !state.logQuery || [log.action, log.targetType, log.targetValue, log.details, log.adminEmail, log.adminName].some(v => includes(v, state.logQuery)));
+  }
+
+  function buildHeader(){
+    const tabs = [
+      ['overview','Overview','fa-chart-pie'],
+      ['reports','Reports','fa-flag'],
+      ['users','Users','fa-users'],
+      ['products','Products','fa-box-open'],
+      ['orders','Orders','fa-bag-shopping'],
+      ['activity','Activity','fa-clock-rotate-left']
+    ];
+    return `
+      <div class="admin-v4-header">
+        <div class="admin-v4-title">
+          <div>
+            <h2>Admin Control Center</h2>
+            <p class="admin-v4-sub">A cleaner and more advanced admin panel built around the features that are already working in your system.</p>
+          </div>
+          <span class="admin-v4-badge info"><i class="fas fa-shield-halved"></i> English Mode</span>
+        </div>
+        <div class="admin-v4-tabs">
+          ${tabs.map(([key,label,icon]) => `
+            <button type="button" class="admin-v4-tab ${state.tab === key ? 'active' : ''}" onclick="switchAdminPanelTabV4('${key}')">
+              <i class="fas ${icon} mr-2"></i>${label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function buildKpis(users, products, offers, reports){
+    const pending = offers.filter(o => o.offerStatus === 'pending').length;
+    const completed = offers.filter(o => o.offerStatus === 'completed').length;
+    const suspended = users.filter(u => u.isSuspended).length;
+    const openReports = reports.filter(r => r.status !== 'resolved').length;
+    const lowStock = products.filter(p => { const s = getProductStock(p); return s > 0 && s <= 3 && !p?.isSold; }).length;
+    const stats = [
+      ['Total Users', users.length, 'fa-users'],
+      ['Total Products', products.length, 'fa-box-open'],
+      ['Pending Orders', pending, 'fa-hourglass-half'],
+      ['Completed Orders', completed, 'fa-circle-check'],
+      ['Open Reports', openReports, 'fa-flag'],
+      ['Suspended Accounts', suspended, 'fa-user-lock']
+    ];
+    return `
+      <div class="admin-v4-kpis">
+        ${stats.map(([label,value,icon]) => `
+          <div class="admin-v4-kpi">
+            <div class="admin-v4-kpi-top">
+              <div>
+                <div class="label">${label}</div>
+                <div class="value">${value}</div>
+              </div>
+              <div class="admin-v4-icon"><i class="fas ${icon}"></i></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <p class="admin-v4-table-note">Low stock products currently detected: <strong>${lowStock}</strong></p>
+    `;
+  }
+
+  function buildOverview(users, products, offers, reports, logs){
+    const lowStock = products.filter(p => { const s = getProductStock(p); return s > 0 && s <= 3 && !p?.isSold; }).slice(0, 6);
+    const outOfStock = products.filter(p => getProductStock(p) <= 0 || p?.isSold).slice(0, 6);
+    const recentOrders = offers.slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 6);
+    const openReports = reports.filter(r => r.status !== 'resolved').slice(0, 6);
+    const verifiedUsers = users.filter(isVerified).length;
+    const adminCount = users.filter(isAdmin).length;
+    return `
+      <div class="admin-v4-section-stack">
+        ${buildKpis(users, products, offers, reports)}
+        <div class="admin-v4-grid">
+          <section class="admin-v4-card admin-v4-col-4">
+            <div class="admin-v4-meta">
+              <div class="admin-v4-meta-copy">
+                <h3>Account Overview</h3>
+                <p>Quick visibility for user trust and access levels.</p>
+              </div>
+              <span class="admin-v4-badge info">${users.length} accounts</span>
+            </div>
+            <div class="admin-v4-mini-list custom-scrollbar">
+              <div class="admin-v4-mini-row"><span>Verified accounts</span><strong>${verifiedUsers}</strong></div>
+              <div class="admin-v4-mini-row"><span>Admin accounts</span><strong>${adminCount}</strong></div>
+              <div class="admin-v4-mini-row"><span>Suspended accounts</span><strong>${users.filter(u => u.isSuspended).length}</strong></div>
+              <div class="admin-v4-mini-row"><span>Students with matric number</span><strong>${users.filter(u => !!u.matricCardNumber).length}</strong></div>
+              <div class="admin-v4-mini-row"><span>Lecturer / staff with staff ID</span><strong>${users.filter(u => !!u.staffId).length}</strong></div>
+            </div>
+          </section>
+
+          <section class="admin-v4-card admin-v4-col-4">
+            <div class="admin-v4-meta">
+              <div class="admin-v4-meta-copy">
+                <h3>Open Reports</h3>
+                <p>Most recent unresolved cases.</p>
+              </div>
+              <span class="admin-v4-badge danger">${reports.filter(r => r.status !== 'resolved').length} open</span>
+            </div>
+            ${openReports.length ? `
+              <div class="admin-v4-mini-list custom-scrollbar">
+                ${openReports.map(report => `
+                  <div class="admin-v4-item">
+                    <div class="admin-v4-item-title">${esc(report.category || 'Report')}</div>
+                    <p class="admin-v4-small mt-1">${esc(report.reporterEmail || '-')} • ${fmt(report.createdAt)}</p>
+                    ${report.note ? `<p class="mt-2">${esc(report.note)}</p>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<div class="admin-v4-empty">No open reports right now.</div>`}
+          </section>
+
+          <section class="admin-v4-card admin-v4-col-4">
+            <div class="admin-v4-meta">
+              <div class="admin-v4-meta-copy">
+                <h3>Stock Watch</h3>
+                <p>Products that need admin attention.</p>
+              </div>
+              <span class="admin-v4-badge warn">${lowStock.length + outOfStock.length} flagged</span>
+            </div>
+            <div class="admin-v4-mini-list custom-scrollbar">
+              ${[...lowStock.map(p => ({p, label:'Low Stock', cls:'warn'})), ...outOfStock.map(p => ({p, label:'Out of Stock', cls:'danger'}))].slice(0,8).map(entry => `
+                <div class="admin-v4-item">
+                  <div class="admin-v4-mini-row">
+                    <div>
+                      <div class="admin-v4-item-title">${esc(entry.p.productName || '-')}</div>
+                      <p class="admin-v4-small mt-1">${esc(entry.p.sellerName || entry.p.sellerId || '-')}</p>
+                    </div>
+                    <span class="admin-v4-badge ${entry.cls}">${entry.label}</span>
+                  </div>
+                </div>
+              `).join('') || '<div class="admin-v4-empty">No stock alerts at the moment.</div>'}
+            </div>
+          </section>
+
+          <section class="admin-v4-card admin-v4-col-7">
+            <div class="admin-v4-meta">
+              <div class="admin-v4-meta-copy">
+                <h3>Recent Orders</h3>
+                <p>Read-only monitoring for the latest order activity.</p>
+              </div>
+              <span class="admin-v4-badge info">${offers.length} total</span>
+            </div>
+            ${recentOrders.length ? `
+              <div class="admin-v4-list custom-scrollbar">
+                ${recentOrders.map(offer => `
+                  <div class="admin-v4-item">
+                    <div class="admin-v4-item-top">
+                      <div>
+                        <div class="admin-v4-item-title">${esc(offer.buyerName || offer.buyerEmail || 'Buyer')}</div>
+                        <p class="admin-v4-small mt-1">${esc(getOrderItemSummary(offer))}</p>
+                      </div>
+                      <div class="admin-v4-actions">
+                        <span class="admin-v4-badge ${getOrderStatusBadge(offer.offerStatus)}">${getOrderStatusLabel(offer.offerStatus)}</span>
+                        <span class="admin-v4-badge">${money(getOrderTotal(offer))}</span>
+                      </div>
+                    </div>
+                    <div class="admin-v4-badges">
+                      <span class="admin-v4-badge">Seller: ${esc(getOrderSellerSummary(offer))}</span>
+                      <span class="admin-v4-badge">Created: ${esc(fmt(offer.createdAt))}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<div class="admin-v4-empty">No orders have been created yet.</div>`}
+          </section>
+
+          <section class="admin-v4-card admin-v4-col-5">
+            <div class="admin-v4-meta">
+              <div class="admin-v4-meta-copy">
+                <h3>Admin Activity</h3>
+                <p>Latest actions already recorded by the system.</p>
+              </div>
+              <span class="admin-v4-badge">${logs.length} logs</span>
+            </div>
+            ${logs.length ? `
+              <div class="admin-v4-mini-list custom-scrollbar">
+                ${logs.slice(0,8).map(log => `
+                  <div class="admin-v4-item">
+                    <div class="admin-v4-item-title">${esc(log.action || 'Admin action')}</div>
+                    <p class="admin-v4-small mt-1">${esc(log.targetType || 'system')} • ${esc(log.targetValue || '-')}</p>
+                    <p class="admin-v4-small mt-2">${esc(fmt(log.createdAt))} • ${esc(log.adminEmail || log.adminName || 'admin')}</p>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<div class="admin-v4-empty">No admin activity has been logged yet.</div>`}
+          </section>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildReportsTab(reports){
+    const rows = filteredReports(reports);
+    return `
+      <section class="admin-v4-card admin-v4-col-12">
+        <div class="admin-v4-meta">
+          <div class="admin-v4-meta-copy">
+            <h3>Reports</h3>
+            <p>Keep only the working moderation flow: review reports and resolve them.</p>
+          </div>
+          <span class="admin-v4-badge">${rows.length} / ${reports.length} shown</span>
+        </div>
+        <div class="admin-v4-toolbar">
+          <input id="admin-v4-report-query" class="admin-v4-input" placeholder="Search by reporter, product, note, or category" value="${esc(state.reportQuery)}">
+          <select id="admin-v4-report-status" class="admin-v4-select">
+            <option value="all" ${state.reportStatus === 'all' ? 'selected' : ''}>All statuses</option>
+            <option value="open" ${state.reportStatus === 'open' ? 'selected' : ''}>Open</option>
+            <option value="resolved" ${state.reportStatus === 'resolved' ? 'selected' : ''}>Resolved</option>
+          </select>
+          <select id="admin-v4-report-target" class="admin-v4-select">
+            <option value="all" ${state.reportTarget === 'all' ? 'selected' : ''}>All targets</option>
+            <option value="product" ${state.reportTarget === 'product' ? 'selected' : ''}>Product</option>
+            <option value="user" ${state.reportTarget === 'user' ? 'selected' : ''}>User</option>
+            <option value="order" ${state.reportTarget === 'order' ? 'selected' : ''}>Order</option>
+          </select>
+          <button class="admin-v4-btn admin-v4-btn-primary" onclick="applyAdminPanelReportFiltersV4()">Apply</button>
+          <button class="admin-v4-btn admin-v4-btn-soft" onclick="resetAdminPanelReportFiltersV4()">Reset</button>
+        </div>
+        ${rows.length ? `
+          <div class="admin-v4-list custom-scrollbar mt-4">
+            ${rows.map(report => `
+              <div class="admin-v4-item">
+                <div class="admin-v4-item-top">
+                  <div>
+                    <div class="admin-v4-item-title">${esc(report.category || 'Report')}</div>
+                    <p class="admin-v4-small mt-1">Reporter: ${esc(report.reporterEmail || '-')} • Target: ${esc(report.reportTargetType || '-')}</p>
+                  </div>
+                  <div class="admin-v4-actions">
+                    <span class="admin-v4-badge ${report.status === 'resolved' ? 'success' : 'danger'}">${report.status === 'resolved' ? 'Resolved' : 'Open'}</span>
+                    ${report.status !== 'resolved' ? `<button class="admin-v4-btn admin-v4-btn-primary" onclick="resolveReportV2('${report.__firebaseId}')">Mark as Resolved</button>` : ''}
+                  </div>
+                </div>
+                <div class="admin-v4-badges">
+                  ${report.relatedProductName ? `<span class="admin-v4-badge">Product: ${esc(report.relatedProductName)}</span>` : ''}
+                  ${report.relatedUserEmail ? `<span class="admin-v4-badge">Related user: ${esc(report.relatedUserEmail)}</span>` : ''}
+                  <span class="admin-v4-badge">Created: ${esc(fmt(report.createdAt))}</span>
+                </div>
+                ${report.note ? `<p class="mt-3">${esc(report.note)}</p>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="admin-v4-empty mt-4">No reports match your current filters.</div>`}
+      </section>
+    `;
+  }
+
+  function buildUsersTab(users){
+    const rows = filteredUsers(users);
+    return `
+      <section class="admin-v4-card admin-v4-col-12">
+        <div class="admin-v4-meta">
+          <div class="admin-v4-meta-copy">
+            <h3>User Management</h3>
+            <p>Only working actions are shown here: suspend or reactivate non-admin accounts.</p>
+          </div>
+          <span class="admin-v4-badge">${rows.length} / ${users.length} shown</span>
+        </div>
+        <div class="admin-v4-toolbar" style="grid-template-columns:minmax(0,1.25fr) minmax(180px,.7fr) auto auto;">
+          <input id="admin-v4-user-query" class="admin-v4-input" placeholder="Search by name, email, matric number, or staff ID" value="${esc(state.userQuery)}">
+          <select id="admin-v4-user-status" class="admin-v4-select">
+            <option value="all" ${state.userStatus === 'all' ? 'selected' : ''}>All users</option>
+            <option value="active" ${state.userStatus === 'active' ? 'selected' : ''}>Active</option>
+            <option value="suspended" ${state.userStatus === 'suspended' ? 'selected' : ''}>Suspended</option>
+            <option value="verified" ${state.userStatus === 'verified' ? 'selected' : ''}>Verified</option>
+            <option value="admin" ${state.userStatus === 'admin' ? 'selected' : ''}>Admin</option>
+          </select>
+          <button class="admin-v4-btn admin-v4-btn-primary" onclick="applyAdminPanelUserFiltersV4()">Apply</button>
+          <button class="admin-v4-btn admin-v4-btn-soft" onclick="resetAdminPanelUserFiltersV4()">Reset</button>
+        </div>
+        ${rows.length ? `
+          <div class="admin-v4-list custom-scrollbar mt-4">
+            ${rows.map(user => `
+              <div class="admin-v4-item">
+                <div class="admin-v4-item-top">
+                  <div>
+                    <div class="admin-v4-item-title">${esc(user.name || '-')}</div>
+                    <p class="admin-v4-small mt-1">${esc(user.email || '-')}</p>
+                  </div>
+                  <div class="admin-v4-actions">
+                    ${isAdmin(user)
+                      ? `<span class="admin-v4-badge info">Admin</span>`
+                      : `<button class="admin-v4-btn ${user.isSuspended ? 'admin-v4-btn-primary' : 'admin-v4-btn-soft'}" onclick="toggleSuspendUserV2('${esc(user.email || '')}')">${user.isSuspended ? 'Reactivate' : 'Suspend'}</button>`
+                    }
+                  </div>
+                </div>
+                <div class="admin-v4-badges">
+                  <span class="admin-v4-badge">${esc(getUserType(user))}</span>
+                  <span class="admin-v4-badge ${user.isSuspended ? 'danger' : 'success'}">${user.isSuspended ? 'Suspended' : 'Active'}</span>
+                  ${isVerified(user) ? `<span class="admin-v4-badge success">Verified</span>` : `<span class="admin-v4-badge warn">Unverified</span>`}
+                  ${user.matricCardNumber ? `<span class="admin-v4-badge">Matric: ${esc(user.matricCardNumber)}</span>` : ''}
+                  ${user.staffId ? `<span class="admin-v4-badge">Staff ID: ${esc(user.staffId)}</span>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="admin-v4-empty mt-4">No users match your current filters.</div>`}
+      </section>
+    `;
+  }
+
+  function buildProductsTab(products){
+    const rows = filteredProducts(products);
+    return `
+      <section class="admin-v4-card admin-v4-col-12">
+        <div class="admin-v4-meta">
+          <div class="admin-v4-meta-copy">
+            <h3>Product Moderation</h3>
+            <p>Only the working delete moderation flow is kept here.</p>
+          </div>
+          <span class="admin-v4-badge">${rows.length} / ${products.length} shown</span>
+        </div>
+        <div class="admin-v4-toolbar" style="grid-template-columns:minmax(0,1.25fr) minmax(200px,.7fr) auto auto;">
+          <input id="admin-v4-product-query" class="admin-v4-input" placeholder="Search by product, category, seller, condition, or COD location" value="${esc(state.productQuery)}">
+          <select id="admin-v4-product-stock" class="admin-v4-select">
+            <option value="all" ${state.productStock === 'all' ? 'selected' : ''}>All stock states</option>
+            <option value="available" ${state.productStock === 'available' ? 'selected' : ''}>Available</option>
+            <option value="low" ${state.productStock === 'low' ? 'selected' : ''}>Low stock</option>
+            <option value="out" ${state.productStock === 'out' ? 'selected' : ''}>Out of stock / sold</option>
+          </select>
+          <button class="admin-v4-btn admin-v4-btn-primary" onclick="applyAdminPanelProductFiltersV4()">Apply</button>
+          <button class="admin-v4-btn admin-v4-btn-soft" onclick="resetAdminPanelProductFiltersV4()">Reset</button>
+        </div>
+        ${rows.length ? `
+          <div class="admin-v4-list custom-scrollbar mt-4">
+            ${rows.map(product => {
+              const stock = getProductStock(product);
+              const badge = getProductAvailability(product);
+              return `
+                <div class="admin-v4-item">
+                  <div class="admin-v4-item-top">
+                    <div>
+                      <div class="admin-v4-item-title">${esc(product.productName || '-')}</div>
+                      <p class="admin-v4-small mt-1">Seller: ${esc(product.sellerName || product.sellerId || '-')} • Category: ${esc(product.category || '-')}</p>
+                    </div>
+                    <div class="admin-v4-actions">
+                      <span class="admin-v4-badge ${badge.cls}">${badge.label}</span>
+                      <button class="admin-v4-btn admin-v4-btn-soft" onclick="deleteProductByAdminV2('${product.__firebaseId || getProductId(product)}')">Delete</button>
+                    </div>
+                  </div>
+                  <div class="admin-v4-badges">
+                    <span class="admin-v4-badge">Stock: ${stock}</span>
+                    ${product.condition ? `<span class="admin-v4-badge">Condition: ${esc(product.condition)}</span>` : ''}
+                    ${product.codLocation ? `<span class="admin-v4-badge">COD: ${esc(product.codLocation)}</span>` : ''}
+                    ${product.createdAt ? `<span class="admin-v4-badge">Posted: ${esc(fmt(product.createdAt))}</span>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : `<div class="admin-v4-empty mt-4">No products match your current filters.</div>`}
+      </section>
+    `;
+  }
+
+  function buildOrdersTab(offers){
+    const rows = filteredOrders(offers);
+    return `
+      <section class="admin-v4-card admin-v4-col-12">
+        <div class="admin-v4-meta">
+          <div class="admin-v4-meta-copy">
+            <h3>Order Monitoring</h3>
+            <p>This section is intentionally read-only so the panel stays stable and easy to use.</p>
+          </div>
+          <span class="admin-v4-badge">${rows.length} / ${offers.length} shown</span>
+        </div>
+        <div class="admin-v4-toolbar" style="grid-template-columns:minmax(0,1.25fr) minmax(200px,.7fr) auto auto;">
+          <input id="admin-v4-order-query" class="admin-v4-input" placeholder="Search by buyer, seller, item, or order ID" value="${esc(state.orderQuery)}">
+          <select id="admin-v4-order-status" class="admin-v4-select">
+            <option value="all" ${state.orderStatus === 'all' ? 'selected' : ''}>All statuses</option>
+            <option value="pending" ${state.orderStatus === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="accepted" ${state.orderStatus === 'accepted' ? 'selected' : ''}>Accepted</option>
+            <option value="rejected" ${state.orderStatus === 'rejected' ? 'selected' : ''}>Rejected</option>
+            <option value="cancelled" ${state.orderStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            <option value="completed" ${state.orderStatus === 'completed' ? 'selected' : ''}>Completed</option>
+          </select>
+          <button class="admin-v4-btn admin-v4-btn-primary" onclick="applyAdminPanelOrderFiltersV4()">Apply</button>
+          <button class="admin-v4-btn admin-v4-btn-soft" onclick="resetAdminPanelOrderFiltersV4()">Reset</button>
+        </div>
+        ${rows.length ? `
+          <div class="admin-v4-list custom-scrollbar mt-4">
+            ${rows.map(offer => `
+              <div class="admin-v4-item">
+                <div class="admin-v4-item-top">
+                  <div>
+                    <div class="admin-v4-item-title">${esc(offer.offerId || offer.buyerName || 'Order')}</div>
+                    <p class="admin-v4-small mt-1">Buyer: ${esc(offer.buyerName || offer.buyerEmail || '-')}</p>
+                  </div>
+                  <div class="admin-v4-actions">
+                    <span class="admin-v4-badge ${getOrderStatusBadge(offer.offerStatus)}">${getOrderStatusLabel(offer.offerStatus)}</span>
+                    <span class="admin-v4-badge">${money(getOrderTotal(offer))}</span>
+                  </div>
+                </div>
+                <p class="mt-3">${esc(getOrderItemSummary(offer))}</p>
+                <div class="admin-v4-badges">
+                  <span class="admin-v4-badge">Seller: ${esc(getOrderSellerSummary(offer))}</span>
+                  <span class="admin-v4-badge">Created: ${esc(fmt(offer.createdAt))}</span>
+                  ${offer.acceptedAt ? `<span class="admin-v4-badge">Accepted: ${esc(fmt(offer.acceptedAt))}</span>` : ''}
+                  ${offer.completedAt ? `<span class="admin-v4-badge success">Completed: ${esc(fmt(offer.completedAt))}</span>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="admin-v4-empty mt-4">No orders match your current filters.</div>`}
+      </section>
+    `;
+  }
+
+  function buildActivityTab(logs){
+    const rows = filteredLogs(logs);
+    return `
+      <section class="admin-v4-card admin-v4-col-12">
+        <div class="admin-v4-meta">
+          <div class="admin-v4-meta-copy">
+            <h3>Admin Activity</h3>
+            <p>Only action history is shown here. Extra shortcuts and unstable widgets were removed.</p>
+          </div>
+          <span class="admin-v4-badge">${rows.length} / ${logs.length} shown</span>
+        </div>
+        <div class="admin-v4-toolbar" style="grid-template-columns:minmax(0,1.2fr) auto auto;">
+          <input id="admin-v4-log-query" class="admin-v4-input" placeholder="Search by action, target, details, or admin email" value="${esc(state.logQuery)}">
+          <button class="admin-v4-btn admin-v4-btn-primary" onclick="applyAdminPanelLogFiltersV4()">Apply</button>
+          <button class="admin-v4-btn admin-v4-btn-soft" onclick="resetAdminPanelLogFiltersV4()">Reset</button>
+        </div>
+        ${rows.length ? `
+          <div class="admin-v4-list custom-scrollbar mt-4">
+            ${rows.map(log => `
+              <div class="admin-v4-item">
+                <div class="admin-v4-item-top">
+                  <div>
+                    <div class="admin-v4-item-title">${esc(log.action || 'Admin action')}</div>
+                    <p class="admin-v4-small mt-1">Target: ${esc(log.targetType || 'system')} • ${esc(log.targetValue || '-')}</p>
+                  </div>
+                  <span class="admin-v4-badge">${esc(fmt(log.createdAt))}</span>
+                </div>
+                ${log.details ? `<p class="mt-3">${esc(log.details)}</p>` : ''}
+                <p class="admin-v4-small mt-3">Performed by: ${esc(log.adminEmail || log.adminName || 'admin')}</p>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="admin-v4-empty mt-4">No activity matches your current filters.</div>`}
+      </section>
+    `;
+  }
+
+  function buildBody(){
+    const users = getUsers();
+    const products = getProducts();
+    const offers = getOffers();
+    const reports = getReports();
+    const logs = readLogs();
+    let section = '';
+    if (state.tab === 'overview') section = buildOverview(users, products, offers, reports, logs);
+    if (state.tab === 'reports') section = buildReportsTab(reports);
+    if (state.tab === 'users') section = buildUsersTab(users);
+    if (state.tab === 'products') section = buildProductsTab(products);
+    if (state.tab === 'orders') section = buildOrdersTab(offers);
+    if (state.tab === 'activity') section = buildActivityTab(logs);
+    return `<div class="admin-v4-shell custom-scrollbar">${buildHeader()}${section}</div>`;
+  }
+
+  function renderBody(){
+    const body = document.querySelector('#modal-container .modal-content .modal-body');
+    if (body) body.innerHTML = buildBody();
+  }
+
+  window.switchAdminPanelTabV4 = function(tab){
+    state.tab = tab || 'overview';
+    renderBody();
+  };
+
+  window.applyAdminPanelReportFiltersV4 = function(){
+    state.reportQuery = document.getElementById('admin-v4-report-query')?.value || '';
+    state.reportStatus = document.getElementById('admin-v4-report-status')?.value || 'all';
+    state.reportTarget = document.getElementById('admin-v4-report-target')?.value || 'all';
+    renderBody();
+  };
+  window.resetAdminPanelReportFiltersV4 = function(){
+    state.reportQuery = ''; state.reportStatus = 'all'; state.reportTarget = 'all'; renderBody();
+  };
+
+  window.applyAdminPanelUserFiltersV4 = function(){
+    state.userQuery = document.getElementById('admin-v4-user-query')?.value || '';
+    state.userStatus = document.getElementById('admin-v4-user-status')?.value || 'all';
+    renderBody();
+  };
+  window.resetAdminPanelUserFiltersV4 = function(){
+    state.userQuery = ''; state.userStatus = 'all'; renderBody();
+  };
+
+  window.applyAdminPanelProductFiltersV4 = function(){
+    state.productQuery = document.getElementById('admin-v4-product-query')?.value || '';
+    state.productStock = document.getElementById('admin-v4-product-stock')?.value || 'all';
+    renderBody();
+  };
+  window.resetAdminPanelProductFiltersV4 = function(){
+    state.productQuery = ''; state.productStock = 'all'; renderBody();
+  };
+
+  window.applyAdminPanelOrderFiltersV4 = function(){
+    state.orderQuery = document.getElementById('admin-v4-order-query')?.value || '';
+    state.orderStatus = document.getElementById('admin-v4-order-status')?.value || 'all';
+    renderBody();
+  };
+  window.resetAdminPanelOrderFiltersV4 = function(){
+    state.orderQuery = ''; state.orderStatus = 'all'; renderBody();
+  };
+
+  window.applyAdminPanelLogFiltersV4 = function(){
+    state.logQuery = document.getElementById('admin-v4-log-query')?.value || '';
+    renderBody();
+  };
+  window.resetAdminPanelLogFiltersV4 = function(){
+    state.logQuery = ''; renderBody();
+  };
+
+  function currentUserIsAdmin(){
+    const adminCheck = window.isAdminUserV2 || window.isAdminUser;
+    return !!(window.currentUser && typeof adminCheck === 'function' && adminCheck(window.currentUser));
+  }
+
+  const previousOpenAdminMonitor = window.openAdminMonitor;
+  window.openAdminMonitor = function(){
+    if (!currentUserIsAdmin()) {
+      if (typeof window.showToast === 'function') window.showToast('Admin panel access is for administrators only.', 'warning');
+      return;
+    }
+    if (typeof window.showModal === 'function') {
+      window.showModal('Admin Control Center', buildBody(), { modalClass:'modal-fullscreen', bodyClass:'custom-scrollbar' });
+    } else if (typeof previousOpenAdminMonitor === 'function') {
+      return previousOpenAdminMonitor.apply(this, arguments);
+    }
+  };
+
+  function rerenderIfOpen(){
+    const titleEl = document.querySelector('#modal-container .modal-content .modal-header h2');
+    if (titleEl && /Admin Control Center/i.test(titleEl.textContent || '')) renderBody();
+  }
+
+  const prevResolve = window.resolveReportV2;
+  if (typeof prevResolve === 'function') {
+    window.resolveReportV2 = async function(){
+      const result = await prevResolve.apply(this, arguments);
+      rerenderIfOpen();
+      return result;
+    };
+  }
+  const prevSuspend = window.toggleSuspendUserV2;
+  if (typeof prevSuspend === 'function') {
+    window.toggleSuspendUserV2 = async function(){
+      const result = await prevSuspend.apply(this, arguments);
+      rerenderIfOpen();
+      return result;
+    };
+  }
+  const prevDelete = window.deleteProductByAdminV2;
+  if (typeof prevDelete === 'function') {
+    window.deleteProductByAdminV2 = async function(){
+      const result = await prevDelete.apply(this, arguments);
+      rerenderIfOpen();
+      return result;
+    };
+  }
+})();
+</script>
+
+<style>
+  .sop-chat-search{padding:12px 14px 0}
+  .sop-chat-search input{width:100%;border:1px solid rgba(148,163,184,.18);background:rgba(248,250,252,.95);padding:11px 14px;border-radius:16px}
+  .dark .sop-chat-search input{background:rgba(15,23,42,.75);color:#fff}
+  .sop-chat-search input:focus{outline:none;box-shadow:0 0 0 2px rgba(249,115,22,.25)}
+  .sop-last-active{font-size:12px;color:#64748b}
+  .dark .sop-last-active{color:#cbd5e1}
+  .sop-pinned-summary{margin:0 12px 12px;padding:12px 14px;border-radius:18px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.18)}
+  .dark .sop-pinned-summary{background:rgba(249,115,22,.12)}
+  .sop-pinned-summary h4{font-size:13px;font-weight:700;margin-bottom:6px}
+  .sop-pinned-summary p{font-size:12px;line-height:1.45;color:#475569}
+  .dark .sop-pinned-summary p{color:#e2e8f0}
+  .sop-verif-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+  .sop-verif-grid > *{grid-column:span 12}
+  @media(min-width:1024px){.sop-verif-grid .span-4{grid-column:span 4}.sop-verif-grid .span-6{grid-column:span 6}}
+</style>
+
+<script>
+(function(){
+  const UPGRADE = { adminTab:'overview', userFilter:'all', userQuery:'', verifyFilter:'pending_review', verifyQuery:'', chatQuery:'' };
+  const ADMIN_MODAL_TITLE = 'Admin Operations Hub';
+  const ADMIN_EMAIL = 'admin@polinilai.edu.my';
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function norm(v){ return String(v == null ? '' : v).trim().toLowerCase(); }
+  function includes(v,q){ return norm(v).includes(norm(q)); }
+  function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+  function money(v){ try { return new Intl.NumberFormat('en-MY',{style:'currency',currency:'MYR'}).format(num(v)); } catch(e){ return 'RM ' + num(v).toFixed(2); } }
+  function fmt(v){ if(!v) return '-'; try { return new Date(v).toLocaleString('en-MY',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch(e){ return String(v); } }
+  function shortDate(v){ if(!v) return '-'; try { return new Date(v).toLocaleDateString('en-MY',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return String(v); } }
+  function getAllData(){ return Array.isArray(window.allData) ? window.allData : []; }
+  function getUsersSafe(){ return typeof window.getUsers === 'function' ? window.getUsers() : getAllData().filter(x => x && (x.__collection === 'users' || x.type === 'user')); }
+  function getMessagesSafe(){ return typeof window.getMessages === 'function' ? window.getMessages() : getAllData().filter(x => x && (x.__collection === 'messages' || x.type === 'message')); }
+  function getProductsSafe(){ return typeof window.getProducts === 'function' ? window.getProducts() : getAllData().filter(x => x && (x.__collection === 'products' || x.type === 'product')); }
+  function getOffersSafe(){ return typeof window.getOffers === 'function' ? window.getOffers() : getAllData().filter(x => x && (x.__collection === 'offers' || x.type === 'offer')); }
+  function getReportsSafe(){ return getAllData().filter(x => x && (x.__collection === 'reports' || x.type === 'report')); }
+  function getLogsSafe(){
+    const remote = getAllData().filter(x => x && (x.__collection === 'admin_logs' || x.type === 'admin_log'));
+    let local = [];
+    try { local = JSON.parse(localStorage.getItem('sop_admin_logs_local_upgrade') || '[]'); } catch(e){}
+    const merged = [...remote];
+    local.forEach(entry => {
+      if (!merged.some(item => (item.__firebaseId && item.__firebaseId === entry.__firebaseId) || (item.createdAt === entry.createdAt && item.action === entry.action && item.targetValue === entry.targetValue))) {
+        merged.push(entry);
+      }
+    });
+    return merged.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+  function isAdminEmail(email){
+    const fn = window.isAdminUserV2 || window.isAdminUser;
+    if (typeof fn === 'function') { try { return !!fn(email); } catch(e){} }
+    return norm(email) === ADMIN_EMAIL;
+  }
+  function isAdminUser(user){ return !!user && isAdminEmail(user.email || user); }
+  function getUserType(user){
+    const explicit = String(user?.userType || user?.roleLabel || user?.accountType || '').trim();
+    if (explicit) return explicit.charAt(0).toUpperCase() + explicit.slice(1);
+    if (user?.matricCardNumber) return 'Student';
+    if (user?.staffId) return 'Staff';
+    return isAdminUser(user) ? 'Admin' : 'User';
+  }
+  function getUserByEmail(email){ return getUsersSafe().find(u => norm(u.email) === norm(email)); }
+  function getVerificationStatus(user){
+    const raw = norm(user?.verificationStatus);
+    if (isAdminUser(user)) return 'verified_admin';
+    if (raw) return raw;
+    return 'unverified';
+  }
+  function verificationLabel(status, user){
+    const type = norm(user?.userType || getUserType(user));
+    if (status === 'verified_student') return 'Verified Student';
+    if (status === 'verified_lecturer') return 'Verified Lecturer';
+    if (status === 'verified_staff') return 'Verified Staff';
+    if (status === 'verified_admin') return 'Admin';
+    if (status === 'pending_review' || status === 'pending') return 'Pending Review';
+    if (status === 'rejected') return 'Rejected';
+    if (type === 'student') return 'Student';
+    if (type === 'lecturer') return 'Lecturer';
+    if (type === 'staff') return 'Staff';
+    return 'Unverified';
+  }
+  function verificationBadgeClass(status){
+    if (/^verified_/.test(status)) return 'success';
+    if (status === 'pending_review' || status === 'pending') return 'warn';
+    if (status === 'rejected') return 'danger';
+    return '';
+  }
+  function verificationIcon(status){
+    if (status === 'verified_student') return 'fa-user-graduate';
+    if (status === 'verified_lecturer' || status === 'verified_staff') return 'fa-id-badge';
+    if (status === 'pending_review' || status === 'pending') return 'fa-hourglass-half';
+    if (status === 'rejected') return 'fa-circle-xmark';
+    return 'fa-user-check';
+  }
+  function verifiedStatusFromUser(user){
+    const type = norm(user?.userType || getUserType(user));
+    if (type === 'student') return 'verified_student';
+    if (type === 'lecturer') return 'verified_lecturer';
+    return 'verified_staff';
+  }
+  function isVerified(user){ return /^verified_/.test(getVerificationStatus(user)); }
+  function getVerificationBadgeHtml(userOrEmail){
+    const user = typeof userOrEmail === 'string' ? getUserByEmail(userOrEmail) : userOrEmail;
+    if (!user) return '';
+    const status = getVerificationStatus(user);
+    if (!/^verified_/.test(status)) return '';
+    return `<span class="admin-v4-badge success"><i class="fas ${verificationIcon(status)} mr-1"></i>${verificationLabel(status, user)}</span>`;
+  }
+  function initials(name){ return String(name || '?').split(/\s+/).filter(Boolean).slice(0,2).map(s => s[0]?.toUpperCase() || '').join('') || '?'; }
+  function avatarHtml(user){
+    if (typeof window.getUserAvatarHtml === 'function') {
+      try { return window.getUserAvatarHtml(user, { sizeClass:'w-12 h-12', textClass:'text-sm' }); } catch(e){}
+    }
+    return `<div class="w-12 h-12 rounded-full bg-accent-orange text-white flex items-center justify-center font-semibold">${esc(initials(user?.name || user?.email || '?'))}</div>`;
+  }
+  function getProductStock(product){
+    const fn = window.getProductStockV2 || window.getProductStock;
+    if (typeof fn === 'function') { try { return Number(fn(product) || 0); } catch(e){} }
+    return Number(product?.stockQuantity ?? product?.quantity ?? product?.stock ?? 0);
+  }
+  function availability(product){
+    const stock = getProductStock(product);
+    if (product?.isSold || norm(product?.availabilityStatus || product?.status) === 'sold') return { label:'Sold', cls:'danger' };
+    if (stock <= 0) return { label:'Out of Stock', cls:'danger' };
+    if (stock <= 3) return { label:'Low Stock', cls:'warn' };
+    return { label:'Available', cls:'success' };
+  }
+  function conversationPreview(message){
+    if (!message) return 'No messages yet';
+    if (message.imageUrl || message.image_url) return 'Image message';
+    if (message.systemType || norm(message.messageType) === 'system') return String(message.message || message.text || 'System update');
+    return String(message.message || message.text || '').slice(0, 72) || 'Message';
+  }
+  function ensureChatSearch(){
+    const listBox = document.getElementById('chat-list-box');
+    if (!listBox) return;
+    if (!document.getElementById('sop-chat-search-box')) {
+      const box = document.createElement('div');
+      box.id = 'sop-chat-search-box';
+      box.className = 'sop-chat-search';
+      box.innerHTML = '<input id="sop-chat-search-input" type="text" placeholder="Search conversations">';
+      listBox.insertBefore(box, listBox.children[1] || null);
+      box.querySelector('input').addEventListener('input', e => {
+        UPGRADE.chatQuery = e.target.value || '';
+        if (typeof window.renderChatList === 'function') window.renderChatList();
+      });
+    }
+    const input = document.getElementById('sop-chat-search-input');
+    if (input && input.value !== UPGRADE.chatQuery) input.value = UPGRADE.chatQuery;
+  }
+  const prevRenderChatList = window.renderChatList;
+  window.renderChatList = function(){
+    ensureChatSearch();
+    const container = document.getElementById('chat-list');
+    if (!container) return prevRenderChatList ? prevRenderChatList.apply(this, arguments) : undefined;
+    const currentUser = window.currentUser;
+    if (!currentUser) {
+      container.innerHTML = '<div class="p-5 text-center text-navy-500"><i class="fas fa-lock text-2xl mb-2"></i><p>Please log in to view messages</p></div>';
+      return;
+    }
+    const messages = getMessagesSafe();
+    const users = getUsersSafe();
+    const partnerEmails = new Set();
+    messages.forEach(message => {
+      if (norm(message.messageFrom) === norm(currentUser.email) && message.messageTo) partnerEmails.add(message.messageTo);
+      if (norm(message.messageTo) === norm(currentUser.email) && message.messageFrom) partnerEmails.add(message.messageFrom);
+    });
+    let conversations = Array.from(partnerEmails).map(email => {
+      const user = users.find(item => norm(item.email) === norm(email)) || { email, name: String(email).split('@')[0] };
+      const convoMessages = messages.filter(message =>
+        (norm(message.messageFrom) === norm(currentUser.email) && norm(message.messageTo) === norm(email)) ||
+        (norm(message.messageFrom) === norm(email) && norm(message.messageTo) === norm(currentUser.email))
+      ).sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      const lastMsg = convoMessages[0] || null;
+      const unreadCount = convoMessages.filter(message => norm(message.messageFrom) === norm(email) && !message.isRead).length;
+      return { email, user, name:user.name || String(email).split('@')[0], lastMsg, unreadCount, preview:conversationPreview(lastMsg) };
+    }).sort((a,b) => {
+      const aUnread = a.unreadCount > 0 ? 1 : 0;
+      const bUnread = b.unreadCount > 0 ? 1 : 0;
+      if (aUnread !== bUnread) return bUnread - aUnread;
+      return new Date(b.lastMsg?.createdAt || 0) - new Date(a.lastMsg?.createdAt || 0);
+    });
+    if (UPGRADE.chatQuery) conversations = conversations.filter(item => [item.name, item.email, item.preview].some(v => includes(v, UPGRADE.chatQuery)));
+    if (!conversations.length) {
+      container.innerHTML = '<div class="px-4 py-8 text-center text-navy-500"><div class="w-16 h-16 mx-auto mb-3 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center text-accent-orange"><i class="fas fa-comments text-xl"></i></div><p class="text-sm font-medium">No conversations found</p><p class="text-xs mt-1 text-navy-400">Start with a product chat or message admin.</p></div>';
+      return;
+    }
+    container.innerHTML = conversations.map(({ email, user, name, lastMsg, unreadCount, preview }) => `
+      <button type="button" onclick="openChat('${esc(email)}')" class="conversation-item ${window.currentChatWith === email ? 'active-chat-item' : ''} w-full text-left rounded-2xl px-3 py-3 mb-2 border ${(window.currentChatWith === email) ? 'border-accent-orange bg-orange-50 dark:bg-navy-700/70 shadow-md' : 'border-navy-100 dark:border-navy-700 bg-white/70 dark:bg-navy-800/60 hover:bg-navy-50 dark:hover:bg-navy-700/60'}">
+        <div class="flex items-center gap-3">
+          <div role="button" tabindex="0" onclick="event.stopPropagation(); showUserProfileModal('${esc(email)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); event.stopPropagation(); showUserProfileModal('${esc(email)}');}" class="flex-shrink-0 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-orange/40">${avatarHtml(user)}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="font-semibold text-sm md:text-base truncate">${esc(name)}</div>
+                <div class="flex flex-wrap gap-2 mt-1">${getVerificationBadgeHtml(user)}</div>
+                <p class="text-xs md:text-sm text-navy-500 dark:text-navy-400 truncate mt-1">${esc(preview)}</p>
+              </div>
+              <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                ${lastMsg?.createdAt ? `<span class="text-[11px] md:text-xs text-navy-400 whitespace-nowrap">${esc(shortDate(lastMsg.createdAt))}</span>` : ''}
+                ${unreadCount > 0 ? `<span class="min-w-[22px] h-[22px] px-1 rounded-full bg-accent-orange text-white text-[11px] font-semibold inline-flex items-center justify-center">${unreadCount > 9 ? '9+' : unreadCount}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>`).join('');
+  };
+
+  function latestActivityFor(email){
+    const messages = getMessagesSafe().filter(m => norm(m.messageFrom) === norm(email) || norm(m.messageTo) === norm(email)).sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return messages[0]?.createdAt || '';
+  }
+  function relatedOfferFor(email){
+    const user = window.currentUser;
+    if (!user) return null;
+    const offers = getOffersSafe().filter(offer => {
+      const buyerMatch = norm(offer.buyerEmail) === norm(user.email) || norm(offer.createdBy) === norm(user.email);
+      const sellerMatch = (offer.items || []).some(item => norm(item.sellerId) === norm(email) || norm(item.sellerEmail) === norm(email));
+      const inverseBuyer = norm(offer.buyerEmail) === norm(email);
+      const inverseSeller = (offer.items || []).some(item => norm(item.sellerId) === norm(user.email) || norm(item.sellerEmail) === norm(user.email));
+      return (buyerMatch && sellerMatch) || (inverseBuyer && inverseSeller);
+    }).sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return offers[0] || null;
+  }
+  function injectPinnedSummary(email){
+    const messagesBox = document.getElementById('chat-messages');
+    if (!messagesBox) return;
+    document.getElementById('sop-pinned-chat-summary')?.remove();
+    const offer = relatedOfferFor(email);
+    if (!offer) return;
+    const summary = document.createElement('div');
+    summary.id = 'sop-pinned-chat-summary';
+    const itemSummary = (offer.items || []).map(item => `${item.productName || 'Item'} × ${num(item.quantity || 1)}`).join(', ') || 'No item details';
+    summary.className = 'sop-pinned-summary';
+    summary.innerHTML = `<h4><i class="fas fa-thumbtack mr-2"></i>Order Summary</h4><p><strong>Status:</strong> ${esc(String(offer.offerStatus || 'pending').replace(/_/g,' '))}<br><strong>Items:</strong> ${esc(itemSummary)}<br><strong>Total:</strong> ${esc(money((offer.items || []).reduce((sum,item) => sum + num(item.originalPrice || item.price) * num(item.quantity || 1),0)))}<br><strong>Created:</strong> ${esc(fmt(offer.createdAt))}</p>`;
+    messagesBox.insertAdjacentElement('afterbegin', summary);
+  }
+  const prevOpenChat = window.openChat;
+  window.openChat = function(email){
+    const result = prevOpenChat ? prevOpenChat.apply(this, arguments) : undefined;
+    setTimeout(() => {
+      ensureChatSearch();
+      const user = getUserByEmail(email) || { email, name: String(email).split('@')[0] };
+      const header = document.getElementById('chat-header');
+      if (header) {
+        const activeText = latestActivityFor(email) ? `Last active ${shortDate(latestActivityFor(email))}` : 'Conversation ready';
+        header.innerHTML = `
+          <div class="flex items-center justify-between gap-3 w-full">
+            <div class="flex items-center gap-3 min-w-0">
+              ${window.innerWidth < 768 ? `<button type="button" onclick="showChatListMobile()" class="w-9 h-9 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center flex-shrink-0"><i class="fas fa-arrow-left text-sm"></i></button>` : ''}
+              <button type="button" onclick="showUserProfileModal('${esc(email)}')" class="flex-shrink-0 rounded-full">${avatarHtml(user)}</button>
+              <div class="min-w-0">
+                <button type="button" onclick="showUserProfileModal('${esc(email)}')" class="font-semibold hover:text-accent-orange transition-colors text-left truncate block max-w-full">${esc(user.name || String(email).split('@')[0])}</button>
+                <div class="flex flex-wrap gap-2 mt-1">${getVerificationBadgeHtml(user)}</div>
+                <div class="sop-last-active mt-1">${esc(activeText)}</div>
+              </div>
+            </div>
+            <button type="button" onclick="showUserProfileModal('${esc(email)}')" class="hidden md:inline-flex px-3 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 text-sm font-medium transition-colors"><i class="fas fa-user mr-2 text-accent-orange"></i>Profile</button>
+          </div>`;
+      }
+      injectPinnedSummary(email);
+    }, 120);
+    return result;
+  };
+  const prevRenderChatMessages = window.renderChatMessages;
+  if (typeof prevRenderChatMessages === 'function') {
+    window.renderChatMessages = function(){
+      const result = prevRenderChatMessages.apply(this, arguments);
+      setTimeout(() => { if (window.currentChatWith) injectPinnedSummary(window.currentChatWith); }, 60);
+      return result;
+    };
+  }
+
+  function ensureRoleFields(){
+    const form = document.getElementById('register-form');
+    if (!form) return null;
+    if (!document.getElementById('reg-user-type')) {
+      const emailBlock = document.getElementById('reg-email')?.closest('div');
+      const matricBlock = document.getElementById('reg-matric')?.closest('div');
+      if (emailBlock) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = '<label class="block text-sm font-medium mb-2" for="reg-user-type">User Type</label><select id="reg-user-type" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange"><option value="student">Student</option><option value="lecturer">Lecturer</option><option value="staff">Staff</option></select>';
+        emailBlock.parentElement.insertBefore(wrapper, emailBlock);
+      }
+      if (matricBlock && !document.getElementById('reg-staff-id-wrap')) {
+        const staffWrap = document.createElement('div');
+        staffWrap.id = 'reg-staff-id-wrap';
+        staffWrap.className = 'hidden';
+        staffWrap.innerHTML = '<label class="block text-sm font-medium mb-2" for="reg-staff-id">Staff ID</label><input type="text" id="reg-staff-id" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange uppercase" placeholder="Example: STAF1024" /><p class="text-xs text-navy-500 dark:text-navy-300 mt-2">Required for lecturer and staff verification review.</p>';
+        matricBlock.insertAdjacentElement('afterend', staffWrap);
+      }
+    }
+    const typeEl = document.getElementById('reg-user-type');
+    const matricWrap = document.getElementById('reg-matric')?.closest('div');
+    const matricInput = document.getElementById('reg-matric');
+    const staffWrap = document.getElementById('reg-staff-id-wrap');
+    const staffInput = document.getElementById('reg-staff-id');
+    const sync = () => {
+      const type = norm(typeEl?.value || 'student');
+      if (type === 'student') {
+        matricWrap?.classList.remove('hidden');
+        staffWrap?.classList.add('hidden');
+        if (matricInput) matricInput.required = true;
+        if (staffInput) staffInput.required = false;
+      } else {
+        matricWrap?.classList.add('hidden');
+        staffWrap?.classList.remove('hidden');
+        if (matricInput) matricInput.required = false;
+        if (staffInput) staffInput.required = true;
+      }
+    };
+    if (typeEl && !typeEl.dataset.upgradeBound) {
+      typeEl.dataset.upgradeBound = 'true';
+      typeEl.addEventListener('change', sync);
+    }
+    sync();
+    return form;
+  }
+  function upsertLocalUser(payload, id){
+    const all = getAllData();
+    const idx = all.findIndex(item => item && (item.__firebaseId === id || norm(item.email) === norm(payload.email)) && (item.__collection === 'users' || item.type === 'user'));
+    const merged = { ...payload, __firebaseId:id || payload.__firebaseId || payload.id, id:id || payload.id, __collection:'users' };
+    if (idx >= 0) all[idx] = { ...all[idx], ...merged };
+    else all.push(merged);
+  }
+  function bindStrictRegister(){
+    const form = ensureRoleFields();
+    if (!form || form.dataset.upgradeStrictBound === 'true') return;
+    const clone = form.cloneNode(true);
+    form.replaceWith(clone);
+    clone.dataset.upgradeStrictBound = 'true';
+    setTimeout(ensureRoleFields, 0);
+    clone.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = String(document.getElementById('reg-name')?.value || '').trim();
+      const email = norm(document.getElementById('reg-email')?.value || '');
+      const password = String(document.getElementById('reg-password')?.value || '');
+      const userType = norm(document.getElementById('reg-user-type')?.value || 'student');
+      const matricCardNumber = String(document.getElementById('reg-matric')?.value || '').trim().toUpperCase();
+      const staffId = String(document.getElementById('reg-staff-id')?.value || '').trim().toUpperCase();
+      if (!name) return window.showToast?.('Please enter your full name.', 'warning');
+      const emailOk = (typeof window.isPoliEmail === 'function') ? window.isPoliEmail(email) : email.endsWith('@polinilai.edu.my');
+      if (!emailOk) return window.showToast?.('Registration is only allowed with an official @polinilai.edu.my email address.', 'warning');
+      if (password.length < 6) return window.showToast?.('Password must be at least 6 characters.', 'warning');
+      if (userType === 'student' && !matricCardNumber) return window.showToast?.('Students must enter a matric card number.', 'warning');
+      if ((userType === 'lecturer' || userType === 'staff') && !staffId) return window.showToast?.('Lecturer and staff users must enter a staff ID.', 'warning');
+      const existing = getUsersSafe().find(user => norm(user.email) === email);
+      if (existing) return window.showToast?.('Email is already registered.', 'error');
+      if (!window.firebaseReady) return window.showToast?.('Firebase is not ready. Please check the configuration.', 'error');
+      const verificationStatus = isAdminEmail(email) ? 'verified_admin' : 'pending_review';
+      const payload = { type:'user', __collection:'users', role:isAdminEmail(email) ? 'admin' : 'user', name, email, password, userType, matricCardNumber, staffId, verificationStatus, verificationSubmittedAt:new Date().toISOString(), verificationUpdatedAt:new Date().toISOString(), createdAt:new Date().toISOString() };
+      try {
+        const userId = await saveToFirebase('users', payload);
+        upsertLocalUser(payload, userId);
+        window.showToast?.('Registration submitted. Your account is waiting for admin verification.', 'success');
+        if (typeof window.navigateTo === 'function') window.navigateTo('login');
+      } catch (error) {
+        window.showToast?.('Registration error: ' + error.message, 'error');
+      }
+    });
+  }
+
+  async function logAdminAction(action, targetType, targetValue, details){
+    const payload = { action, targetType, targetValue, details, adminEmail: window.currentUser?.email || ADMIN_EMAIL, adminName: window.currentUser?.name || 'Admin', createdAt: new Date().toISOString(), type:'admin_log', __collection:'admin_logs' };
+    try {
+      if (typeof saveToFirebase === 'function' && window.firebaseReady) {
+        const id = await saveToFirebase('admin_logs', payload);
+        getAllData().push({ ...payload, __firebaseId:id, id });
+      } else {
+        throw new Error('offline log');
+      }
+    } catch(e) {
+      let local = [];
+      try { local = JSON.parse(localStorage.getItem('sop_admin_logs_local_upgrade') || '[]'); } catch(err){}
+      local.unshift(payload);
+      local = local.slice(0, 200);
+      localStorage.setItem('sop_admin_logs_local_upgrade', JSON.stringify(local));
+    }
+  }
+  async function updateUserVerification(email, status, note){
+    const user = getUserByEmail(email);
+    if (!user) return window.showToast?.('User not found.', 'error');
+    const id = user.__firebaseId || user.id;
+    if (!id) return window.showToast?.('User record is missing an ID.', 'error');
+    const payload = { verificationStatus:status, verificationUpdatedAt:new Date().toISOString(), verificationNote:note || '' };
+    await updateInFirebase('users', id, payload);
+    Object.assign(user, payload);
+    if (window.currentUser && norm(window.currentUser.email) === norm(email)) Object.assign(window.currentUser, payload);
+    await logAdminAction(status === 'rejected' ? 'Reject verification' : 'Approve verification', 'user', email, note || verificationLabel(status, user));
+    window.showToast?.(status === 'rejected' ? 'Verification rejected.' : 'Verification approved.', 'success');
+    rerenderAdminIfOpen();
+    if (typeof window.renderChatList === 'function') window.renderChatList();
+  }
+
+  function adminRows(){
+    const users = getUsersSafe();
+    const products = getProductsSafe();
+    const offers = getOffersSafe();
+    const reports = getReportsSafe();
+    const logs = getLogsSafe();
+    return { users, products, offers, reports, logs };
+  }
+  function filteredVerification(users){
+    return users.filter(user => {
+      const status = getVerificationStatus(user);
+      const filterMatch = UPGRADE.verifyFilter === 'all' || status === UPGRADE.verifyFilter;
+      const queryMatch = !UPGRADE.verifyQuery || [user.name, user.email, user.matricCardNumber, user.staffId, getUserType(user), status].some(v => includes(v, UPGRADE.verifyQuery));
+      return !isAdminUser(user) && filterMatch && queryMatch;
+    }).sort((a,b) => new Date(b.verificationSubmittedAt || b.createdAt || 0) - new Date(a.verificationSubmittedAt || a.createdAt || 0));
+  }
+  function filteredUsers(users){
+    return users.filter(user => {
+      const queryMatch = !UPGRADE.userQuery || [user.name, user.email, user.matricCardNumber, user.staffId, getUserType(user), getVerificationStatus(user)].some(v => includes(v, UPGRADE.userQuery));
+      const status = getVerificationStatus(user);
+      let typeMatch = true;
+      if (UPGRADE.userFilter === 'verified') typeMatch = /^verified_/.test(status);
+      if (UPGRADE.userFilter === 'pending') typeMatch = status === 'pending_review' || status === 'pending';
+      if (UPGRADE.userFilter === 'rejected') typeMatch = status === 'rejected';
+      if (UPGRADE.userFilter === 'suspended') typeMatch = !!user.isSuspended;
+      if (UPGRADE.userFilter === 'student') typeMatch = norm(getUserType(user)) === 'student';
+      if (UPGRADE.userFilter === 'lecturer') typeMatch = norm(getUserType(user)) === 'lecturer';
+      if (UPGRADE.userFilter === 'staff') typeMatch = norm(getUserType(user)) === 'staff';
+      return queryMatch && typeMatch;
+    }).sort((a,b) => String(a.name || '').localeCompare(String(b.name || ''), 'en'));
+  }
+  function orderTotal(offer){ return (offer?.items || []).reduce((sum,item) => sum + num(item.originalPrice || item.price) * num(item.quantity || 1), 0); }
+  function orderItems(offer){ return (offer?.items || []).map(item => `${item.productName || 'Item'} × ${num(item.quantity || 1)}`).join(', ') || 'No item details'; }
+  function orderSellers(offer){ return [...new Set((offer?.items || []).map(item => item.sellerName || item.sellerId || item.sellerEmail).filter(Boolean))].join(', ') || '-'; }
+  function orderStatusLabel(status){ return ({pending:'Pending',accepted:'Accepted',rejected:'Rejected',cancelled:'Cancelled',completed:'Completed'})[status] || 'Unknown'; }
+  function orderStatusBadge(status){ if (status === 'completed') return 'success'; if (status === 'accepted') return 'info'; if (status === 'pending') return 'warn'; if (status === 'rejected' || status === 'cancelled') return 'danger'; return ''; }
+  function modalOpen(){ return Array.from(document.querySelectorAll('#modal-container .modal-header h2')).some(el => (el.textContent || '').trim() === ADMIN_MODAL_TITLE); }
+  function rerenderAdminIfOpen(){ if (modalOpen()) renderAdminPanel(); }
+
+  function buildAdminBody(){
+    const { users, products, offers, reports, logs } = adminRows();
+    const pendingVerifications = users.filter(user => getVerificationStatus(user) === 'pending_review' || getVerificationStatus(user) === 'pending').length;
+    const rejectedVerifications = users.filter(user => getVerificationStatus(user) === 'rejected').length;
+    const verifiedUsers = users.filter(isVerified).length;
+    const suspendedUsers = users.filter(user => user.isSuspended).length;
+    const openReports = reports.filter(report => norm(report.status) !== 'resolved').length;
+    const pendingOrders = offers.filter(offer => norm(offer.offerStatus) === 'pending').length;
+    const tabs = [ ['overview','Overview','fa-chart-pie'], ['verification','Verification','fa-user-check'], ['reports','Reports','fa-flag'], ['users','Users','fa-users'], ['products','Products','fa-box-open'], ['orders','Orders','fa-bag-shopping'], ['activity','Activity','fa-clock-rotate-left'], ['settings','Settings','fa-sliders'] ];
+    let main = '';
+    if (UPGRADE.adminTab === 'overview') {
+      const newestOrders = offers.slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0,5);
+      const stockAlerts = products.filter(product => getProductStock(product) <= 3 || product.isSold).slice(0,6);
+      main = `<div class="admin-v4-kpis">${[['Verified Users', verifiedUsers, 'fa-user-check'], ['Pending Verification', pendingVerifications, 'fa-hourglass-half'], ['Rejected Verification', rejectedVerifications, 'fa-circle-xmark'], ['Open Reports', openReports, 'fa-flag'], ['Pending Orders', pendingOrders, 'fa-hourglass-half'], ['Suspended Accounts', suspendedUsers, 'fa-user-lock']].map(([label,val,icon]) => `<div class="admin-v4-kpi"><div class="admin-v4-kpi-top"><div><div class="label">${label}</div><div class="value">${val}</div></div><div class="admin-v4-icon"><i class="fas ${icon}"></i></div></div></div>`).join('')}</div><div class="sop-verif-grid mt-4"><section class="admin-v4-card span-4"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Verification Snapshot</h3><p>Trust is now reviewed by admin before badges appear.</p></div><span class="admin-v4-badge warn">${pendingVerifications} waiting</span></div><div class="admin-v4-mini-list custom-scrollbar"><div class="admin-v4-mini-row"><span>Verified accounts</span><strong>${verifiedUsers}</strong></div><div class="admin-v4-mini-row"><span>Pending review</span><strong>${pendingVerifications}</strong></div><div class="admin-v4-mini-row"><span>Rejected</span><strong>${rejectedVerifications}</strong></div><div class="admin-v4-mini-row"><span>Students registered</span><strong>${users.filter(u => norm(getUserType(u)) === 'student').length}</strong></div><div class="admin-v4-mini-row"><span>Lecturers registered</span><strong>${users.filter(u => norm(getUserType(u)) === 'lecturer').length}</strong></div><div class="admin-v4-mini-row"><span>Staff registered</span><strong>${users.filter(u => norm(getUserType(u)) === 'staff').length}</strong></div></div></section><section class="admin-v4-card span-4"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Recent Orders</h3><p>Read-only monitoring with cleaner summary.</p></div><span class="admin-v4-badge info">${offers.length} total</span></div>${newestOrders.length ? `<div class="admin-v4-mini-list custom-scrollbar">${newestOrders.map(offer => `<div class="admin-v4-item"><div class="admin-v4-item-title">${esc(offer.buyerName || offer.buyerEmail || 'Buyer')}</div><p class="admin-v4-small mt-1">${esc(orderItems(offer))}</p><div class="admin-v4-badges mt-2"><span class="admin-v4-badge ${orderStatusBadge(offer.offerStatus)}">${orderStatusLabel(offer.offerStatus)}</span><span class="admin-v4-badge">${esc(money(orderTotal(offer)))}</span></div></div>`).join('')}</div>` : `<div class="admin-v4-empty">No orders available.</div>`}</section><section class="admin-v4-card span-4"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Stock Watch</h3><p>Products that need admin attention.</p></div><span class="admin-v4-badge danger">${stockAlerts.length} alerts</span></div>${stockAlerts.length ? `<div class="admin-v4-mini-list custom-scrollbar">${stockAlerts.map(product => { const badge = availability(product); return `<div class="admin-v4-item"><div class="admin-v4-mini-row"><div><div class="admin-v4-item-title">${esc(product.productName || '-')}</div><p class="admin-v4-small mt-1">${esc(product.sellerName || product.sellerId || '-')}</p></div><span class="admin-v4-badge ${badge.cls}">${badge.label}</span></div></div>`; }).join('')}</div>` : `<div class="admin-v4-empty">No stock alerts right now.</div>`}</section></div>`;
+    }
+    if (UPGRADE.adminTab === 'verification') {
+      const rows = filteredVerification(users);
+      main = `<section class="admin-v4-card admin-v4-col-12"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Verification Review Queue</h3><p>Approve or reject user verification before trust badges are shown across the system.</p></div><span class="admin-v4-badge">${rows.length} / ${users.length} shown</span></div><div class="admin-v4-toolbar" style="grid-template-columns:minmax(0,1.2fr) minmax(220px,.6fr) auto auto;"><input id="sop-admin-verify-query" class="admin-v4-input" placeholder="Search by name, email, matric number, or staff ID" value="${esc(UPGRADE.verifyQuery)}"><select id="sop-admin-verify-filter" class="admin-v4-select"><option value="pending_review" ${UPGRADE.verifyFilter === 'pending_review' ? 'selected' : ''}>Pending review</option><option value="rejected" ${UPGRADE.verifyFilter === 'rejected' ? 'selected' : ''}>Rejected</option><option value="verified_student" ${UPGRADE.verifyFilter === 'verified_student' ? 'selected' : ''}>Verified student</option><option value="verified_lecturer" ${UPGRADE.verifyFilter === 'verified_lecturer' ? 'selected' : ''}>Verified lecturer</option><option value="verified_staff" ${UPGRADE.verifyFilter === 'verified_staff' ? 'selected' : ''}>Verified staff</option><option value="all" ${UPGRADE.verifyFilter === 'all' ? 'selected' : ''}>All statuses</option></select><button class="admin-v4-btn admin-v4-btn-primary" onclick="sopApplyVerificationFilters()">Apply</button><button class="admin-v4-btn admin-v4-btn-soft" onclick="sopResetVerificationFilters()">Reset</button></div>${rows.length ? `<div class="admin-v4-list custom-scrollbar mt-4">${rows.map(user => { const status = getVerificationStatus(user); return `<div class="admin-v4-item"><div class="admin-v4-item-top"><div><div class="admin-v4-item-title">${esc(user.name || '-')}</div><p class="admin-v4-small mt-1">${esc(user.email || '-')}</p></div><div class="admin-v4-actions"><span class="admin-v4-badge ${verificationBadgeClass(status)}"><i class="fas ${verificationIcon(status)} mr-1"></i>${verificationLabel(status, user)}</span>${status === 'pending_review' || status === 'pending' || status === 'rejected' ? `<button class="admin-v4-btn admin-v4-btn-primary" onclick="sopApproveVerification('${esc(user.email || '')}')">Approve</button><button class="admin-v4-btn admin-v4-btn-soft" onclick="sopRejectVerification('${esc(user.email || '')}')">Reject</button>` : ''}</div></div><div class="admin-v4-badges"><span class="admin-v4-badge">Type: ${esc(getUserType(user))}</span>${user.matricCardNumber ? `<span class="admin-v4-badge">Matric: ${esc(user.matricCardNumber)}</span>` : ''}${user.staffId ? `<span class="admin-v4-badge">Staff ID: ${esc(user.staffId)}</span>` : ''}<span class="admin-v4-badge">Submitted: ${esc(fmt(user.verificationSubmittedAt || user.createdAt))}</span>${user.verificationNote ? `<span class="admin-v4-badge danger">Note: ${esc(user.verificationNote)}</span>` : ''}</div></div>`; }).join('')}</div>` : `<div class="admin-v4-empty mt-4">No verification records match your current filters.</div>`}</section>`;
+    }
+    if (UPGRADE.adminTab === 'reports') {
+      const rows = reports.slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      main = `<section class="admin-v4-card admin-v4-col-12"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Reports & Disputes</h3><p>Resolve operational issues while keeping the flow simple and stable.</p></div><span class="admin-v4-badge">${rows.length} total</span></div>${rows.length ? `<div class="admin-v4-list custom-scrollbar mt-4">${rows.map(report => `<div class="admin-v4-item"><div class="admin-v4-item-top"><div><div class="admin-v4-item-title">${esc(report.category || 'Report')}</div><p class="admin-v4-small mt-1">Reporter: ${esc(report.reporterEmail || '-')} • Target: ${esc(report.reportTargetType || '-')}</p></div><div class="admin-v4-actions"><span class="admin-v4-badge ${norm(report.status) === 'resolved' ? 'success' : 'danger'}">${norm(report.status) === 'resolved' ? 'Resolved' : 'Open'}</span>${norm(report.status) !== 'resolved' ? `<button class="admin-v4-btn admin-v4-btn-primary" onclick="resolveReportV2('${esc(report.__firebaseId || report.id || '')}')">Mark as Resolved</button>` : ''}</div></div><div class="admin-v4-badges">${report.relatedProductName ? `<span class="admin-v4-badge">Product: ${esc(report.relatedProductName)}</span>` : ''}${report.relatedUserEmail ? `<span class="admin-v4-badge">Related user: ${esc(report.relatedUserEmail)}</span>` : ''}<span class="admin-v4-badge">Created: ${esc(fmt(report.createdAt))}</span></div>${report.note ? `<p class="mt-3">${esc(report.note)}</p>` : ''}</div>`).join('')}</div>` : `<div class="admin-v4-empty mt-4">No reports found.</div>`}</section>`;
+    }
+    if (UPGRADE.adminTab === 'users') {
+      const rows = filteredUsers(users);
+      main = `<section class="admin-v4-card admin-v4-col-12"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>User Management</h3><p>Monitor user trust, account status, and role information in one place.</p></div><span class="admin-v4-badge">${rows.length} / ${users.length} shown</span></div><div class="admin-v4-toolbar" style="grid-template-columns:minmax(0,1.2fr) minmax(220px,.6fr) auto auto;"><input id="sop-admin-user-query" class="admin-v4-input" placeholder="Search by name, email, matric number, staff ID, or status" value="${esc(UPGRADE.userQuery)}"><select id="sop-admin-user-filter" class="admin-v4-select"><option value="all" ${UPGRADE.userFilter === 'all' ? 'selected' : ''}>All users</option><option value="verified" ${UPGRADE.userFilter === 'verified' ? 'selected' : ''}>Verified</option><option value="pending" ${UPGRADE.userFilter === 'pending' ? 'selected' : ''}>Pending review</option><option value="rejected" ${UPGRADE.userFilter === 'rejected' ? 'selected' : ''}>Rejected</option><option value="suspended" ${UPGRADE.userFilter === 'suspended' ? 'selected' : ''}>Suspended</option><option value="student" ${UPGRADE.userFilter === 'student' ? 'selected' : ''}>Students</option><option value="lecturer" ${UPGRADE.userFilter === 'lecturer' ? 'selected' : ''}>Lecturers</option><option value="staff" ${UPGRADE.userFilter === 'staff' ? 'selected' : ''}>Staff</option></select><button class="admin-v4-btn admin-v4-btn-primary" onclick="sopApplyUserFilters()">Apply</button><button class="admin-v4-btn admin-v4-btn-soft" onclick="sopResetUserFilters()">Reset</button></div>${rows.length ? `<div class="admin-v4-list custom-scrollbar mt-4">${rows.map(user => { const status = getVerificationStatus(user); return `<div class="admin-v4-item"><div class="admin-v4-item-top"><div><div class="admin-v4-item-title">${esc(user.name || '-')}</div><p class="admin-v4-small mt-1">${esc(user.email || '-')}</p></div><div class="admin-v4-actions">${isAdminUser(user) ? `<span class="admin-v4-badge info">Admin</span>` : `<button class="admin-v4-btn ${user.isSuspended ? 'admin-v4-btn-primary' : 'admin-v4-btn-soft'}" onclick="toggleSuspendUserV2('${esc(user.email || '')}')">${user.isSuspended ? 'Reactivate' : 'Suspend'}</button>`}</div></div><div class="admin-v4-badges"><span class="admin-v4-badge">${esc(getUserType(user))}</span><span class="admin-v4-badge ${user.isSuspended ? 'danger' : 'success'}">${user.isSuspended ? 'Suspended' : 'Active'}</span><span class="admin-v4-badge ${verificationBadgeClass(status)}">${verificationLabel(status, user)}</span>${user.matricCardNumber ? `<span class="admin-v4-badge">Matric: ${esc(user.matricCardNumber)}</span>` : ''}${user.staffId ? `<span class="admin-v4-badge">Staff ID: ${esc(user.staffId)}</span>` : ''}</div></div>`; }).join('')}</div>` : `<div class="admin-v4-empty mt-4">No users match your current filters.</div>`}</section>`;
+    }
+    if (UPGRADE.adminTab === 'products') {
+      main = `<section class="admin-v4-card admin-v4-col-12"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Product Moderation</h3><p>Keep working moderation actions while showing stronger stock visibility.</p></div><span class="admin-v4-badge">${products.length} total</span></div>${products.length ? `<div class="admin-v4-list custom-scrollbar mt-4">${products.sort((a,b) => String(a.productName || '').localeCompare(String(b.productName || ''),'en')).map(product => { const badge = availability(product); return `<div class="admin-v4-item"><div class="admin-v4-item-top"><div><div class="admin-v4-item-title">${esc(product.productName || '-')}</div><p class="admin-v4-small mt-1">Seller: ${esc(product.sellerName || product.sellerId || '-')} • Category: ${esc(product.category || '-')}</p></div><div class="admin-v4-actions"><span class="admin-v4-badge ${badge.cls}">${badge.label}</span><button class="admin-v4-btn admin-v4-btn-soft" onclick="deleteProductByAdminV2('${esc(product.__firebaseId || product.id || '')}')">Delete</button></div></div><div class="admin-v4-badges"><span class="admin-v4-badge">Stock: ${getProductStock(product)}</span>${product.productCondition || product.condition ? `<span class="admin-v4-badge">Condition: ${esc(product.productCondition || product.condition)}</span>` : ''}${product.codLocation ? `<span class="admin-v4-badge">COD: ${esc(product.codLocation)}</span>` : ''}<span class="admin-v4-badge">Posted: ${esc(fmt(product.createdAt))}</span></div></div>`; }).join('')}</div>` : `<div class="admin-v4-empty mt-4">No products found.</div>`}</section>`;
+    }
+    if (UPGRADE.adminTab === 'orders') {
+      main = `<section class="admin-v4-card admin-v4-col-12"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Order Monitoring</h3><p>Track buyer-seller flow without changing the existing order logic.</p></div><span class="admin-v4-badge">${offers.length} total</span></div>${offers.length ? `<div class="admin-v4-list custom-scrollbar mt-4">${offers.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).map(offer => `<div class="admin-v4-item"><div class="admin-v4-item-top"><div><div class="admin-v4-item-title">${esc(offer.offerId || offer.buyerName || 'Order')}</div><p class="admin-v4-small mt-1">Buyer: ${esc(offer.buyerName || offer.buyerEmail || '-')}</p></div><div class="admin-v4-actions"><span class="admin-v4-badge ${orderStatusBadge(offer.offerStatus)}">${orderStatusLabel(offer.offerStatus)}</span><span class="admin-v4-badge">${esc(money(orderTotal(offer)))}</span></div></div><p class="mt-3">${esc(orderItems(offer))}</p><div class="admin-v4-badges"><span class="admin-v4-badge">Seller: ${esc(orderSellers(offer))}</span><span class="admin-v4-badge">Created: ${esc(fmt(offer.createdAt))}</span>${offer.completedAt ? `<span class="admin-v4-badge success">Completed: ${esc(fmt(offer.completedAt))}</span>` : ''}${offer.cancelledAt ? `<span class="admin-v4-badge danger">Cancelled: ${esc(fmt(offer.cancelledAt))}</span>` : ''}</div></div>`).join('')}</div>` : `<div class="admin-v4-empty mt-4">No orders found.</div>`}</section>`;
+    }
+    if (UPGRADE.adminTab === 'activity') {
+      main = `<section class="admin-v4-card admin-v4-col-12"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Admin Activity</h3><p>Action history for reports, verification, user control, and product moderation.</p></div><span class="admin-v4-badge">${logs.length} total</span></div>${logs.length ? `<div class="admin-v4-list custom-scrollbar mt-4">${logs.map(log => `<div class="admin-v4-item"><div class="admin-v4-item-top"><div><div class="admin-v4-item-title">${esc(log.action || 'Admin action')}</div><p class="admin-v4-small mt-1">Target: ${esc(log.targetType || '-')} • ${esc(log.targetValue || '-')}</p></div><span class="admin-v4-badge">${esc(fmt(log.createdAt))}</span></div>${log.details ? `<p class="mt-3">${esc(log.details)}</p>` : ''}<div class="admin-v4-badges"><span class="admin-v4-badge">Admin: ${esc(log.adminName || log.adminEmail || 'Admin')}</span></div></div>`).join('')}</div>` : `<div class="admin-v4-empty mt-4">No admin activity found yet.</div>`}</section>`;
+    }
+    if (UPGRADE.adminTab === 'settings') {
+      main = `<div class="sop-verif-grid mt-4"><section class="admin-v4-card span-6"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>Trust & Safety Rules</h3><p>Operational guidance that supports your upgraded workflow.</p></div></div><div class="admin-v4-mini-list"><div class="admin-v4-item">Student, lecturer, and staff accounts now require admin verification before trust badges appear.</div><div class="admin-v4-item">Rejected verification can be reviewed again after users update their details.</div><div class="admin-v4-item">Use reports for suspicious behaviour, fake listings, unsafe COD arrangements, or repeated spam.</div><div class="admin-v4-item">Suspend users when they repeatedly violate platform rules or misuse the system.</div></div></section><section class="admin-v4-card span-6"><div class="admin-v4-meta"><div class="admin-v4-meta-copy"><h3>What was improved</h3><p>This version focuses on the three weaknesses you chose earlier.</p></div></div><div class="admin-v4-mini-list"><div class="admin-v4-item"><strong>Chat:</strong> search, unread-first sorting, admin messaging shortcut, verification badge in chat, and pinned order summary.</div><div class="admin-v4-item"><strong>Admin:</strong> cleaner operations hub with dedicated verification review and better monitoring sections.</div><div class="admin-v4-item"><strong>Verification:</strong> pending review flow, approve/reject actions, and badges only after approval.</div></div></section></div>`;
+    }
+    return `<div class="admin-v4-shell custom-scrollbar"><div class="admin-v4-header"><div class="admin-v4-title"><div><h2>Admin Operations Hub</h2><p class="admin-v4-sub">A more practical control center focused on verification, moderation, and cleaner platform monitoring.</p></div><span class="admin-v4-badge info"><i class="fas fa-shield-halved"></i> English Mode</span></div><div class="admin-v4-tabs">${tabs.map(([key,label,icon]) => `<button type="button" class="admin-v4-tab ${UPGRADE.adminTab === key ? 'active' : ''}" onclick="sopSwitchAdminTab('${key}')"><i class="fas ${icon} mr-2"></i>${label}</button>`).join('')}</div></div>${main}</div>`;
+  }
+  function renderAdminPanel(){ if (typeof window.showModal === 'function') window.showModal(ADMIN_MODAL_TITLE, buildAdminBody(), { modalClass:'modal-fullscreen', bodyClass:'custom-scrollbar' }); }
+  window.sopSwitchAdminTab = function(tab){ UPGRADE.adminTab = tab; renderAdminPanel(); };
+  window.sopApplyVerificationFilters = function(){ UPGRADE.verifyQuery = document.getElementById('sop-admin-verify-query')?.value || ''; UPGRADE.verifyFilter = document.getElementById('sop-admin-verify-filter')?.value || 'pending_review'; renderAdminPanel(); };
+  window.sopResetVerificationFilters = function(){ UPGRADE.verifyQuery=''; UPGRADE.verifyFilter='pending_review'; renderAdminPanel(); };
+  window.sopApplyUserFilters = function(){ UPGRADE.userQuery = document.getElementById('sop-admin-user-query')?.value || ''; UPGRADE.userFilter = document.getElementById('sop-admin-user-filter')?.value || 'all'; renderAdminPanel(); };
+  window.sopResetUserFilters = function(){ UPGRADE.userQuery=''; UPGRADE.userFilter='all'; renderAdminPanel(); };
+  window.sopApproveVerification = function(email){ updateUserVerification(email, verifiedStatusFromUser(getUserByEmail(email)), 'Approved by admin').catch(err => window.showToast?.('Failed to approve verification: ' + err.message, 'error')); };
+  window.sopRejectVerification = function(email){ const note = window.prompt('Add a short reason for rejection:', 'Verification details do not match our records.'); if (note === null) return; updateUserVerification(email, 'rejected', note).catch(err => window.showToast?.('Failed to reject verification: ' + err.message, 'error')); };
+
+  const prevOpenAdminMonitor = window.openAdminMonitor;
+  window.openAdminMonitor = function(){ if (!window.currentUser || !isAdminUser(window.currentUser)) return window.showToast?.('Admin panel access is for administrators only.', 'warning'); renderAdminPanel(); };
+  const prevResolveReport = window.resolveReportV2;
+  if (typeof prevResolveReport === 'function') window.resolveReportV2 = async function(){ const result = await prevResolveReport.apply(this, arguments); await logAdminAction('Resolve report','report', arguments[0] || '-', 'Report marked as resolved'); rerenderAdminIfOpen(); return result; };
+  const prevToggleSuspend = window.toggleSuspendUserV2;
+  if (typeof prevToggleSuspend === 'function') window.toggleSuspendUserV2 = async function(){ const email = arguments[0]; const result = await prevToggleSuspend.apply(this, arguments); await logAdminAction('Toggle user suspension','user', email || '-', 'User account status was updated'); rerenderAdminIfOpen(); return result; };
+  const prevDeleteProduct = window.deleteProductByAdminV2;
+  if (typeof prevDeleteProduct === 'function') window.deleteProductByAdminV2 = async function(){ const productId = arguments[0]; const result = await prevDeleteProduct.apply(this, arguments); await logAdminAction('Delete product','product', productId || '-', 'Product was removed by admin'); rerenderAdminIfOpen(); return result; };
+
+  const prevNavigate = window.navigateTo;
+  window.navigateTo = function(page){ const result = prevNavigate ? prevNavigate.apply(this, arguments) : undefined; setTimeout(() => { bindStrictRegister(); if (page === 'chat') { ensureChatSearch(); if (typeof window.renderChatList === 'function') window.renderChatList(); } }, 120); return result; };
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(() => { bindStrictRegister(); if (typeof window.renderChatList === 'function') window.renderChatList(); }, 180); });
+})();
+
+</script>
+
+<!-- IC_NAME_PROFILE_PATCH_START -->
+<script>
+(function(){
+  function norm(value){ return String(value || '').trim().toLowerCase(); }
+  function text(value){ return String(value || '').trim(); }
+  function byId(id){ return document.getElementById(id); }
+  function getAllDataSafe(){
+    try {
+      if (typeof allData !== 'undefined' && Array.isArray(allData)) return allData;
+    } catch (e) {}
+    return Array.isArray(window.allData) ? window.allData : [];
+  }
+  function getUsersLocal(){
+    return getAllDataSafe().filter(item => item && (item.type === 'user' || item.__collection === 'users'));
+  }
+  function getUserByEmailLocal(email){
+    const target = norm(email);
+    return getUsersLocal().find(user => norm(user.email) === target) || null;
+  }
+  function upsertLocalUserLocal(payload, id){
+    const data = getAllDataSafe();
+    const idx = data.findIndex(item => item && (item.type === 'user' || item.__collection === 'users') && norm(item.email) === norm(payload.email));
+    const merged = { ...(idx >= 0 ? data[idx] : {}), ...payload, __collection: 'users', type: 'user' };
+    if (id) {
+      merged.__firebaseId = id;
+      merged.id = id;
+    }
+    if (idx >= 0) data[idx] = merged;
+    else data.push(merged);
+    return merged;
+  }
+  function getCurrentUserLocal(){
+    try {
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) return currentUser;
+    } catch (e) {}
+    if (window.currentUser && window.currentUser.email) return window.currentUser;
+    try {
+      const raw = localStorage.getItem('sop_user');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+  function syncCurrentUserLocal(nextUser){
+    if (!nextUser) return;
+    try { currentUser = nextUser; } catch (e) {}
+    window.currentUser = nextUser;
+    try { localStorage.setItem('sop_user', JSON.stringify(nextUser)); } catch (e) {}
+  }
+  function escHtml(value){
+    return String(value || '').replace(/[&<>"']/g, function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+    });
+  }
+  function ensureIcField(){
+    const form = byId('register-form');
+    if (!form) return null;
+    const emailBlock = byId('reg-email')?.closest('div');
+    if (emailBlock && !byId('reg-ic')) {
+      const icWrap = document.createElement('div');
+      icWrap.id = 'reg-ic-wrap';
+      icWrap.innerHTML = `
+        <label class="block text-sm font-medium mb-2" for="reg-ic">IC Number</label>
+        <input type="text" id="reg-ic" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Example: 010203-04-5678" />
+        <p class="text-xs text-navy-500 dark:text-navy-300 mt-2">Required for account registration.</p>
+      `;
+      emailBlock.insertAdjacentElement('afterend', icWrap);
+    }
+    return form;
+  }
+  function attachUserTypeSync(){
+    const typeEl = byId('reg-user-type');
+    const matricWrap = byId('reg-matric')?.closest('div');
+    const matricInput = byId('reg-matric');
+    const staffWrap = byId('reg-staff-id-wrap');
+    const staffInput = byId('reg-staff-id');
+    if (!typeEl) return;
+    const sync = function(){
+      const type = norm(typeEl.value || 'student');
+      if (type === 'student') {
+        matricWrap?.classList.remove('hidden');
+        staffWrap?.classList.add('hidden');
+        if (matricInput) matricInput.required = true;
+        if (staffInput) staffInput.required = false;
+      } else {
+        matricWrap?.classList.add('hidden');
+        staffWrap?.classList.remove('hidden');
+        if (matricInput) matricInput.required = false;
+        if (staffInput) staffInput.required = true;
+      }
+    };
+    if (!typeEl.dataset.icSyncBound) {
+      typeEl.addEventListener('change', sync);
+      typeEl.dataset.icSyncBound = 'true';
+    }
+    sync();
+  }
+  function bindRegisterWithIc(){
+    const originalForm = ensureIcField();
+    if (!originalForm || originalForm.dataset.icPatchBound === 'true') return;
+    const cloned = originalForm.cloneNode(true);
+    originalForm.replaceWith(cloned);
+    cloned.dataset.icPatchBound = 'true';
+    setTimeout(function(){ ensureIcField(); attachUserTypeSync(); }, 0);
+
+    cloned.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = text(byId('reg-name')?.value);
+      const email = norm(byId('reg-email')?.value);
+      const password = String(byId('reg-password')?.value || '');
+      const userType = norm(byId('reg-user-type')?.value || 'student');
+      const icNumber = text(byId('reg-ic')?.value);
+      const matricCardNumber = text(byId('reg-matric')?.value).toUpperCase();
+      const staffId = text(byId('reg-staff-id')?.value).toUpperCase();
+      const firebaseOk = (typeof firebaseReady !== 'undefined') ? firebaseReady : window.firebaseReady;
+      const emailOk = (typeof window.isPoliEmail === 'function') ? window.isPoliEmail(email) : email.endsWith('@polinilai.edu.my');
+
+      if (!name) return window.showToast?.('Please enter your full name.', 'warning');
+      if (!emailOk) return window.showToast?.('Registration is only allowed with an official @polinilai.edu.my email address.', 'warning');
+      if (!icNumber) return window.showToast?.('Please enter your IC number.', 'warning');
+      if (password.length < 6) return window.showToast?.('Password must be at least 6 characters.', 'warning');
+      if (userType === 'student' && !matricCardNumber) return window.showToast?.('Students must enter a matric card number.', 'warning');
+      if ((userType === 'lecturer' || userType === 'staff') && !staffId) return window.showToast?.('Lecturer and staff users must enter a staff ID.', 'warning');
+      const existing = getUsersLocal().find(user => norm(user.email) === email);
+      if (existing) return window.showToast?.('Email is already registered.', 'error');
+      if (!firebaseOk) return window.showToast?.('Firebase is not ready. Please check the configuration.', 'error');
+
+      const isAdminEmail = typeof window.isAdminEmail === 'function' ? window.isAdminEmail(email) : false;
+      const nowIso = new Date().toISOString();
+      const payload = {
+        type: 'user',
+        __collection: 'users',
+        role: isAdminEmail ? 'admin' : 'user',
+        name,
+        email,
+        password,
+        userType,
+        icNumber,
+        matricCardNumber,
+        staffId,
+        verificationStatus: isAdminEmail ? 'verified_admin' : 'pending_review',
+        verificationSubmittedAt: nowIso,
+        verificationUpdatedAt: nowIso,
+        createdAt: nowIso,
+        updatedAt: nowIso
+      };
+
+      try {
+        const userId = await saveToFirebase('users', payload);
+        upsertLocalUserLocal(payload, userId);
+        window.showToast?.('Registration submitted. Your account is waiting for admin verification.', 'success');
+        if (typeof window.navigateTo === 'function') window.navigateTo('login');
+      } catch (error) {
+        window.showToast?.('Registration error: ' + error.message, 'error');
+      }
+    });
+  }
+
+  async function changeMyProfileName(){
+    const activeUser = getCurrentUserLocal();
+    if (!activeUser || !activeUser.email) {
+      window.showToast?.('Please log in first.', 'warning');
+      return;
+    }
+    const currentName = text(activeUser.name || '');
+    const newName = text(window.prompt('Enter your new name', currentName));
+    if (!newName) return;
+    if (newName.length < 2) {
+      window.showToast?.('Name must be at least 2 characters.', 'warning');
+      return;
+    }
+    const liveUser = getUserByEmailLocal(activeUser.email) || activeUser;
+    try {
+      if (liveUser.__firebaseId) {
+        await updateInFirebase('users', liveUser.__firebaseId, {
+          name: newName,
+          updatedAt: new Date().toISOString()
+        });
+      }
+      liveUser.name = newName;
+      const merged = upsertLocalUserLocal(liveUser, liveUser.__firebaseId || liveUser.id);
+      syncCurrentUserLocal({ ...activeUser, ...merged, name: newName });
+      if (typeof window.updateAuthNav === 'function') window.updateAuthNav();
+      if (typeof window.renderProfile === 'function') window.renderProfile();
+      if (typeof window.renderChatList === 'function' && window.currentPage === 'chat') window.renderChatList();
+      window.showToast?.('Your name has been updated.', 'success');
+    } catch (error) {
+      window.showToast?.('Unable to update your name: ' + error.message, 'error');
+    }
+  }
+  window.changeMyProfileName = changeMyProfileName;
+
+  function applyProfileExtras(){
+    const activeUser = getCurrentUserLocal();
+    if (!activeUser || !activeUser.email) return;
+    const liveUser = getUserByEmailLocal(activeUser.email) || activeUser;
+    const header = document.querySelector('#page-profile .text-center.mb-8');
+    if (!header) return;
+
+    const nameEl = header.querySelector('#profile-name');
+    if (nameEl) {
+      let matricEl = header.querySelector('#profile-matric');
+      if (liveUser.matricCardNumber) {
+        if (!matricEl) {
+          matricEl = document.createElement('p');
+          matricEl.id = 'profile-matric';
+          matricEl.className = 'text-sm text-navy-500 dark:text-navy-300 mt-2';
+          nameEl.insertAdjacentElement('afterend', matricEl);
+        }
+        matricEl.textContent = 'Matric Number: ' + liveUser.matricCardNumber;
+      } else if (matricEl) {
+        matricEl.remove();
+      }
+    }
+
+    const row = header.querySelector('.flex.flex-wrap.justify-center.gap-2.mt-4');
+    if (row && !header.querySelector('#change-profile-name-btn')) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.id = 'change-profile-name-btn';
+      button.className = 'px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 font-medium text-sm transition-colors';
+      button.innerHTML = '<i class="fas fa-pen mr-2 text-accent-orange"></i>Change My Name';
+      button.addEventListener('click', changeMyProfileName);
+      row.appendChild(button);
+    }
+  }
+
+  function applyModalExtras(email){
+    const modal = document.querySelector('#modal-container .modal-content');
+    if (!modal) return;
+    const user = getUserByEmailLocal(email);
+    const titleEl = modal.querySelector('h3.text-2xl.font-bold');
+    if (titleEl && user?.matricCardNumber) {
+      let info = modal.querySelector('#modal-profile-matric');
+      if (!info) {
+        info = document.createElement('p');
+        info.id = 'modal-profile-matric';
+        info.className = 'text-sm text-navy-500 dark:text-navy-300 mt-2';
+        titleEl.insertAdjacentElement('afterend', info);
+      }
+      info.textContent = 'Matric Number: ' + user.matricCardNumber;
+    }
+    const activeUser = getCurrentUserLocal();
+    const actions = modal.querySelector('.flex.flex-wrap.justify-end.gap-2');
+    if (actions && activeUser && norm(activeUser.email) === norm(email) && !modal.querySelector('#modal-change-name-btn')) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.id = 'modal-change-name-btn';
+      button.className = 'px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 font-medium';
+      button.innerHTML = '<i class="fas fa-pen mr-2"></i>Change My Name';
+      button.addEventListener('click', function(){
+        const maybeClose = window.closeModal;
+        if (typeof maybeClose === 'function') maybeClose();
+        setTimeout(changeMyProfileName, 80);
+      });
+      actions.prepend(button);
+    }
+  }
+
+  const prevRenderProfilePatch = window.renderProfile;
+  window.renderProfile = function(){
+    const result = typeof prevRenderProfilePatch === 'function' ? prevRenderProfilePatch.apply(this, arguments) : undefined;
+    setTimeout(applyProfileExtras, 40);
+    return result;
+  };
+
+  const prevShowUserProfileModalPatch = window.showUserProfileModal;
+  window.showUserProfileModal = function(email){
+    const result = typeof prevShowUserProfileModalPatch === 'function' ? prevShowUserProfileModalPatch.apply(this, arguments) : undefined;
+    setTimeout(function(){ applyModalExtras(email); }, 60);
+    return result;
+  };
+
+  const prevNavigatePatch = window.navigateTo;
+  window.navigateTo = function(page){
+    const result = typeof prevNavigatePatch === 'function' ? prevNavigatePatch.apply(this, arguments) : undefined;
+    setTimeout(function(){
+      if (page === 'register') bindRegisterWithIc();
+      if (page === 'profile') applyProfileExtras();
+    }, 260);
+    return result;
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      bindRegisterWithIc();
+      attachUserTypeSync();
+      applyProfileExtras();
+    }, 320);
+  });
+
+  setTimeout(function(){
+    bindRegisterWithIc();
+    attachUserTypeSync();
+    applyProfileExtras();
+  }, 900);
+})();
+</script>
+<!-- IC_NAME_PROFILE_PATCH_END -->
+
+
+<!-- AUTH_FORGOT_SECURITY_PATCH_START -->
+<script>
+(function(){
+  const SECURITY_OPTIONS = [
+    'What is your mother\'s name?',
+    'What is the name of your first pet?',
+    'What is your favourite teacher\'s name?',
+    'What is your hometown?'
+  ];
+
+  function byId(id){ return document.getElementById(id); }
+  function text(value){ return String(value || '').trim(); }
+  function norm(value){ return text(value).toLowerCase(); }
+  function normalizeEmailSafe(value){
+    if (typeof window.normalizeEmail === 'function') return window.normalizeEmail(value);
+    return norm(value);
+  }
+  function isPoliEmailSafe(value){
+    if (typeof window.isPoliEmail === 'function') return window.isPoliEmail(value);
+    return /@polinilai\.edu\.my$/i.test(text(value));
+  }
+  function showToastSafe(message, type){
+    if (typeof window.showToast === 'function') window.showToast(message, type || 'info');
+    else alert(message);
+  }
+  function getUsersSafe(){
+    if (typeof window.getUsers === 'function') return window.getUsers() || [];
+    if (Array.isArray(window.allData)) {
+      return window.allData.filter(item => item && (item.type === 'user' || item.__collection === 'users'));
+    }
+    return [];
+  }
+  function isAdminUserSafe(user){
+    try {
+      if (typeof window.isAdminUser === 'function') return !!window.isAdminUser(user);
+    } catch (e) {}
+    try {
+      if (typeof window.isAdminEmail === 'function') return !!window.isAdminEmail(user && user.email ? user.email : user);
+    } catch (e) {}
+    return norm(user && user.role) === 'admin';
+  }
+  function setActiveUser(user){
+    try { currentUser = user; } catch (e) {}
+    window.currentUser = user;
+  }
+  function clearAuthStorage(){
+    try { localStorage.removeItem('sop_user'); } catch (e) {}
+    try { sessionStorage.removeItem('sop_user'); } catch (e) {}
+  }
+  function storeAuthUser(user, rememberMe){
+    clearAuthStorage();
+    try { localStorage.setItem('sop_remember_me', rememberMe ? '1' : '0'); } catch (e) {}
+    try { localStorage.setItem('sop_last_login_email', user && user.email ? user.email : ''); } catch (e) {}
+    const raw = JSON.stringify(user || {});
+    try {
+      if (rememberMe) localStorage.setItem('sop_user', raw);
+      else sessionStorage.setItem('sop_user', raw);
+    } catch (e) {}
+  }
+  function restoreStoredUser(){
+    let raw = '';
+    try { raw = localStorage.getItem('sop_user') || sessionStorage.getItem('sop_user') || ''; } catch (e) {}
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.email && !(window.currentUser && window.currentUser.email)) {
+        setActiveUser(parsed);
+        if (typeof window.updateAuthNav === 'function') window.updateAuthNav();
+      }
+    } catch (e) {}
+  }
+  function syncRegisterRoleFields(){
+    const typeEl = byId('reg-user-type');
+    const matricInput = byId('reg-matric');
+    const staffInput = byId('reg-staff-id');
+    const staffWrap = byId('reg-staff-id-wrap');
+    const matricWrap = matricInput ? matricInput.closest('div') : null;
+    if (!typeEl) return;
+    const role = norm(typeEl.value || 'student');
+    if (role === 'student') {
+      if (matricWrap) matricWrap.classList.remove('hidden');
+      if (staffWrap) staffWrap.classList.add('hidden');
+      if (matricInput) matricInput.required = true;
+      if (staffInput) staffInput.required = false;
+    } else {
+      if (matricWrap) matricWrap.classList.add('hidden');
+      if (staffWrap) staffWrap.classList.remove('hidden');
+      if (matricInput) matricInput.required = false;
+      if (staffInput) staffInput.required = true;
+    }
+  }
+  function ensureSecurityQuestionFields(){
+    const form = byId('register-form');
+    if (!form) return;
+    const passwordBlock = byId('reg-password') ? byId('reg-password').closest('div') : null;
+    if (!passwordBlock || byId('reg-security-question')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'reg-security-wrap';
+    wrap.className = 'space-y-4';
+    const options = SECURITY_OPTIONS.map(q => `<option value="${q.replace(/"/g, '&quot;')}">${q}</option>`).join('');
+    wrap.innerHTML = `
+      <div>
+        <label class="block text-sm font-medium mb-2" for="reg-security-question">Security Question</label>
+        <select id="reg-security-question" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
+          <option value="">Select a question</option>
+          ${options}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-2" for="reg-security-answer">Security Answer</label>
+        <input type="text" id="reg-security-answer" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Enter your answer" />
+        <p class="text-xs text-navy-500 dark:text-navy-300 mt-2">This will be used for Forgot Password.</p>
+      </div>
+    `;
+    passwordBlock.insertAdjacentElement('beforebegin', wrap);
+  }
+  function applyLoginUi(){
+    const page = byId('page-login');
+    const form = byId('login-form');
+    if (!page || !form) return;
+    const title = page.querySelector('h1');
+    const subtitle = page.querySelector('p.text-navy-500, p.text-navy-400');
+    if (title) title.textContent = 'Log In';
+    if (subtitle) subtitle.textContent = 'Welcome back to S.O.P!';
+    const passwordLabel = form.querySelector('label[for="login-password"]');
+    if (passwordLabel) passwordLabel.textContent = 'Password';
+    const submitButton = form.querySelector('button[type="submit"]');
+    const helperRowOutside = byId('auth-helper-row');
+    if (helperRowOutside) helperRowOutside.remove();
+    if (submitButton && !byId('login-options-row')) {
+      const row = document.createElement('div');
+      row.id = 'login-options-row';
+      row.className = 'flex items-center justify-between gap-3 text-sm';
+      row.innerHTML = `
+        <label class="inline-flex items-center gap-2 cursor-pointer text-navy-600 dark:text-navy-300">
+          <input type="checkbox" id="login-remember-me" class="w-4 h-4 rounded border-navy-300 text-accent-orange focus:ring-accent-orange" />
+          <span>Remember me</span>
+        </label>
+        <button type="button" onclick="openForgotPasswordModal()" class="text-accent-orange hover:underline font-medium">Forgot password</button>
+      `;
+      submitButton.insertAdjacentElement('beforebegin', row);
+    }
+    const rememberInput = byId('login-remember-me');
+    const emailInput = byId('login-email');
+    try {
+      if (rememberInput) rememberInput.checked = localStorage.getItem('sop_remember_me') === '1';
+      const lastEmail = localStorage.getItem('sop_last_login_email') || '';
+      if (emailInput && lastEmail && !emailInput.value) emailInput.value = lastEmail;
+    } catch (e) {}
+  }
+  function bindLoginFormPatch(){
+    const originalForm = byId('login-form');
+    if (!originalForm) return;
+    applyLoginUi();
+    if (originalForm.dataset.authPatchBound === '1') return;
+    const cloned = originalForm.cloneNode(true);
+    originalForm.replaceWith(cloned);
+    cloned.dataset.authPatchBound = '1';
+    applyLoginUi();
+    cloned.addEventListener('submit', function(e){
+      e.preventDefault();
+      const email = normalizeEmailSafe(byId('login-email')?.value);
+      const password = String(byId('login-password')?.value || '');
+      const rememberMe = !!byId('login-remember-me')?.checked;
+      if (!isPoliEmailSafe(email)) {
+        showToastSafe('Please use an official @polinilai.edu.my email address.', 'warning');
+        return;
+      }
+      const user = getUsersSafe().find(item => normalizeEmailSafe(item.email) === email && String(item.password || '') === password);
+      if (!user) {
+        showToastSafe('Invalid email or password.', 'error');
+        return;
+      }
+      const accountState = norm(user.accountStatus || user.status || '');
+      if (accountState === 'suspended' || user.suspended === true || user.isSuspended === true) {
+        showToastSafe('Your account has been suspended by the admin.', 'error');
+        return;
+      }
+      const nextUser = {
+        name: user.name,
+        email: normalizeEmailSafe(user.email),
+        role: isAdminUserSafe(user) ? 'admin' : 'user',
+        profileImageUrl: user.profileImageUrl || user.avatarUrl || '',
+        userType: user.userType || '',
+        matricCardNumber: user.matricCardNumber || '',
+        staffId: user.staffId || '',
+        icNumber: user.icNumber || '',
+        verificationStatus: user.verificationStatus || ''
+      };
+      setActiveUser(nextUser);
+      storeAuthUser(nextUser, rememberMe);
+      if (typeof window.updateAuthNav === 'function') window.updateAuthNav();
+      showToastSafe('Logged in successfully!', 'success');
+      if (typeof window.navigateTo === 'function') window.navigateTo('home');
+    });
+  }
+  function bindRegisterFormPatch(){
+    const originalForm = byId('register-form');
+    if (!originalForm) return;
+    ensureSecurityQuestionFields();
+    syncRegisterRoleFields();
+    if (originalForm.dataset.securityPatchBound === '1') return;
+    const cloned = originalForm.cloneNode(true);
+    originalForm.replaceWith(cloned);
+    cloned.dataset.securityPatchBound = '1';
+    ensureSecurityQuestionFields();
+    syncRegisterRoleFields();
+    const typeEl = byId('reg-user-type');
+    if (typeEl && !typeEl.dataset.roleSyncBoundFinal) {
+      typeEl.addEventListener('change', syncRegisterRoleFields);
+      typeEl.dataset.roleSyncBoundFinal = '1';
+    }
+    cloned.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = text(byId('reg-name')?.value);
+      const email = normalizeEmailSafe(byId('reg-email')?.value);
+      const password = String(byId('reg-password')?.value || '');
+      const userType = norm(byId('reg-user-type')?.value || 'student');
+      const icNumber = text(byId('reg-ic')?.value);
+      const matricCardNumber = text(byId('reg-matric')?.value).toUpperCase();
+      const staffId = text(byId('reg-staff-id')?.value).toUpperCase();
+      const securityQuestion = text(byId('reg-security-question')?.value);
+      const securityAnswer = text(byId('reg-security-answer')?.value);
+      const firebaseOk = (typeof window.firebaseReady !== 'undefined') ? !!window.firebaseReady : true;
+      if (!name) return showToastSafe('Please enter your full name.', 'warning');
+      if (!isPoliEmailSafe(email)) return showToastSafe('Registration is only allowed with an official @polinilai.edu.my email address.', 'warning');
+      if (!icNumber) return showToastSafe('Please enter your IC number.', 'warning');
+      if (!securityQuestion) return showToastSafe('Please choose a security question.', 'warning');
+      if (!securityAnswer) return showToastSafe('Please enter your security answer.', 'warning');
+      if (password.length < 6) return showToastSafe('Password must be at least 6 characters.', 'warning');
+      if (userType === 'student' && !matricCardNumber) return showToastSafe('Students must enter a matric card number.', 'warning');
+      if ((userType === 'lecturer' || userType === 'staff') && !staffId) return showToastSafe('Lecturer and staff users must enter a staff ID.', 'warning');
+      const existing = getUsersSafe().find(user => normalizeEmailSafe(user.email) === email);
+      if (existing) return showToastSafe('Email is already registered.', 'error');
+      if (!firebaseOk) return showToastSafe('Firebase is not ready. Please check the configuration.', 'error');
+      const isAdmin = isAdminUserSafe({ email: email, role: '' });
+      const nowIso = new Date().toISOString();
+      const payload = {
+        type: 'user',
+        __collection: 'users',
+        role: isAdmin ? 'admin' : 'user',
+        name,
+        email,
+        password,
+        userType,
+        icNumber,
+        matricCardNumber,
+        staffId,
+        securityQuestion,
+        securityAnswer,
+        securityAnswerNormalized: norm(securityAnswer),
+        verificationStatus: isAdmin ? 'verified_admin' : 'pending_review',
+        verificationSubmittedAt: nowIso,
+        verificationUpdatedAt: nowIso,
+        createdAt: nowIso,
+        updatedAt: nowIso
+      };
+      try {
+        let userId = '';
+        if (typeof window.saveToFirebase === 'function') {
+          userId = await window.saveToFirebase('users', payload);
+        }
+        if (typeof window.upsertLocalUserLocal === 'function') {
+          window.upsertLocalUserLocal(payload, userId);
+        } else if (Array.isArray(window.allData)) {
+          window.allData.push({ ...payload, __firebaseId: userId, id: userId });
+        }
+        showToastSafe('Registration submitted. Your security question is ready for Forgot Password.', 'success');
+        if (typeof window.navigateTo === 'function') window.navigateTo('login');
+      } catch (error) {
+        showToastSafe('Registration error: ' + (error && error.message ? error.message : error), 'error');
+      }
+    });
+  }
+
+  window.openForgotPasswordModal = function(){
+    const options = SECURITY_OPTIONS.map(q => `<option value="${q.replace(/"/g, '&quot;')}">${q}</option>`).join('');
+    if (typeof window.showModal !== 'function') return;
+    window.showModal('Forgot Password', `
+      <form id="forgot-password-form" class="space-y-4">
+        <p class="text-sm text-navy-600 dark:text-navy-300">Enter your email, choose your security question, and set a new password.</p>
+        <div>
+          <label class="block text-sm font-medium mb-2" for="forgot-email">Email</label>
+          <input type="email" id="forgot-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="nama@polinilai.edu.my">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" for="forgot-security-question">Security Question</label>
+          <select id="forgot-security-question" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0">
+            <option value="">Select a question</option>
+            ${options}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" for="forgot-security-answer">Security Answer</label>
+          <input type="text" id="forgot-security-answer" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Enter your answer">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" for="forgot-new-password">New Password</label>
+          <input type="password" id="forgot-new-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Minimum 6 characters">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" for="forgot-confirm-password">Confirm New Password</label>
+          <input type="password" id="forgot-confirm-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Repeat new password">
+        </div>
+        <button type="submit" class="w-full bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">Save New Password</button>
+      </form>
+    `);
+
+    byId('forgot-password-form')?.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = normalizeEmailSafe(byId('forgot-email')?.value);
+      const question = text(byId('forgot-security-question')?.value);
+      const answer = norm(byId('forgot-security-answer')?.value);
+      const newPassword = String(byId('forgot-new-password')?.value || '');
+      const confirmPassword = String(byId('forgot-confirm-password')?.value || '');
+      if (!isPoliEmailSafe(email)) return showToastSafe('Please use an official @polinilai.edu.my email address.', 'warning');
+      if (!question) return showToastSafe('Please choose your security question.', 'warning');
+      if (!answer) return showToastSafe('Please enter your security answer.', 'warning');
+      if (newPassword.length < 6) return showToastSafe('New password must be at least 6 characters.', 'warning');
+      if (newPassword !== confirmPassword) return showToastSafe('Password confirmation does not match.', 'warning');
+      const user = getUsersSafe().find(item => normalizeEmailSafe(item.email) === email);
+      if (!user) return showToastSafe('Account not found.', 'error');
+      const savedQuestion = text(user.securityQuestion);
+      const savedAnswer = norm(user.securityAnswerNormalized || user.securityAnswer);
+      if (!savedQuestion || !savedAnswer) return showToastSafe('This account does not have a security question yet. Please contact admin.', 'error');
+      if (savedQuestion !== question || savedAnswer !== answer) return showToastSafe('Security question or answer is incorrect.', 'error');
+      try {
+        const docId = user.__firebaseId || user.id || '';
+        if (typeof window.updateInFirebase === 'function' && docId) {
+          await window.updateInFirebase('users', docId, {
+            password: newPassword,
+            updatedAt: new Date().toISOString()
+          });
+        }
+        user.password = newPassword;
+        if (Array.isArray(window.allData)) {
+          const target = window.allData.find(item => item && (item.__firebaseId === docId || item.id === docId || normalizeEmailSafe(item.email) === email));
+          if (target) target.password = newPassword;
+        }
+        if (typeof window.closeModal === 'function') window.closeModal();
+        showToastSafe('Password updated successfully.', 'success');
+      } catch (error) {
+        showToastSafe('Error updating password: ' + (error && error.message ? error.message : error), 'error');
+      }
+    });
+  };
+
+  const previousLogout = window.logout;
+  window.logout = function(){
+    clearAuthStorage();
+    try { localStorage.removeItem('sop_remember_me'); } catch (e) {}
+    if (typeof previousLogout === 'function') return previousLogout.apply(this, arguments);
+    setActiveUser(null);
+    if (typeof window.updateAuthNav === 'function') window.updateAuthNav();
+    showToastSafe('Logged out successfully.', 'success');
+    if (typeof window.navigateTo === 'function') window.navigateTo('home');
+  };
+
+  const previousNavigate = window.navigateTo;
+  window.navigateTo = function(page){
+    const result = typeof previousNavigate === 'function' ? previousNavigate.apply(this, arguments) : undefined;
+    setTimeout(function(){
+      if (page === 'login') bindLoginFormPatch();
+      if (page === 'register') bindRegisterFormPatch();
+    }, 420);
+    return result;
+  };
+
+  function runFinalAuthPatch(){
+    restoreStoredUser();
+    bindLoginFormPatch();
+    bindRegisterFormPatch();
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(runFinalAuthPatch, 1300);
+  });
+  setTimeout(runFinalAuthPatch, 1700);
+})();
+</script>
+<!-- AUTH_FORGOT_SECURITY_PATCH_END -->
 
 </body>
 </html>
