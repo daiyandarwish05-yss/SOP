@@ -291,7 +291,7 @@
             <div class="flex flex-col md:flex-row items-center justify-between">
               <div class="text-center md:text-left mb-8 md:mb-0">
                 <h1 id="banner-title" class="text-3xl md:text-5xl font-bold mb-4">Selamat Datang ke SHOP ONLINE POLY!</h1>
-                <p id="banner-tagline" class="text-lg md:text-xl text-navy-200 mb-6">Platform Jual Beli Komuniti Politeknik Nilai Anda</p>
+                <p id="banner-tagline" class="text-lg md:text-xl text-navy-200 mb-6">Platform Jual Beli Polytechnic Community Nilai Anda</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                   <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg">
                     <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli
@@ -318,15 +318,15 @@
               <div class="w-14 h-14 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4">
                 <i class="fas fa-hand-holding-dollar text-2xl text-green-600"></i>
               </div>
-              <h3 class="font-semibold text-lg mb-2">COD Sahaja</h3>
-              <p class="text-navy-500 dark:text-navy-300 text-sm">Pembayaran secara tunai semasa penyerahan. Selamat dan mudah!</p>
+              <h3 class="font-semibold text-lg mb-2">COD Only</h3>
+              <p class="text-navy-500 dark:text-navy-300 text-sm">Cash payment upon delivery. Safe and easy!</p>
             </div>
             <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
               <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4">
                 <i class="fas fa-users text-2xl text-blue-600"></i>
               </div>
-              <h3 class="font-semibold text-lg mb-2">Komuniti Politeknik</h3>
-              <p class="text-navy-500 dark:text-navy-300 text-sm">Platform eksklusif untuk pelajar, pensyarah dan staf politeknik.</p>
+              <h3 class="font-semibold text-lg mb-2">Polytechnic Community</h3>
+              <p class="text-navy-500 dark:text-navy-300 text-sm">An exclusive platform for polytechnic students, lecturers, and staff.</p>
             </div>
             <div class="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg card-hover">
               <div class="w-14 h-14 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4">
@@ -340,21 +340,11 @@
 
         <div class="max-w-7xl mx-auto px-4 py-8">
           <h2 class="text-2xl font-bold mb-6">Kategori Produk</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4" id="categories-grid">
-            <div onclick="filterByCategory('Akademik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-              <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-2">
-                <i class="fas fa-book text-blue-600 text-xl"></i>
-              </div><span class="text-sm font-medium">Akademik</span>
-            </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="categories-grid">
             <div onclick="filterByCategory('Elektronik')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
               <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-2">
                 <i class="fas fa-laptop text-purple-600 text-xl"></i>
               </div><span class="text-sm font-medium">Elektronik</span>
-            </div>
-            <div onclick="filterByCategory('Asrama')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
-              <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-2">
-                <i class="fas fa-bed text-green-600 text-xl"></i>
-              </div><span class="text-sm font-medium">Asrama</span>
             </div>
             <div onclick="filterByCategory('Peribadi')" class="bg-white dark:bg-navy-800 rounded-xl p-4 text-center cursor-pointer card-hover shadow-md">
               <div class="w-12 h-12 mx-auto bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center mb-2">
@@ -463,23 +453,6 @@
             <div>
               <label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label>
               <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: JP, JKM" />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium mb-2" for="cod-location">Lokasi COD</label>
-              <select id="cod-location" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
-                <option value="">Pilih lokasi</option>
-                <option value="Cafeteria">☕ Cafeteria</option>
-                <option value="Library">📚 Library</option>
-                <option value="Kolej Kediaman">🏠 Kolej Kediaman</option>
-                <option value="Parking Gate">🚗 Parking Gate</option>
-                <option value="Main Lobby">🏛️ Main Lobby</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium mb-2" for="offer-price">Harga Cadangan Pembeli (pilihan)</label>
-              <input type="number" id="offer-price" min="0" step="0.01" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 25.00" />
             </div>
 
             <div id="checkout-summary" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mt-4">
@@ -602,36 +575,41 @@
               <div class="w-16 h-16 bg-gradient-to-br from-navy-600 to-accent-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-user-plus text-white text-2xl"></i>
               </div>
-              <h1 class="text-2xl font-bold">Daftar Akaun</h1>
-              <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Sertai komuniti S.O.P hari ini!</p>
+              <h1 class="text-2xl font-bold">Create Account</h1>
+              <p class="text-navy-500 dark:text-navy-400 text-sm mt-2">Join the S.O.P community today!</p>
             </div>
             <form id="register-form" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium mb-2" for="reg-name">Nama Penuh</label>
-                <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Nama penuh anda" />
+                <label class="block text-sm font-medium mb-2" for="reg-name">Full Name</label>
+                <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Your full name" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="reg-email">Email</label>
                 <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="nama@polinilai.edu.my" />
               </div>
               <div>
-                <label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
+                <label class="block text-sm font-medium mb-2" for="reg-matric">Matric Card Number (Students Only)</label>
+                <input type="text" id="reg-matric" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange uppercase" placeholder="Example: 23DIB23F1001" />
+                <p class="text-xs text-navy-500 dark:text-navy-300 mt-2">Optional for lecturers and staff.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2" for="reg-password">Password</label>
                 <div class="relative">
-                  <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 aksara" />
+                  <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Minimum 6 characters" />
                   <button type="button" onclick="togglePassword('reg-password')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-navy-400">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
               </div>
               <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-sm text-navy-600 dark:text-navy-300">
-                <p class="font-semibold text-navy-800 dark:text-white mb-1">Satu Akaun untuk Membeli & Menjual</p>
-                <p>Semua pengguna boleh membeli produk dan juga menjual produk menggunakan akaun yang sama.</p>
+                <p class="font-semibold text-navy-800 dark:text-white mb-1">One Account for Buying & Selling</p>
+                <p>All users can buy and sell products using the same account.</p>
               </div>
               <button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">
-                <i class="fas fa-user-plus mr-2"></i> Daftar Sekarang
+                <i class="fas fa-user-plus mr-2"></i> Register Now
               </button>
             </form>
-            <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Sudah ada akaun? <a href="#" onclick="navigateTo('login')" class="text-accent-orange hover:underline font-medium">Log masuk</a></p>
+            <p class="text-center text-sm text-navy-500 dark:text-navy-400 mt-6">Already have an account? <a href="#" onclick="navigateTo('login')" class="text-accent-orange hover:underline font-medium">Log in</a></p>
           </div>
         </div>
       </div>
@@ -649,7 +627,7 @@
             <div class="bg-white dark:bg-navy-800 rounded-xl p-4 shadow-lg">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-navy-500 dark:text-navy-400">Jumlah Produk</p>
+                  <p class="text-sm text-navy-500 dark:text-navy-400">Total Products</p>
                   <p id="seller-product-count" class="text-2xl font-bold">0</p>
                 </div>
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
@@ -782,7 +760,7 @@
 
     const defaultConfig = {
       site_title: 'S.O.P',
-      tagline: 'Platform Jual Beli Komuniti Politeknik Nilai Anda',
+      tagline: 'Platform Jual Beli Polytechnic Community Nilai Anda',
       banner_text: 'Selamat Datang ke SHOP ONLINE POLY!',
       primary_color: '#102a43',
       secondary_color: '#ffffff',
@@ -1119,6 +1097,7 @@
       const name = document.getElementById('reg-name').value;
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
+      const matricCardNumber = String(document.getElementById('reg-matric')?.value || '').trim().toUpperCase();
 
       const users = getUsers();
       if (users.find(u => u.email === email)) {
@@ -1137,6 +1116,7 @@
           name,
           email,
           password,
+          matricCardNumber,
           role: 'user',
           type: 'user',
           createdAt
@@ -1150,6 +1130,7 @@
           name,
           email,
           password,
+          matricCardNumber,
           role: 'user',
           createdAt
         });
@@ -1644,21 +1625,20 @@
       const name = currentUser?.name || 'Pembeli';
       const phone = document.getElementById('cod-phone').value;
       const dept = document.getElementById('cod-dept').value;
-      const location = document.getElementById('cod-location').value;
-      const offerPrice = parseFloat(document.getElementById('offer-price')?.value || 0);
-
-      if (!location) {
-        showToast('Sila pilih lokasi COD', 'warning');
-        return;
-      }
+      const cartItems = getCartItems();
+      const products = getProducts();
+      const sellerLocations = [...new Set(cartItems.map(item => {
+        const product = products.find(p => p.__firebaseId === item.cartProductId || p.id === item.cartProductId);
+        return (product?.preferredCodLocation || product?.codLocation || '').trim();
+      }).filter(Boolean))];
+      const location = sellerLocations.length ? sellerLocations.join(', ') : 'Refer to seller';
+      const offerPrice = 0;
 
       if (!firebaseReady) {
         showToast('Firebase belum siap. Sila periksa konfigurasi.', 'error');
         return;
       }
 
-      const cartItems = getCartItems();
-      const products = getProducts();
 
       if (!cartItems.length) {
         showToast('Troli kosong', 'warning');
@@ -3783,7 +3763,7 @@ function renderProfile() {
     whatsappButton.target = '_blank';
     whatsappButton.rel = 'noopener noreferrer';
     whatsappButton.className = 'bg-green-500 hover:bg-green-600 text-white rounded-full shadow-xl px-4 py-3 flex items-center gap-2';
-    whatsappButton.innerHTML = '<i class="fab fa-whatsapp text-xl"></i><span class="hidden md:inline font-semibold">Hubungi Admin</span>';
+    whatsappButton.innerHTML = '<i class="fab fa-whatsapp text-xl"></i><span class="hidden md:inline font-semibold">Message Admin</span>';
 
     wrap.appendChild(callButton);
     wrap.appendChild(whatsappButton);
@@ -4009,7 +3989,7 @@ function renderProfile() {
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center">
-            <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Jumlah Produk</p>
+            <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Total Products</p>
             <p class="text-xl font-bold">${stats.products.length}</p>
           </div>
           <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 text-center">
@@ -5308,7 +5288,7 @@ function renderProfile() {
   }
 
   function getProductStatusLabelEnhanced(product) {
-    return getProductStock(product) > 0 ? `Stok: ${getProductStock(product)}` : 'Stok Habis';
+    return getProductStock(product) > 0 ? `Stok: ${getProductStock(product)}` : 'Out of Stock';
   }
 
   function escapeHtmlSafe(value) {
@@ -5385,7 +5365,7 @@ function renderProfile() {
       const note = document.createElement('p');
       note.id = 'reg-email-note';
       note.className = 'text-xs text-navy-500 dark:text-navy-300 mt-2';
-      note.textContent = 'Pendaftaran hanya dibenarkan menggunakan e-mel rasmi @polinilai.edu.my.';
+      note.textContent = 'Registration is only allowed using an official @polinilai.edu.my email address.';
       registerEmail.parentElement.appendChild(note);
     }
   }
@@ -5436,6 +5416,7 @@ function renderProfile() {
         const name = String(document.getElementById('reg-name')?.value || '').trim();
         const email = normalizeEmail(document.getElementById('reg-email')?.value);
         const password = document.getElementById('reg-password')?.value || '';
+        const matricCardNumber = String(document.getElementById('reg-matric')?.value || '').trim().toUpperCase();
 
         if (!name) {
           showToast('Sila isi nama penuh', 'warning');
@@ -5469,6 +5450,7 @@ function renderProfile() {
             name,
             email,
             password,
+            matricCardNumber,
             role: isAdminUser(email) ? 'admin' : 'user',
             type: 'user',
             createdAt
@@ -5738,7 +5720,7 @@ function renderProfile() {
             : `<div class="w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700"><i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i></div>`
           }
           <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${sold ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}">
-            ${sold ? 'Stok Habis' : 'Stok ' + stock}
+            ${sold ? 'Out of Stock' : 'Stok ' + stock}
           </div>
         </div>
         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-10 pb-4">
@@ -5767,7 +5749,7 @@ function renderProfile() {
       infoGrid.insertAdjacentHTML('beforeend', `
         <div id="product-stock-card" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
           <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Status Stok</p>
-          <p class="font-semibold ${sold ? 'text-red-500' : 'text-green-500'}">${sold ? 'Stok Habis' : 'Masih Ada (' + stock + ')'}</p>
+          <p class="font-semibold ${sold ? 'text-red-500' : 'text-green-500'}">${sold ? 'Out of Stock' : 'Masih Ada (' + stock + ')'}</p>
         </div>
       `);
     }
@@ -5798,7 +5780,7 @@ function renderProfile() {
     const addToCartButton = actionRow.querySelector('button[onclick^="addToCart"]');
     if (addToCartButton) {
       addToCartButton.setAttribute('onclick', `addToCart('${productId}', getModalSelectedQuantity())`);
-      addToCartButton.innerHTML = `<i class="fas fa-cart-plus mr-2"></i>${sold ? 'Stok Habis' : 'Tambah ke Troli'}`;
+      addToCartButton.innerHTML = `<i class="fas fa-cart-plus mr-2"></i>${sold ? 'Out of Stock' : 'Tambah ke Troli'}`;
       if (sold) {
         addToCartButton.disabled = true;
         addToCartButton.className = 'flex-1 btn-primary bg-gray-400 cursor-not-allowed text-white py-3 rounded-xl font-semibold';
@@ -5966,15 +5948,14 @@ function renderProfile() {
     const form = document.getElementById('checkout-form');
     if (!form) return;
 
-    if (!document.getElementById('meet-date')) {
-      const meetDateWrap = document.createElement('div');
-      meetDateWrap.innerHTML = `
-        <label class="block text-sm font-medium mb-2" for="meet-date">Tarikh Pertemuan</label>
-        <input type="date" id="meet-date" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
-      `;
-      const locationWrap = document.getElementById('cod-location')?.parentElement;
-      locationWrap?.insertAdjacentElement('afterend', meetDateWrap);
-    }
+    const oldMeetDate = document.getElementById('meet-date')?.parentElement;
+    if (oldMeetDate) oldMeetDate.remove();
+
+    const oldCodLocation = document.getElementById('cod-location')?.parentElement;
+    if (oldCodLocation) oldCodLocation.remove();
+
+    const oldOfferPrice = document.getElementById('offer-price')?.parentElement;
+    if (oldOfferPrice) oldOfferPrice.remove();
 
     if (!document.getElementById('meet-time')) {
       const meetTimeWrap = document.createElement('div');
@@ -5982,8 +5963,8 @@ function renderProfile() {
         <label class="block text-sm font-medium mb-2" for="meet-time">Masa Pertemuan</label>
         <input type="time" id="meet-time" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
       `;
-      const meetDateParent = document.getElementById('meet-date')?.parentElement;
-      meetDateParent?.insertAdjacentElement('afterend', meetTimeWrap);
+      const deptWrap = document.getElementById('cod-dept')?.parentElement;
+      deptWrap?.insertAdjacentElement('afterend', meetTimeWrap);
     }
 
     const heading = document.querySelector('#page-checkout h1');
@@ -6037,14 +6018,15 @@ function renderProfile() {
       const name = currentUser?.name || 'Pembeli';
       const phone = document.getElementById('cod-phone')?.value || '';
       const dept = document.getElementById('cod-dept')?.value || '';
-      const location = document.getElementById('cod-location')?.value || '';
-      const meetDate = document.getElementById('meet-date')?.value || '';
+      const sellerLocations = [...new Set(checkoutItems.map(item => (item.product?.preferredCodLocation || item.product?.codLocation || '').trim()).filter(Boolean))];
+      const location = sellerLocations.length ? sellerLocations.join(', ') : 'Refer to seller';
+      const meetDate = '';
       const meetTime = document.getElementById('meet-time')?.value || '';
-      const offerPrice = parseFloat(document.getElementById('offer-price')?.value || '0');
+      const offerPrice = 0;
       const checkoutItems = getActiveCheckoutItems();
 
-      if (!location || !meetDate || !meetTime) {
-        showToast('Sila lengkapkan lokasi, tarikh, dan masa pertemuan', 'warning');
+      if (!meetTime) {
+        showToast('Sila lengkapkan masa pertemuan', 'warning');
         return;
       }
 
@@ -6464,7 +6446,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 
   window.openAdminMonitor = function () {
     if (!currentUser || !isAdminUser(currentUser)) {
-      showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      showToast('Admin panel access is for administrators only.', 'warning');
       return;
     }
 
@@ -6477,30 +6459,30 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     const pendingOffers = offers.filter(offer => offer.offerStatus === 'pending');
     const cancelledOffers = offers.filter(offer => offer.offerStatus === 'cancelled');
 
-    showModal('Panel Pemantauan Admin', `
+    showModal('Admin Monitoring Panel', `
       <div class="space-y-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Pengguna</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Total Users</p>
             <p class="text-2xl font-bold">${usersCount}</p>
           </div>
           <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Produk</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Total Products</p>
             <p class="text-2xl font-bold">${products.length}</p>
           </div>
           <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Menunggu</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Pending Orders</p>
             <p class="text-2xl font-bold">${pendingOffers.length}</p>
           </div>
           <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Dibatalkan</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Cancelled Orders</p>
             <p class="text-2xl font-bold">${cancelledOffers.length}</p>
           </div>
         </div>
 
         <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4">
           <div class="flex items-center justify-between gap-3 mb-3">
-            <h3 class="font-semibold">Produk Stok Rendah</h3>
+            <h3 class="font-semibold">Low Stock Products</h3>
             <span class="text-sm text-navy-500 dark:text-navy-300">${lowStock.length} produk</span>
           </div>
           ${lowStock.length ? `
@@ -6525,7 +6507,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
               ${outOfStock.slice(0, 8).map(product => `
                 <div class="flex items-center justify-between gap-3 rounded-xl bg-navy-50 dark:bg-navy-700 p-3">
                   <span>${escapeHtmlSafe(product.productName)}</span>
-                  <span class="font-semibold text-red-500">Stok Habis</span>
+                  <span class="font-semibold text-red-500">Out of Stock</span>
                 </div>
               `).join('')}
             </div>
@@ -6534,7 +6516,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 
         <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4">
           <div class="flex items-center justify-between gap-3 mb-3">
-            <h3 class="font-semibold">Hubungi Admin</h3>
+            <h3 class="font-semibold">Message Admin</h3>
             <span class="text-sm text-navy-500 dark:text-navy-300">${ADMIN_PHONE_DISPLAY}</span>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -6564,7 +6546,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       btn.href = '#';
       btn.id = 'admin-nav-button';
       btn.className = 'nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors';
-      btn.innerHTML = '<i class="fas fa-user-shield mr-1"></i> Panel Admin';
+      btn.innerHTML = '<i class="fas fa-user-shield mr-1"></i> Admin Panel';
       btn.onclick = (e) => {
         e.preventDefault();
         openAdminMonitor();
@@ -6577,7 +6559,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       btnMobile.href = '#';
       btnMobile.id = 'admin-nav-button-mobile';
       btnMobile.className = 'text-navy-600 dark:text-navy-200 py-2';
-      btnMobile.innerHTML = '<i class="fas fa-user-shield mr-2"></i> Panel Admin';
+      btnMobile.innerHTML = '<i class="fas fa-user-shield mr-2"></i> Admin Panel';
       btnMobile.onclick = (e) => {
         e.preventDefault();
         openAdminMonitor();
@@ -6952,13 +6934,13 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       <div class="space-y-4">
         <p class="text-sm text-navy-600 dark:text-navy-300">Sila nyatakan sebab laporan dengan jelas supaya admin boleh membuat semakan.</p>
         <div>
-          <label class="block text-sm font-medium mb-2">Kategori Aduan</label>
+          <label class="block text-sm font-medium mb-2">Kategori Reports</label>
           <select id="report-category-v2" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0">
             <option value="Maklumat palsu">Maklumat palsu</option>
-            <option value="Produk tidak sesuai">Produk tidak sesuai</option>
+            <option value="Inappropriate product">Inappropriate product</option>
             <option value="Scam / penipuan">Scam / penipuan</option>
-            <option value="Pembeli / penjual tidak hadir">Pembeli / penjual tidak hadir</option>
-            <option value="Pembatalan saat akhir">Pembatalan saat akhir</option>
+            <option value="Buyer / seller did not show up">Buyer / seller did not show up</option>
+            <option value="Last-minute cancellation">Last-minute cancellation</option>
             <option value="Lain-lain">Lain-lain</option>
           </select>
         </div>
@@ -6968,7 +6950,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
         </div>
         <div class="flex justify-end gap-2">
           <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700">Tutup</button>
-          <button type="button" onclick="submitReportV2('${targetType}','${targetId}')" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white">Hantar Aduan</button>
+          <button type="button" onclick="submitReportV2('${targetType}','${targetId}')" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white">Hantar Reports</button>
         </div>
       </div>
     `);
@@ -7007,7 +6989,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       const reportId = await saveToFirebase('reports', payload);
       allData.push({ ...payload, __firebaseId: reportId, id: reportId, __collection: 'reports' });
       closeModal();
-      showToast('Aduan berjaya dihantar kepada admin', 'success');
+      showToast('Reports berjaya dihantar kepada admin', 'success');
     } catch (error) {
       showToast('Ralat semasa menghantar aduan: ' + error.message, 'error');
     }
@@ -7214,7 +7196,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       report.status = 'resolved';
       report.resolvedAt = new Date().toISOString();
       report.resolvedBy = currentUser?.email || 'admin';
-      showToast('Aduan telah ditandakan selesai', 'success');
+      showToast('Report marked as resolved', 'success');
       openAdminMonitor();
     } catch (error) {
       showToast('Ralat semasa mengemas kini aduan: ' + error.message, 'error');
@@ -7267,7 +7249,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 
   window.openAdminMonitor = function () {
     if (!currentUser || !isAdminUserV2(currentUser)) {
-      showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      showToast('Admin panel access is for administrators only.', 'warning');
       return;
     }
 
@@ -7281,27 +7263,27 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     const pendingOffers = offers.filter(offer => offer.offerStatus === 'pending');
     const suspendedUsers = users.filter(user => user.isSuspended);
 
-    showModal('Panel Pemantauan Admin', `
+    showModal('Admin Monitoring Panel', `
       <div class="admin-panel-shell custom-scrollbar space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
           <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Pengguna</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Total Users</p>
             <p class="text-3xl font-bold mt-2">${users.length}</p>
           </div>
           <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Produk</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Total Products</p>
             <p class="text-3xl font-bold mt-2">${products.length}</p>
           </div>
           <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Menunggu</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Pending Orders</p>
             <p class="text-3xl font-bold mt-2">${pendingOffers.length}</p>
           </div>
           <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Aduan Terbuka</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Open Reports</p>
             <p class="text-3xl font-bold mt-2">${openReports.length}</p>
           </div>
           <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
-            <p class="text-sm text-navy-500 dark:text-navy-300">Akaun Digantung</p>
+            <p class="text-sm text-navy-500 dark:text-navy-300">Akaun Suspended</p>
             <p class="text-3xl font-bold mt-2">${suspendedUsers.length}</p>
           </div>
         </div>
@@ -7310,7 +7292,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
           <section class="admin-panel-section">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
               <div>
-                <h3 class="text-xl font-semibold">Aduan / Report</h3>
+                <h3 class="text-xl font-semibold">Reports / Report</h3>
                 <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Semak aduan terbuka dan tandakan selesai selepas tindakan diambil.</p>
               </div>
               <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start md:self-auto">${reports.length} laporan</span>
@@ -7322,8 +7304,8 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                     <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                       <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-1">
-                          <p class="font-semibold text-base">${escapeHtmlV2(report.category || 'Aduan')}</p>
-                          <span class="text-xs px-2 py-1 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${report.status === 'resolved' ? 'Selesai' : 'Terbuka'}</span>
+                          <p class="font-semibold text-base">${escapeHtmlV2(report.category || 'Reports')}</p>
+                          <span class="text-xs px-2 py-1 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${report.status === 'resolved' ? 'Selesai' : 'Open'}</span>
                         </div>
                         <p class="text-xs text-navy-500 dark:text-navy-300">Pelapor: ${escapeHtmlV2(report.reporterEmail || '-')} • Sasaran: ${escapeHtmlV2(report.reportTargetType || '-')}</p>
                         ${report.relatedProductName ? `<p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Produk: ${escapeHtmlV2(report.relatedProductName)}</p>` : ''}
@@ -7332,7 +7314,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                       </div>
                       <div class="lg:text-right shrink-0">
                         <p class="text-xs text-navy-400">${formatDateTimeV2(report.createdAt)}</p>
-                        ${report.status !== 'resolved' ? `<button onclick="resolveReportV2('${report.__firebaseId}')" class="mt-3 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium">Tanda Selesai</button>` : ''}
+                        ${report.status !== 'resolved' ? `<button onclick="resolveReportV2('${report.__firebaseId}')" class="mt-3 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium">Mark as Resolved</button>` : ''}
                       </div>
                     </div>
                   </div>
@@ -7345,7 +7327,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
             <section class="admin-panel-section">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <div>
-                  <h3 class="text-xl font-semibold">Hubungi Admin</h3>
+                  <h3 class="text-xl font-semibold">Message Admin</h3>
                   <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Akses pantas untuk bantuan dan semakan pengurusan.</p>
                 </div>
                 <span class="text-sm text-navy-500 dark:text-navy-300">+6019-540 2353</span>
@@ -7358,14 +7340,14 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 
             <section class="admin-panel-section">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <h3 class="text-xl font-semibold">Produk Stok Rendah / Habis</h3>
+                <h3 class="text-xl font-semibold">Low / Out of Stock Products</h3>
                 <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start sm:self-auto">${lowStock.length + outOfStock.length} produk</span>
               </div>
               ${lowStock.length || outOfStock.length ? `
                 <div class="admin-panel-list custom-scrollbar space-y-2 text-sm">
                   ${[
                     ...lowStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-orange-500">Baki ${getProductStockV2(product)}</span></div>`),
-                    ...outOfStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-red-500">Stok Habis</span></div>`)
+                    ...outOfStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-red-500">Out of Stock</span></div>`)
                   ].join('')}
                 </div>
               ` : `<div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-sm text-navy-500 dark:text-navy-300">Tiada produk stok rendah atau habis.</div>`}
@@ -7377,8 +7359,8 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
           <section class="admin-panel-section">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <div>
-                <h3 class="text-xl font-semibold">Kawalan Pengguna</h3>
-                <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Gantung atau aktifkan semula akaun pengguna mengikut keperluan.</p>
+                <h3 class="text-xl font-semibold">User Management</h3>
+                <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Suspend atau aktifkan semula akaun pengguna mengikut keperluan.</p>
               </div>
               <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start sm:self-auto">${users.length} pengguna</span>
             </div>
@@ -7391,7 +7373,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                   </div>
                   ${isAdminUserV2(user)
                     ? `<span class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Admin</span>`
-                    : `<button onclick="toggleSuspendUserV2('${escapeHtmlV2(user.email || '')}')" class="shrink-0 px-4 py-2 rounded-xl ${user.isSuspended ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30'} text-xs font-medium">${user.isSuspended ? 'Aktifkan' : 'Gantung'}</button>`}
+                    : `<button onclick="toggleSuspendUserV2('${escapeHtmlV2(user.email || '')}')" class="shrink-0 px-4 py-2 rounded-xl ${user.isSuspended ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30'} text-xs font-medium">${user.isSuspended ? 'Reactivate' : 'Suspend'}</button>`}
                 </div>
               `).join('')}
             </div>
@@ -7400,7 +7382,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
           <section class="admin-panel-section">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <div>
-                <h3 class="text-xl font-semibold">Moderasi Produk</h3>
+                <h3 class="text-xl font-semibold">Product Moderation</h3>
                 <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Padam produk yang tidak sesuai atau tidak patuh kepada peraturan sistem.</p>
               </div>
               <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start sm:self-auto">${products.length} produk</span>
@@ -7748,12 +7730,12 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     return `
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
         ${[
-          ['Jumlah Pengguna', users.length, 'fas fa-users'],
-          ['Jumlah Produk', products.length, 'fas fa-box-open'],
-          ['Tempahan Menunggu', pendingOffers, 'fas fa-hourglass-half'],
-          ['Tempahan Selesai', completedOffers, 'fas fa-circle-check'],
-          ['Aduan Terbuka', openReports, 'fas fa-flag'],
-          ['Stok Rendah', lowStock, 'fas fa-triangle-exclamation']
+          ['Total Users', users.length, 'fas fa-users'],
+          ['Total Products', products.length, 'fas fa-box-open'],
+          ['Pending Orders', pendingOffers, 'fas fa-hourglass-half'],
+          ['Completed Orders', completedOffers, 'fas fa-circle-check'],
+          ['Open Reports', openReports, 'fas fa-flag'],
+          ['Low Stock', lowStock, 'fas fa-triangle-exclamation']
         ].map(([label, value, icon]) => `
           <div class="sop-mini-card">
             <div class="flex items-start justify-between gap-3">
@@ -7814,16 +7796,16 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       <section class="admin-panel-section sop-admin-col-7">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
           <div>
-            <h3 class="text-xl font-semibold">Aduan / Report</h3>
+            <h3 class="text-xl font-semibold">Reports / Report</h3>
             <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Cari aduan mengikut pelapor, kategori, produk, atau status.</p>
           </div>
           <span class="sop-data-pill">${reports.length} / ${allReports.length} laporan</span>
         </div>
         <div class="sop-toolbar mb-4">
-          <input id="admin-report-search-v3" class="sop-soft-input" placeholder="Cari aduan, produk, atau pelapor" value="${escV3(adminMonitorStateV3.reportQuery)}">
+          <input id="admin-report-search-v3" class="sop-soft-input" placeholder="Search reports, products, or reporter" value="${escV3(adminMonitorStateV3.reportQuery)}">
           <select id="admin-report-filter-v3" class="sop-soft-select">
-            <option value="all" ${adminMonitorStateV3.reportStatus === 'all' ? 'selected' : ''}>Semua Status</option>
-            <option value="open" ${adminMonitorStateV3.reportStatus === 'open' ? 'selected' : ''}>Terbuka</option>
+            <option value="all" ${adminMonitorStateV3.reportStatus === 'all' ? 'selected' : ''}>All Statuses</option>
+            <option value="open" ${adminMonitorStateV3.reportStatus === 'open' ? 'selected' : ''}>Open</option>
             <option value="resolved" ${adminMonitorStateV3.reportStatus === 'resolved' ? 'selected' : ''}>Selesai</option>
           </select>
           <button onclick="applyAdminReportFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
@@ -7836,8 +7818,8 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                 <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2 mb-2">
-                      <p class="font-semibold text-base">${escV3(report.category || 'Aduan')}</p>
-                      <span class="text-xs px-2 py-1 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${report.status === 'resolved' ? 'Selesai' : 'Terbuka'}</span>
+                      <p class="font-semibold text-base">${escV3(report.category || 'Reports')}</p>
+                      <span class="text-xs px-2 py-1 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${report.status === 'resolved' ? 'Selesai' : 'Open'}</span>
                     </div>
                     <p class="text-xs text-navy-500 dark:text-navy-300">Pelapor: ${escV3(report.reporterEmail || '-')} • Sasaran: ${escV3(report.reportTargetType || '-')}</p>
                     ${report.relatedProductName ? `<p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Produk: ${escV3(report.relatedProductName)}</p>` : ''}
@@ -7846,7 +7828,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                   </div>
                   <div class="lg:text-right shrink-0">
                     <p class="text-xs text-navy-400">${fmtV3(report.createdAt)}</p>
-                    ${report.status !== 'resolved' ? `<button onclick="resolveReportV2('${report.__firebaseId}')" class="mt-3 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium">Tanda Selesai</button>` : ''}
+                    ${report.status !== 'resolved' ? `<button onclick="resolveReportV2('${report.__firebaseId}')" class="mt-3 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium">Mark as Resolved</button>` : ''}
                   </div>
                 </div>
               </div>
@@ -7863,17 +7845,17 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       <section class="admin-panel-section sop-admin-col-6">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
           <div>
-            <h3 class="text-xl font-semibold">Kawalan Pengguna</h3>
+            <h3 class="text-xl font-semibold">User Management</h3>
             <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Cari pengguna dan tapis ikut status akaun.</p>
           </div>
           <span class="sop-data-pill">${users.length} / ${allUsers.length} pengguna</span>
         </div>
         <div class="sop-toolbar mb-4">
-          <input id="admin-user-search-v3" class="sop-soft-input" placeholder="Cari nama atau e-mel pengguna" value="${escV3(adminMonitorStateV3.userQuery)}">
+          <input id="admin-user-search-v3" class="sop-soft-input" placeholder="Search user name or email" value="${escV3(adminMonitorStateV3.userQuery)}">
           <select id="admin-user-filter-v3" class="sop-soft-select">
-            <option value="all" ${adminMonitorStateV3.userStatus === 'all' ? 'selected' : ''}>Semua Pengguna</option>
+            <option value="all" ${adminMonitorStateV3.userStatus === 'all' ? 'selected' : ''}>All Users</option>
             <option value="active" ${adminMonitorStateV3.userStatus === 'active' ? 'selected' : ''}>Aktif</option>
-            <option value="suspended" ${adminMonitorStateV3.userStatus === 'suspended' ? 'selected' : ''}>Digantung</option>
+            <option value="suspended" ${adminMonitorStateV3.userStatus === 'suspended' ? 'selected' : ''}>Suspended</option>
             <option value="admin" ${adminMonitorStateV3.userStatus === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
           <button onclick="applyAdminUserFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
@@ -7889,7 +7871,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                 </div>
                 ${(typeof window.isAdminUserV2 === 'function' ? window.isAdminUserV2(user) : false)
                   ? `<span class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Admin</span>`
-                  : `<button onclick="toggleSuspendUserV2('${escV3(user.email || '')}')" class="shrink-0 px-4 py-2 rounded-xl ${user.isSuspended ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30'} text-xs font-medium">${user.isSuspended ? 'Aktifkan' : 'Gantung'}</button>`}
+                  : `<button onclick="toggleSuspendUserV2('${escV3(user.email || '')}')" class="shrink-0 px-4 py-2 rounded-xl ${user.isSuspended ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30'} text-xs font-medium">${user.isSuspended ? 'Reactivate' : 'Suspend'}</button>`}
               </div>
             `).join('')}
           </div>
@@ -7904,17 +7886,17 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       <section class="admin-panel-section sop-admin-col-6">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
           <div>
-            <h3 class="text-xl font-semibold">Moderasi Produk</h3>
+            <h3 class="text-xl font-semibold">Product Moderation</h3>
             <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Cari produk dan tapis ikut status stok.</p>
           </div>
           <span class="sop-data-pill">${products.length} / ${allProducts.length} produk</span>
         </div>
         <div class="sop-toolbar mb-4">
-          <input id="admin-product-search-v3" class="sop-soft-input" placeholder="Cari nama produk, kategori, atau penjual" value="${escV3(adminMonitorStateV3.productQuery)}">
+          <input id="admin-product-search-v3" class="sop-soft-input" placeholder="Search product name, category, or seller" value="${escV3(adminMonitorStateV3.productQuery)}">
           <select id="admin-product-filter-v3" class="sop-soft-select">
-            <option value="all" ${adminMonitorStateV3.productStock === 'all' ? 'selected' : ''}>Semua Stok</option>
-            <option value="low" ${adminMonitorStateV3.productStock === 'low' ? 'selected' : ''}>Stok Rendah</option>
-            <option value="out" ${adminMonitorStateV3.productStock === 'out' ? 'selected' : ''}>Stok Habis</option>
+            <option value="all" ${adminMonitorStateV3.productStock === 'all' ? 'selected' : ''}>All Stock</option>
+            <option value="low" ${adminMonitorStateV3.productStock === 'low' ? 'selected' : ''}>Low Stock</option>
+            <option value="out" ${adminMonitorStateV3.productStock === 'out' ? 'selected' : ''}>Out of Stock</option>
             <option value="normal" ${adminMonitorStateV3.productStock === 'normal' ? 'selected' : ''}>Stok Normal</option>
           </select>
           <button onclick="applyAdminProductFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
@@ -7987,19 +7969,19 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       <section class="admin-panel-section sop-admin-col-12">
         <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
           <div class="sop-list-card">
-            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Stok Rendah</h4><span class="sop-data-pill">${lowStock.length}</span></div>
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Low Stock</h4><span class="sop-data-pill">${lowStock.length}</span></div>
             <div class="space-y-2 text-sm ${lowStock.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
               ${lowStock.length ? lowStock.slice(0,8).map(product => `<div class="flex items-center justify-between gap-3"><span class="truncate">${escV3(product.productName)}</span><span class="font-semibold text-orange-500">${getProductStockSafeV3(product)}</span></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
             </div>
           </div>
           <div class="sop-list-card">
-            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Stok Habis</h4><span class="sop-data-pill">${outOfStock.length}</span></div>
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Out of Stock</h4><span class="sop-data-pill">${outOfStock.length}</span></div>
             <div class="space-y-2 text-sm ${outOfStock.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
               ${outOfStock.length ? outOfStock.slice(0,8).map(product => `<div class="flex items-center justify-between gap-3"><span class="truncate">${escV3(product.productName)}</span><span class="font-semibold text-red-500">Habis</span></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
             </div>
           </div>
           <div class="sop-list-card">
-            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Akaun Digantung</h4><span class="sop-data-pill">${suspendedUsers.length}</span></div>
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Akaun Suspended</h4><span class="sop-data-pill">${suspendedUsers.length}</span></div>
             <div class="space-y-2 text-sm ${suspendedUsers.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
               ${suspendedUsers.length ? suspendedUsers.slice(0,8).map(user => `<div><p class="font-medium truncate">${escV3(user.name || '-')}</p><p class="text-xs text-navy-500 dark:text-navy-300 break-all">${escV3(user.email || '-')}</p></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
             </div>
@@ -8065,11 +8047,11 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
   window.openAdminMonitor = function(){
     const adminCheckFn = window.isAdminUserV2 || window.isAdminUser;
     if (!window.currentUser || !(typeof adminCheckFn === 'function' ? adminCheckFn(window.currentUser) : false)) {
-      if (typeof window.showToast === 'function') window.showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      if (typeof window.showToast === 'function') window.showToast('Admin panel access is for administrators only.', 'warning');
       return;
     }
     if (typeof window.showModal === 'function') {
-      window.showModal('Panel Pemantauan Admin', getAdminMonitorHtmlV3(), { modalClass: 'modal-fullscreen', bodyClass: 'custom-scrollbar' });
+      window.showModal('Admin Monitoring Panel', getAdminMonitorHtmlV3(), { modalClass: 'modal-fullscreen', bodyClass: 'custom-scrollbar' });
     }
   };
 
@@ -8097,7 +8079,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       const after = typeof getUserFn === 'function' ? getUserFn(email) : null;
       const nextState = !!after?.isSuspended;
       if (prevState !== nextState) {
-        await saveAdminLogV3(nextState ? 'Gantung pengguna' : 'Aktifkan pengguna', 'user', email, `Nama pengguna: ${after?.name || before?.name || '-'}`);
+        await saveAdminLogV3(nextState ? 'Suspend pengguna' : 'Reactivate pengguna', 'user', email, `Nama pengguna: ${after?.name || before?.name || '-'}`);
         renderAdminMonitorBodyV3();
       }
     };
@@ -8127,14 +8109,14 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     block.className = 'space-y-6 mb-6';
     block.innerHTML = `
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Menunggu</p><p id="seller-pending-count-v3" class="text-2xl font-bold mt-2">0</p></div>
-        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Selesai</p><p id="seller-completed-count-v3" class="text-2xl font-bold mt-2">0</p></div>
-        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Dibatalkan</p><p id="seller-cancelled-count-v3" class="text-2xl font-bold mt-2">0</p></div>
-        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Jualan Berjaya</p><p id="seller-revenue-v3" class="text-2xl font-bold mt-2">RM 0.00</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Pending Orders</p><p id="seller-pending-count-v3" class="text-2xl font-bold mt-2">0</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Completed Orders</p><p id="seller-completed-count-v3" class="text-2xl font-bold mt-2">0</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Cancelled Orders</p><p id="seller-cancelled-count-v3" class="text-2xl font-bold mt-2">0</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Successful Sales</p><p id="seller-revenue-v3" class="text-2xl font-bold mt-2">RM 0.00</p></div>
       </div>
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
-          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Prestasi Produk</h2><span id="seller-performance-badge-v3" class="sop-data-pill">0 produk</span></div>
+          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Product Performance</h2><span id="seller-performance-badge-v3" class="sop-data-pill">0 produk</span></div>
           <div id="seller-performance-v3" class="p-4 space-y-3"></div>
         </div>
         <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
@@ -8371,7 +8353,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     const isAdmin = !!promoted && (window.isAdminUserV2(promoted) || window.isAdminUser(promoted));
     if (!isAdmin) {
       if (typeof window.showToast === 'function') {
-        window.showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+        window.showToast('Admin panel access is for administrators only.', 'warning');
       }
       return;
     }
@@ -8410,7 +8392,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 
 <script>
 (function() {
-  const exactMap = {"Selamat Datang ke SHOP ONLINE POLY!": "Welcome to SHOP ONLINE POLY!", "Platform Jual Beli Komuniti Politeknik Nilai Anda": "Your Politeknik Nilai Community Marketplace", "Daftar Akaun": "Create Account", "Daftar sekarang": "Register now", "Daftar Sekarang": "Register Now", "Log Masuk": "Log In", "Log masuk": "Log in", "Log masuk berjaya!": "Logged in successfully!", "Log keluar berjaya": "Logged out successfully", "Kata Laluan": "Password", "Lupa kata laluan": "Forgot password", "Lupa Kata Laluan": "Forgot Password", "Simpan Kata Laluan Baharu": "Save New Password", "Ulang kata laluan baharu": "Repeat new password", "Belum ada akaun?": "Don't have an account yet?", "Sudah ada akaun?": "Already have an account?", "Sertai komuniti S.O.P hari ini!": "Join the S.O.P community today!", "Nama Penuh": "Full Name", "Nama penuh anda": "Your full name", "Email": "Email", "E-mel": "Email", "Emel": "Email", "Minimum 6 aksara": "Minimum 6 characters", "Satu Akaun untuk Membeli & Menjual": "One Account for Buying & Selling", "Semua pengguna boleh membeli produk dan juga menjual produk menggunakan akaun yang sama.": "All users can buy and sell products using the same account.", "Utama": "Home", "Produk": "Products", "Troli": "Cart", "Troli Saya": "My Cart", "Troli anda kosong": "Your cart is empty", "Teruskan Tempahan": "Proceed to Order", "Mesej": "Messages", "Berbincang terus dengan penjual untuk urusan yang lebih lancar.": "Chat directly with the seller for a smoother transaction.", "Kategori Produk": "Product Categories", "Semua Kategori": "All Categories", "Semua": "All", "Produk Trending": "Trending Products", "Lihat Semua": "View All", "Terbaru": "Newest", "Harga: Rendah ke Tinggi": "Price: Low to High", "Harga: Tinggi ke Rendah": "Price: High to Low", "Tiada produk dijumpai": "No products found", "Tiada produk yang sepadan dengan carian anda.": "No products match your search.", "Tambah ke Troli": "Add to Cart", "Ditambah ke troli!": "Added to cart!", "Produk berjaya ditambah ke troli": "Product added to cart successfully", "Sila log masuk untuk menambah ke troli": "Please log in to add to cart", "Sila log masuk untuk menambah produk ke troli": "Please log in to add products to your cart", "Anda tidak boleh membeli produk sendiri": "You cannot buy your own product", "Produk ini telah kehabisan stok": "This product is out of stock", "Produk ini sudah dijual dan tidak boleh ditambah ke troli": "This product has already been sold and cannot be added to the cart", "Kuantiti Produk": "Product Quantity", "Jumlah Stok": "Stock Quantity", "Harga (RM)": "Price (RM)", "Keadaan Produk": "Product Condition", "Baharu": "New", "Terpakai": "Used", "Kategori": "Category", "Akademik": "Academic", "Elektronik": "Electronics", "Peribadi": "Personal", "Makanan": "Food", "Perkhidmatan": "Services", "Lain-lain": "Others", "Lokasi COD": "COD Location", "Lokasi COD Dicadangkan": "Suggested COD Location", "Masa COD Dicadangkan": "Suggested COD Time", "Pilih lokasi": "Select a location", "Contoh: Kafeteria Utama Politeknik Nilai": "Example: Main Cafeteria, Politeknik Nilai", "Keterangan Produk": "Product Description", "Tiada keterangan produk.": "No product description.", "Contoh: Kalkulator Saintifik": "Example: Scientific Calculator", "Contoh: 25.00": "Example: 25.00", "Contoh: 12.30 tengah hari - 2.00 petang": "Example: 12:30 PM - 2:00 PM", "Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal.": "Enter product information in clear and formal language.", "Masukkan detail produk seperti keadaan barang, saiz, warna, atau maklumat tambahan.": "Enter product details such as item condition, size, color, or additional information.", "Gambar Produk": "Product Images", "Tambah Produk": "Add Product", "Terbitkan Produk": "Publish Product", "Produk berjaya diterbitkan": "Product published successfully", "Produk diterbitkan": "Product Published", "Produk berjaya dimuat naik.": "Product uploaded successfully.", "✅ Produk berjaya ditambah!": "✅ Product added successfully!", "Padam Produk?": "Delete Product?", "Produk telah dipadam": "Product deleted", "Produk berjaya dipadam oleh admin": "Product deleted by admin", "Padam": "Delete", "Padam produk": "Delete product", "Padam produk yang tidak sesuai atau tidak patuh kepada peraturan sistem.": "Delete products that are inappropriate or violate platform rules.", "Pengguna S.O.P": "S.O.P User", "Pengguna": "User", "Penjual": "Seller", "Pembeli": "Buyer", "Penilaian Pengguna": "User Rating", "Tiada Ulasan": "No Reviews", "Ulasan Pembelian": "Purchase Review", "Ulasan Anda": "Your Review", "Pilih bintang": "Select star rating", "Hantar Ulasan": "Submit Review", "Kemaskini Ulasan": "Update Review", "Sila log masuk untuk memberi ulasan": "Please log in to leave a review", "Penjual tidak boleh memberi ulasan pada produk sendiri": "Sellers cannot review their own products", "Ulasan hanya boleh dibuat selepas anda membeli produk ini": "Reviews can only be submitted after you purchase this product", "Ulasan hanya boleh dibuat selepas pembelian berjaya": "Reviews can only be submitted after a successful purchase", "Maklumat Produk": "Product Information", "Harga": "Price", "Penilaian Penjual": "Seller Rating", "Tandakan Masih Tersedia": "Mark as Available", "Tandakan Sudah Dijual": "Mark as Sold", "Status produk berjaya ditukar kepada": "Product status successfully changed to", "Hanya pemilik produk boleh menukar status ini": "Only the product owner can change this status", "Profil Saya": "My Profile", "Profil Pengguna": "User Profile", "Jumlah Produk": "Total Products", "Produk Pengguna": "User Products", "Pengguna ini belum menambah produk.": "This user has not added any products yet.", "Klik produk untuk lihat maklumat penuh.": "Click a product to view full details.", "Lihat Profil Penjual": "View Seller Profile", "Chat Pengguna": "Chat User", "Tekan pengguna untuk buka ruang mesej": "Click a user to open the chat", "Pilih perbualan": "Select conversation", "Pilih perbualan untuk mula mesej": "Select a conversation to start messaging", "Sila log masuk untuk mesej": "Please log in to use messages", "Tawaran Diterima": "Offer Accepted", "Tawaran Ditolak": "Offer Rejected", "✅ Tawaran diterima": "✅ Offer accepted", "❌ Tawaran ditolak": "❌ Offer rejected", "Tiada notifikasi": "No notifications", "Tiada tawaran setakat ini": "No offers yet", "Tiada tempahan daripada pembeli setakat ini.": "No buyer orders at the moment.", "Tiada item untuk dibuat tempahan.": "No items available for checkout.", "Tawaran tidak dijumpai": "Offer not found", "Tawaran telah ditolak dan dihantar ke ruang mesej": "The offer has been rejected and sent to the chat", "Terima": "Accept", "Tolak": "Reject", "Sahkan Tolak": "Confirm Rejection", "Batal": "Cancel", "Tiada sebab diberikan.": "No reason provided.", "Sebab penolakan:": "Rejection reason:", "Contoh: Masa COD tidak sesuai, harga terlalu rendah, atau produk sudah ditempah.": "Example: COD time is not suitable, price is too low, or the product has already been reserved.", "Maksimum 5 gambar sahaja untuk satu produk": "Maximum 5 images are allowed for one product", "Sebahagian gambar ditolak:": "Some images were rejected:", "Firebase belum siap. Sila periksa konfigurasi.": "Firebase is not ready. Please check the configuration.", "Firebase belum siap. Sila semak konfigurasi.": "Firebase is not ready. Please check the configuration.", "Email atau kata laluan tidak sah": "Invalid email or password", "E-mel atau kata laluan tidak sah": "Invalid email or password", "Email sudah didaftarkan": "Email is already registered", "Pendaftaran hanya dibenarkan menggunakan e-mel rasmi @polinilai.edu.my.": "Registration is only allowed using an official @polinilai.edu.my email address.", "Pendaftaran berjaya! Sila log masuk.": "Registration successful! Please log in.", "Pendaftaran berjaya. Sila log masuk.": "Registration successful. Please log in.", "Ralat semasa pendaftaran:": "Registration error:", "Akaun anda sedang digantung oleh admin.": "Your account has been suspended by the admin.", "Akaun anda sedang digantung oleh admin. Sila hubungi admin untuk bantuan.": "Your account has been suspended by the admin. Please contact admin for assistance.", "Hubungi Admin": "Contact Admin", "Panel Admin": "Admin Panel", "Panel Pemantauan Admin": "Admin Monitoring Panel", "Akses panel admin hanya untuk pentadbir.": "Admin panel access is for administrators only.", "Aduan": "Reports", "Aduan Terbuka": "Open Reports", "Laporkan Produk": "Report Product", "Laporkan Isu": "Report Issue", "Kategori Aduan": "Report Category", "Maklumat palsu": "False information", "Produk tidak sesuai": "Inappropriate product", "Scam": "Scam", "Pembeli / penjual tidak hadir": "Buyer / seller did not show up", "Pembatalan saat akhir": "Last-minute cancellation", "Kawalan Pengguna": "User Management", "Moderasi Produk": "Product Moderation", "Stok Rendah": "Low Stock", "Stok Habis": "Out of Stock", "Jumlah Pengguna": "Total Users", "Tempahan Menunggu": "Pending Orders", "Tempahan Selesai": "Completed Orders", "Tempahan Dibatalkan": "Cancelled Orders", "Jualan Berjaya": "Successful Sales", "Prestasi Produk": "Product Performance", "Aktiviti Jualan Terkini": "Recent Sales Activity", "Cari aduan, produk, atau pelapor": "Search reports, products, or reporter", "Cari nama atau e-mel pengguna": "Search user name or email", "Cari nama produk, kategori, atau penjual": "Search product name, category, or seller", "Semua Status": "All Statuses", "Semua Pengguna": "All Users", "Semua Stok": "All Stock", "Terbuka": "Open", "Digantung": "Suspended", "Gantung": "Suspend", "Aktifkan": "Reactivate", "Tanda Selesai": "Mark as Resolved", "Aduan telah ditandakan selesai": "Report marked as resolved", "Akaun admin tidak boleh digantung melalui panel ini.": "Admin accounts cannot be suspended through this panel.", "Akaun pengguna digantung": "User account suspended", "Akaun pengguna diaktifkan semula": "User account reactivated", "Pengguna tidak dijumpai": "User not found", "Maklumat pengguna tidak dijumpai": "User information not found", "Sedang memuat naik gambar profil...": "Uploading profile image...", "Gambar profil berjaya dikemas kini": "Profile image updated successfully", "Isi Butiran Tempahan": "Enter Order Details", "Hantar Tempahan": "Send Order", "Ringkasan Pesanan": "Order Summary", "No Telefon": "Phone Number", "Harga Cadangan Pembeli (pilihan)": "Buyer Suggested Price (optional)", "Buat masa ini, satu tempahan hanya dibenarkan untuk seorang penjual sahaja.": "At the moment, one order is only allowed for one seller.", "Tempahan Berjaya Dihantar": "Order Sent Successfully", "Tempahan tidak dijumpai": "Order not found", "Tempahan ini tidak lagi berada dalam status menunggu": "This order is no longer in pending status", "Dibatalkan": "Cancelled", "Diterima": "Accepted", "Ditolak": "Rejected", "Selesai": "Completed", "Pembelian Selesai": "Purchase Completed", "Lihat Mesej": "View Messages", "Mesej Pembeli": "Buyer Messages", "Cari produk...": "Search products...", "Nama Produk": "Product Name", "Status Produk": "Product Status", "Tersedia": "Available", "Sudah Dijual": "Sold", "Panel Jualan Saya": "My Seller Panel"};
+  const exactMap = {"Selamat Datang ke SHOP ONLINE POLY!": "Welcome to SHOP ONLINE POLY!", "Platform Jual Beli Polytechnic Community Nilai Anda": "Your Politeknik Nilai Community Marketplace", "Daftar Akaun": "Create Account", "Daftar sekarang": "Register now", "Daftar Sekarang": "Register Now", "Log Masuk": "Log In", "Log masuk": "Log in", "Log masuk berjaya!": "Logged in successfully!", "Log keluar berjaya": "Logged out successfully", "Kata Laluan": "Password", "Lupa kata laluan": "Forgot password", "Lupa Kata Laluan": "Forgot Password", "Simpan Kata Laluan Baharu": "Save New Password", "Ulang kata laluan baharu": "Repeat new password", "Belum ada akaun?": "Don't have an account yet?", "Sudah ada akaun?": "Already have an account?", "Sertai komuniti S.O.P hari ini!": "Join the S.O.P community today!", "Nama Penuh": "Full Name", "Nama penuh anda": "Your full name", "Nombor Kad Matrik (Pelajar Sahaja)": "Matric Card Number (Students Only)", "Contoh: 23DIB23F1001": "Example: 23DIB23F1001", "Pilihan untuk pensyarah dan staf.": "Optional for lecturers and staff.", "Email": "Email", "E-mel": "Email", "Emel": "Email", "Minimum 6 aksara": "Minimum 6 characters", "Satu Akaun untuk Membeli & Menjual": "One Account for Buying & Selling", "Semua pengguna boleh membeli produk dan juga menjual produk menggunakan akaun yang sama.": "All users can buy and sell products using the same account.", "Utama": "Home", "Produk": "Products", "Troli": "Cart", "Troli Saya": "My Cart", "Troli anda kosong": "Your cart is empty", "Teruskan Tempahan": "Proceed to Order", "Mesej": "Messages", "Berbincang terus dengan penjual untuk urusan yang lebih lancar.": "Chat directly with the seller for a smoother transaction.", "Kategori Produk": "Product Categories", "Semua Kategori": "All Categories", "Semua": "All", "Produk Trending": "Trending Products", "Lihat Semua": "View All", "Terbaru": "Newest", "Harga: Rendah ke Tinggi": "Price: Low to High", "Harga: Tinggi ke Rendah": "Price: High to Low", "Tiada produk dijumpai": "No products found", "Tiada produk yang sepadan dengan carian anda.": "No products match your search.", "Tambah ke Troli": "Add to Cart", "Ditambah ke troli!": "Added to cart!", "Produk berjaya ditambah ke troli": "Product added to cart successfully", "Sila log masuk untuk menambah ke troli": "Please log in to add to cart", "Sila log masuk untuk menambah produk ke troli": "Please log in to add products to your cart", "Anda tidak boleh membeli produk sendiri": "You cannot buy your own product", "Produk ini telah kehabisan stok": "This product is out of stock", "Produk ini sudah dijual dan tidak boleh ditambah ke troli": "This product has already been sold and cannot be added to the cart", "Kuantiti Produk": "Product Quantity", "Jumlah Stok": "Stock Quantity", "Harga (RM)": "Price (RM)", "Keadaan Produk": "Product Condition", "Baharu": "New", "Terpakai": "Used", "Kategori": "Category", "Akademik": "Academic", "Elektronik": "Electronics", "Peribadi": "Personal", "Makanan": "Food", "Perkhidmatan": "Services", "Lain-lain": "Others", "Lokasi COD": "COD Location", "Lokasi COD Dicadangkan": "Suggested COD Location", "Masa COD Dicadangkan": "Suggested COD Time", "Pilih lokasi": "Select a location", "Contoh: Kafeteria Utama Politeknik Nilai": "Example: Main Cafeteria, Politeknik Nilai", "Keterangan Produk": "Product Description", "Tiada keterangan produk.": "No product description.", "Contoh: Kalkulator Saintifik": "Example: Scientific Calculator", "Contoh: 25.00": "Example: 25.00", "Contoh: 12.30 tengah hari - 2.00 petang": "Example: 12:30 PM - 2:00 PM", "Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal.": "Enter product information in clear and formal language.", "Masukkan detail produk seperti keadaan barang, saiz, warna, atau maklumat tambahan.": "Enter product details such as item condition, size, color, or additional information.", "Gambar Produk": "Product Images", "Tambah Produk": "Add Product", "Terbitkan Produk": "Publish Product", "Produk berjaya diterbitkan": "Product published successfully", "Produk diterbitkan": "Product Published", "Produk berjaya dimuat naik.": "Product uploaded successfully.", "✅ Produk berjaya ditambah!": "✅ Product added successfully!", "Padam Produk?": "Delete Product?", "Produk telah dipadam": "Product deleted", "Produk berjaya dipadam oleh admin": "Product deleted by admin", "Padam": "Delete", "Padam produk": "Delete product", "Padam produk yang tidak sesuai atau tidak patuh kepada peraturan sistem.": "Delete products that are inappropriate or violate platform rules.", "Pengguna S.O.P": "S.O.P User", "Pengguna": "User", "Penjual": "Seller", "Pembeli": "Buyer", "Penilaian Pengguna": "User Rating", "Tiada Ulasan": "No Reviews", "Ulasan Pembelian": "Purchase Review", "Ulasan Anda": "Your Review", "Pilih bintang": "Select star rating", "Hantar Ulasan": "Submit Review", "Kemaskini Ulasan": "Update Review", "Sila log masuk untuk memberi ulasan": "Please log in to leave a review", "Penjual tidak boleh memberi ulasan pada produk sendiri": "Sellers cannot review their own products", "Ulasan hanya boleh dibuat selepas anda membeli produk ini": "Reviews can only be submitted after you purchase this product", "Ulasan hanya boleh dibuat selepas pembelian berjaya": "Reviews can only be submitted after a successful purchase", "Maklumat Produk": "Product Information", "Harga": "Price", "Penilaian Penjual": "Seller Rating", "Tandakan Masih Tersedia": "Mark as Available", "Tandakan Sudah Dijual": "Mark as Sold", "Status produk berjaya ditukar kepada": "Product status successfully changed to", "Hanya pemilik produk boleh menukar status ini": "Only the product owner can change this status", "Profil Saya": "My Profile", "Profil Pengguna": "User Profile", "Total Products": "Total Products", "Produk Pengguna": "User Products", "Pengguna ini belum menambah produk.": "This user has not added any products yet.", "Klik produk untuk lihat maklumat penuh.": "Click a product to view full details.", "Lihat Profil Penjual": "View Seller Profile", "Chat Pengguna": "Chat User", "Tekan pengguna untuk buka ruang mesej": "Click a user to open the chat", "Pilih perbualan": "Select conversation", "Pilih perbualan untuk mula mesej": "Select a conversation to start messaging", "Sila log masuk untuk mesej": "Please log in to use messages", "Tawaran Diterima": "Offer Accepted", "Tawaran Ditolak": "Offer Rejected", "✅ Tawaran diterima": "✅ Offer accepted", "❌ Tawaran ditolak": "❌ Offer rejected", "Tiada notifikasi": "No notifications", "Tiada tawaran setakat ini": "No offers yet", "Tiada tempahan daripada pembeli setakat ini.": "No buyer orders at the moment.", "Tiada item untuk dibuat tempahan.": "No items available for checkout.", "Tawaran tidak dijumpai": "Offer not found", "Tawaran telah ditolak dan dihantar ke ruang mesej": "The offer has been rejected and sent to the chat", "Terima": "Accept", "Tolak": "Reject", "Sahkan Tolak": "Confirm Rejection", "Batal": "Cancel", "Tiada sebab diberikan.": "No reason provided.", "Sebab penolakan:": "Rejection reason:", "Contoh: Masa COD tidak sesuai, harga terlalu rendah, atau produk sudah ditempah.": "Example: COD time is not suitable, price is too low, or the product has already been reserved.", "Maksimum 5 gambar sahaja untuk satu produk": "Maximum 5 images are allowed for one product", "Sebahagian gambar ditolak:": "Some images were rejected:", "Firebase belum siap. Sila periksa konfigurasi.": "Firebase is not ready. Please check the configuration.", "Firebase belum siap. Sila semak konfigurasi.": "Firebase is not ready. Please check the configuration.", "Email atau kata laluan tidak sah": "Invalid email or password", "E-mel atau kata laluan tidak sah": "Invalid email or password", "Email sudah didaftarkan": "Email is already registered", "Registration is only allowed using an official @polinilai.edu.my email address.": "Registration is only allowed using an official @polinilai.edu.my email address.", "Pendaftaran berjaya! Sila log masuk.": "Registration successful! Please log in.", "Pendaftaran berjaya. Sila log masuk.": "Registration successful. Please log in.", "Ralat semasa pendaftaran:": "Registration error:", "Akaun anda sedang digantung oleh admin.": "Your account has been suspended by the admin.", "Akaun anda sedang digantung oleh admin. Sila hubungi admin untuk bantuan.": "Your account has been suspended by the admin. Please contact admin for assistance.", "Contact Admin": "Message Admin", "Panel Admin": "Admin Panel", "Admin Monitoring Panel": "Admin Monitoring Panel", "Admin panel access is for administrators only.": "Admin panel access is for administrators only.", "Reports": "Reports", "Open Reports": "Open Reports", "Laporkan Produk": "Report Product", "Laporkan Isu": "Report Issue", "Kategori Reports": "Report Category", "Maklumat palsu": "False information", "Inappropriate product": "Inappropriate product", "Scam": "Scam", "Buyer / seller did not show up": "Buyer / seller did not show up", "Last-minute cancellation": "Last-minute cancellation", "User Management": "User Management", "Product Moderation": "Product Moderation", "Low Stock": "Low Stock", "Out of Stock": "Out of Stock", "Total Users": "Total Users", "Pending Orders": "Pending Orders", "Completed Orders": "Completed Orders", "Cancelled Orders": "Cancelled Orders", "Successful Sales": "Successful Sales", "Product Performance": "Product Performance", "Recent Sales Activity": "Recent Sales Activity", "Search reports, products, or reporter": "Search reports, products, or reporter", "Search user name or email": "Search user name or email", "Search product name, category, or seller": "Search product name, category, or seller", "All Statuses": "All Statuses", "All Users": "All Users", "All Stock": "All Stock", "Open": "Open", "Suspended": "Suspended", "Suspend": "Suspend", "Reactivate": "Reactivate", "Mark as Resolved": "Mark as Resolved", "Report marked as resolved": "Report marked as resolved", "Akaun admin tidak boleh digantung melalui panel ini.": "Admin accounts cannot be suspended through this panel.", "Akaun pengguna digantung": "User account suspended", "Akaun pengguna diaktifkan semula": "User account reactivated", "Pengguna tidak dijumpai": "User not found", "Maklumat pengguna tidak dijumpai": "User information not found", "Sedang memuat naik gambar profil...": "Uploading profile image...", "Gambar profil berjaya dikemas kini": "Profile image updated successfully", "Isi Butiran Tempahan": "Enter Order Details", "Hantar Tempahan": "Send Order", "Ringkasan Pesanan": "Order Summary", "No Telefon": "Phone Number", "Harga Cadangan Pembeli (pilihan)": "Buyer Suggested Price (optional)", "Buat masa ini, satu tempahan hanya dibenarkan untuk seorang penjual sahaja.": "At the moment, one order is only allowed for one seller.", "Tempahan Berjaya Dihantar": "Order Sent Successfully", "Tempahan tidak dijumpai": "Order not found", "Tempahan ini tidak lagi berada dalam status menunggu": "This order is no longer in pending status", "Dibatalkan": "Cancelled", "Diterima": "Accepted", "Ditolak": "Rejected", "Selesai": "Completed", "Pembelian Selesai": "Purchase Completed", "Lihat Mesej": "View Messages", "Mesej Pembeli": "Buyer Messages", "Cari produk...": "Search products...", "Nama Produk": "Product Name", "Status Produk": "Product Status", "Tersedia": "Available", "Sudah Dijual": "Sold", "Panel Jualan Saya": "My Seller Panel"};
   const regexRules = [["Contoh:", "Example:"], ["Anda:", "You:"], ["Pelapor:", "Reporter:"], ["Sasaran:", "Target:"], ["Pengguna berkaitan:", "Related user:"], ["Produk:", "Product:"], ["Penjual:", "Seller:"], ["Pembeli:", "Buyer:"], ["Diterima:", "Accepted:"], ["Ditolak:", "Rejected:"], ["Dibatalkan:", "Cancelled:"], ["Selesai:", "Completed:"], ["Tarikh selesai:", "Completion date:"], ["Sebab penolakan:", "Rejection reason:"], ["Sebab:", "Reason:"], ["Stok semasa:", "Current stock:"], ["Stok:", "Stock:"], ["Kuantiti:", "Quantity:"], ["Jumlah:", "Total:"], ["Penilaian", "Rating"], ["ulasan pengguna", "user reviews"], ["ulasan produk", "product reviews"], ["Produk dibeli:", "Purchased product:"], ["Produk dalam tawaran:", "Product in offer:"], ["Kuantiti melebihi stok semasa\\. Baki stok ialah (\\d+)\\.", "Quantity exceeds current stock. Remaining stock is $1."], ["Stok tidak mencukupi\\. Baki stok ialah (\\d+)\\.", "Insufficient stock. Remaining stock is $1."], ["Kuantiti tidak boleh melebihi stok semasa \\((\\d+)\\)", "Quantity cannot exceed the current stock ($1)"], ["Stok bagi (.+?) tidak mencukupi\\. Baki stok ialah (\\d+)\\.", "Stock for $1 is insufficient. Remaining stock is $2."], ["Kuantiti minimum pembelian untuk produk ini ialah (\\d+)\\.", "The minimum purchase quantity for this product is $1."], ["Kuantiti maksimum pembelian untuk produk ini ialah (\\d+)\\.", "The maximum purchase quantity for this product is $1."], ["Minimum pembelian: (\\d+) unit\\. Maksimum pembelian: (\\d+) unit\\.", "Minimum purchase: $1 unit. Maximum purchase: $2 units."], ["Ralat semasa ", "Error while "], ["Ralat memadam ", "Error deleting "], ["Ralat mengemas kini ", "Error updating "], ["Ralat menambah ", "Error adding "], ["Ralat memuat naik ", "Error uploading "], ["berjaya dipadam", "deleted successfully"], ["berjaya dikemas kini", "updated successfully"], ["berjaya ditambah", "added successfully"], ["berjaya dihantar", "sent successfully"], ["berjaya", "successfully"]];
   const exactEntries = Object.entries(exactMap).sort((a, b) => b[0].length - a[0].length);
 
@@ -8587,8 +8569,8 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     "Ringkas": "Summary",
     "Belum ada aktiviti jualan untuk dipaparkan.": "No sales activity to display yet.",
     "Belum ada prestasi produk untuk dipaparkan.": "No product performance to display yet.",
-    "Prestasi Produk": "Product Performance",
-    "Aktiviti Jualan Terkini": "Recent Sales Activity",
+    "Product Performance": "Product Performance",
+    "Recent Sales Activity": "Recent Sales Activity",
     "Panel Jualan Saya": "My Seller Panel",
     "Tambah Produk": "Add Product",
     "Produk Saya": "My Products",
@@ -8608,7 +8590,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     "Pembelian Selesai": "Purchase Completed",
 
     "Masih Ada": "Available",
-    "Stok Habis": "Out of Stock",
+    "Out of Stock": "Out of Stock",
     "Tersedia": "Available",
     "Sudah Dijual": "Sold",
     "Status Stok": "Stock Status",
@@ -8645,7 +8627,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     "Pengguna": "User",
     "Pembeli": "Buyer",
     "Penjual": "Seller",
-    "Hubungi Admin": "Contact Admin",
+    "Contact Admin": "Message Admin",
 
     "Log masuk berjaya": "Logged in successfully",
     "Log masuk berjaya!": "Logged in successfully!",
@@ -8820,6 +8802,695 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       attributeFilter: ['placeholder', 'title', 'aria-label', 'alt', 'value']
     });
   });
+})();
+</script>
+
+
+
+<style id="sop-final-upgrade-style">
+  .sop-upgrade-card{border:1px solid rgba(148,163,184,.2);border-radius:20px;padding:16px;background:rgba(255,255,255,.96);box-shadow:0 12px 28px rgba(15,23,42,.06)}
+  .dark .sop-upgrade-card{background:rgba(15,23,42,.7)}
+  .sop-soft-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700}
+  .sop-verified-student{background:rgba(37,99,235,.12);color:#2563eb}
+  .sop-verified-staff{background:rgba(22,163,74,.12);color:#16a34a}
+  .dark .sop-verified-student{background:rgba(59,130,246,.18);color:#93c5fd}
+  .dark .sop-verified-staff{background:rgba(34,197,94,.18);color:#86efac}
+  .sop-policy-list{margin:0;padding-left:18px}
+  .sop-policy-list li{margin:6px 0}
+  .sop-quick-replies{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .sop-quick-reply{border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.92);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer}
+  .dark .sop-quick-reply{background:rgba(15,23,42,.7);color:#fff}
+  .sop-status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700}
+  .sop-status-available{background:rgba(22,163,74,.12);color:#15803d}
+  .sop-status-low{background:rgba(245,158,11,.14);color:#b45309}
+  .sop-status-out,.sop-status-sold{background:rgba(239,68,68,.12);color:#dc2626}
+  .dark .sop-status-available{background:rgba(34,197,94,.18);color:#86efac}
+  .dark .sop-status-low{background:rgba(245,158,11,.18);color:#fcd34d}
+  .dark .sop-status-out,.dark .sop-status-sold{background:rgba(239,68,68,.18);color:#fca5a5}
+  .sop-product-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .sop-mini-muted{font-size:12px;color:rgb(100 116 139)}
+  .dark .sop-mini-muted{color:rgb(203 213 225)}
+</style>
+<script>
+(function(){
+  const FINAL_ADMIN_EMAIL = 'admin@polinilai.edu.my';
+
+  function normEmail(value){
+    try {
+      if (typeof normalizeEmailV2 === 'function') return normalizeEmailV2(value);
+      if (typeof normalizeEmail === 'function') return normalizeEmail(value);
+    } catch(e){}
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function esc(value){
+    try {
+      if (typeof escapeHtmlV2 === 'function') return escapeHtmlV2(value);
+      if (typeof escapeHtmlSafe === 'function') return escapeHtmlSafe(value);
+    } catch(e){}
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getAllDataSafe(){ return Array.isArray(window.allData) ? window.allData : []; }
+  function getUsersSafe(){
+    try {
+      if (typeof getUsersV2 === 'function') return getUsersV2();
+      if (typeof getUsers === 'function') return getUsers();
+    } catch(e){}
+    return getAllDataSafe().filter(item => item && item.type === 'user');
+  }
+  function getProductsSafe(){
+    try {
+      if (typeof getProductsV2 === 'function') return getProductsV2();
+      if (typeof getProducts === 'function') return getProducts();
+    } catch(e){}
+    return getAllDataSafe().filter(item => item && item.type === 'product');
+  }
+  function getCartSafe(){
+    try {
+      if (typeof getCartItems === 'function') return getCartItems();
+    } catch(e){}
+    return [];
+  }
+  function getMessagesSafe(){
+    try {
+      if (typeof getMessages === 'function') return getMessages();
+    } catch(e){}
+    return [];
+  }
+  function getUserByEmailSafe(email){
+    const target = normEmail(email);
+    return getUsersSafe().find(user => normEmail(user.email) === target) || null;
+  }
+  function getProductImagesSafe(product){
+    try {
+      if (typeof getProductImages === 'function') return getProductImages(product) || [];
+    } catch(e){}
+    const urls = Array.isArray(product?.image_urls) ? product.image_urls.filter(Boolean) : [];
+    if (urls.length) return urls;
+    return product?.image_url ? [product.image_url] : [];
+  }
+  function getProductIdSafe(product){ return product?.__firebaseId || product?.id || ''; }
+  function getProductStockSafe(product){
+    try {
+      if (typeof getProductStockV2 === 'function') return Number(getProductStockV2(product) || 0);
+      if (typeof getProductStock === 'function') return Number(getProductStock(product) || 0);
+    } catch(e){}
+    return Number(product?.stockAvailable ?? product?.stockQuantity ?? 0);
+  }
+  function inferUserType(user){
+    const t = String(user?.userType || user?.accountType || user?.memberType || '').toLowerCase();
+    if (['student','lecturer','staff'].includes(t)) return t;
+    if (user?.matricCardNumber) return 'student';
+    if (user?.staffId) return 'staff';
+    return 'user';
+  }
+  function getVerificationMeta(userOrEmail){
+    const user = typeof userOrEmail === 'string' ? getUserByEmailSafe(userOrEmail) : userOrEmail;
+    const type = inferUserType(user);
+    const explicit = String(user?.verificationStatus || '').toLowerCase();
+    if (explicit.includes('student') || (type === 'student' && user?.matricCardNumber)) {
+      return { label: 'Verified Student', cls: 'sop-verified-student', icon: 'fa-user-graduate' };
+    }
+    if (explicit.includes('staff') || explicit.includes('lecturer') || ((type === 'staff' || type === 'lecturer') && user?.staffId)) {
+      return { label: type === 'lecturer' ? 'Verified Lecturer' : 'Verified Staff', cls: 'sop-verified-staff', icon: 'fa-id-badge' };
+    }
+    return null;
+  }
+  function getVerificationBadgeHtml(userOrEmail){
+    const meta = getVerificationMeta(userOrEmail);
+    if (!meta) return '';
+    return '<span class="sop-soft-badge ' + meta.cls + '"><i class="fas ' + meta.icon + '"></i>' + meta.label + '</span>';
+  }
+  function getProductStatusMeta(product){
+    const stock = getProductStockSafe(product);
+    const availability = String(product?.availabilityStatus || product?.status || '').toLowerCase();
+    if (availability === 'sold' || availability === 'out_of_stock' || availability === 'out-of-stock' || stock <= 0) {
+      return { label: 'Out of Stock', cls: 'sop-status-out', short: 'Out of Stock' };
+    }
+    if (availability === 'sold_item') {
+      return { label: 'Sold', cls: 'sop-status-sold', short: 'Sold' };
+    }
+    if (stock > 0 && stock <= 3) {
+      return { label: 'Low Stock', cls: 'sop-status-low', short: 'Low Stock' };
+    }
+    return { label: 'Available', cls: 'sop-status-available', short: 'Available' };
+  }
+  function productConditionLabel(product){
+    const value = String(product?.productCondition || product?.condition || '').toLowerCase();
+    if (value.includes('terpakai') || value.includes('used')) return 'Used';
+    return 'New';
+  }
+  function formatShortDate(value){
+    if (!value) return '-';
+    try {
+      return new Date(value).toLocaleDateString('en-MY', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch(e){ return value; }
+  }
+  function groupCheckoutItemsBySeller(items){
+    const groups = {};
+    (items || []).forEach(entry => {
+      const sellerKey = normEmail(entry?.product?.sellerId || '');
+      const label = entry?.product?.sellerName || entry?.product?.sellerId || 'Seller';
+      if (!groups[sellerKey]) groups[sellerKey] = { sellerKey, label, items: [], total: 0 };
+      const itemTotal = Number(entry?.product?.price || 0) * Number(entry?.quantity || 1);
+      groups[sellerKey].items.push(entry);
+      groups[sellerKey].total += itemTotal;
+    });
+    return Object.values(groups);
+  }
+  function ensureUserTypeFields(){
+    const form = document.getElementById('register-form');
+    if (!form) return null;
+
+    if (!document.getElementById('reg-user-type')) {
+      const fullNameBlock = document.getElementById('reg-name')?.closest('div');
+      const emailBlock = document.getElementById('reg-email')?.closest('div');
+      const matricBlock = document.getElementById('reg-matric')?.closest('div');
+      if (emailBlock) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+          <div>
+            <label class="block text-sm font-medium mb-2" for="reg-user-type">User Type</label>
+            <select id="reg-user-type" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
+              <option value="student">Student</option>
+              <option value="lecturer">Lecturer</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+        `;
+        emailBlock.parentElement.insertBefore(wrapper.firstElementChild, emailBlock);
+      }
+      if (matricBlock && !document.getElementById('reg-staff-id')) {
+        const staffBlock = document.createElement('div');
+        staffBlock.id = 'reg-staff-id-wrap';
+        staffBlock.className = 'hidden';
+        staffBlock.innerHTML = `
+          <label class="block text-sm font-medium mb-2" for="reg-staff-id">Staff ID</label>
+          <input type="text" id="reg-staff-id" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange uppercase" placeholder="Example: STAF1024" />
+          <p class="text-xs text-navy-500 dark:text-navy-300 mt-2">Recommended for lecturer and staff verification.</p>
+        `;
+        matricBlock.insertAdjacentElement('afterend', staffBlock);
+      }
+      const existingTrustBox = document.getElementById('register-trust-box');
+      if (existingTrustBox) existingTrustBox.remove();
+    }
+
+    const typeEl = document.getElementById('reg-user-type');
+    const matricWrap = document.getElementById('reg-matric')?.closest('div');
+    const staffWrap = document.getElementById('reg-staff-id-wrap');
+    const matricInput = document.getElementById('reg-matric');
+    const staffInput = document.getElementById('reg-staff-id');
+    const sync = () => {
+      const type = typeEl?.value || 'student';
+      if (type === 'student') {
+        matricWrap?.classList.remove('hidden');
+        staffWrap?.classList.add('hidden');
+        if (matricInput) matricInput.required = true;
+        if (staffInput) staffInput.required = false;
+      } else {
+        matricWrap?.classList.add('hidden');
+        staffWrap?.classList.remove('hidden');
+        if (matricInput) { matricInput.required = false; matricInput.value = matricInput.value || ''; }
+        if (staffInput) staffInput.required = false;
+      }
+    };
+    if (typeEl && !typeEl.dataset.boundFinalUpgrade) {
+      typeEl.dataset.boundFinalUpgrade = 'true';
+      typeEl.addEventListener('change', sync);
+    }
+    sync();
+    return form;
+  }
+
+  function bindFinalRegisterSubmit(){
+    const form = ensureUserTypeFields();
+    if (!form || form.dataset.finalUpgradeBound === 'true') return;
+    const clone = form.cloneNode(true);
+    form.replaceWith(clone);
+    clone.dataset.finalUpgradeBound = 'true';
+    setTimeout(ensureUserTypeFields, 0);
+    clone.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = String(document.getElementById('reg-name')?.value || '').trim();
+      const email = normEmail(document.getElementById('reg-email')?.value || '');
+      const password = String(document.getElementById('reg-password')?.value || '');
+      const userType = String(document.getElementById('reg-user-type')?.value || 'student').toLowerCase();
+      const matricCardNumber = String(document.getElementById('reg-matric')?.value || '').trim().toUpperCase();
+      const staffId = String(document.getElementById('reg-staff-id')?.value || '').trim().toUpperCase();
+      if (!name) { showToast('Please enter your full name', 'warning'); return; }
+      if (!(typeof isPoliEmail === 'function' ? isPoliEmail(email) : email.endsWith('@polinilai.edu.my'))) {
+        showToast('Registration is only allowed using an official @polinilai.edu.my email address.', 'warning');
+        return;
+      }
+      if (password.length < 6) { showToast('Password must be at least 6 characters.', 'warning'); return; }
+      if (userType === 'student' && !matricCardNumber) { showToast('Students must enter a matric card number.', 'warning'); return; }
+      const existingUsers = getUsersSafe();
+      if (existingUsers.find(user => normEmail(user.email) === email)) { showToast('Email is already registered', 'error'); return; }
+      if (!window.firebaseReady) { showToast('Firebase is not ready. Please check the configuration.', 'error'); return; }
+      const verificationStatus = userType === 'student' ? 'verified_student' : (staffId ? (userType === 'lecturer' ? 'verified_staff' : 'verified_staff') : 'pending');
+      const payload = {
+        type: 'user',
+        role: (typeof isAdminUser === 'function' && isAdminUser(email)) ? 'admin' : 'user',
+        name,
+        email,
+        password,
+        userType,
+        matricCardNumber,
+        staffId,
+        verificationStatus,
+        createdAt: new Date().toISOString()
+      };
+      try {
+        const userId = await saveToFirebase('users', payload);
+        getAllDataSafe().push({ ...payload, __firebaseId: userId, id: userId, __collection: 'users' });
+        showToast('Registration successful. Please log in.', 'success');
+        if (typeof navigateTo === 'function') navigateTo('login');
+      } catch (error) {
+        showToast('Registration error: ' + error.message, 'error');
+      }
+    });
+  }
+
+  function renderPolicyPanels(){
+    const productsPage = document.getElementById('page-products');
+    if (productsPage && !document.getElementById('sop-prohibited-items-panel')) {
+      const host = productsPage.querySelector('.max-w-7xl');
+      if (host) {
+        const panel = document.createElement('div');
+        panel.id = 'sop-prohibited-items-panel';
+        panel.className = 'sop-upgrade-card mb-6';
+        panel.innerHTML = `
+          <div class="flex items-start justify-between gap-4 flex-col md:flex-row">
+            <div>
+              <h3 class="text-lg font-bold"><i class="fas fa-shield-halved mr-2 text-accent-orange"></i>Prohibited Items Policy</h3>
+              <p class="sop-mini-muted mt-1">These items are not allowed on S.O.P to keep the campus marketplace safer and more trusted.</p>
+            </div>
+            <span class="sop-soft-badge sop-verified-staff"><i class="fas fa-circle-info"></i>Trust & Safety</span>
+          </div>
+          <ul class="sop-policy-list text-sm mt-3 text-navy-700 dark:text-navy-100">
+            <li>Illegal, dangerous, fake, stolen, or offensive items</li>
+            <li>Adult content, gambling-related items, or prohibited campus items</li>
+            <li>Listings with misleading information, hidden damage, or suspicious pricing</li>
+          </ul>
+        `;
+        host.insertAdjacentElement('afterbegin', panel);
+      }
+    }
+
+    const checkoutPage = document.getElementById('page-checkout');
+    if (checkoutPage && !document.getElementById('sop-cod-safety-panel')) {
+      const host = checkoutPage.querySelector('.max-w-2xl');
+      const heading = host?.querySelector('h1');
+      if (host && heading) {
+        const panel = document.createElement('div');
+        panel.id = 'sop-cod-safety-panel';
+        panel.className = 'sop-upgrade-card mb-6';
+        panel.innerHTML = `
+          <h3 class="text-lg font-bold"><i class="fas fa-handshake-angle mr-2 text-accent-orange"></i>Safety Tips for COD</h3>
+          <ul class="sop-policy-list text-sm mt-3 text-navy-700 dark:text-navy-100">
+            <li>Meet in busy campus locations such as the cafeteria, library, or main lobby</li>
+            <li>Confirm product condition, quantity, and agreed price in chat before meeting</li>
+            <li>Bring a friend when needed and avoid changing location at the last minute</li>
+          </ul>
+        `;
+        heading.insertAdjacentElement('afterend', panel);
+      }
+    }
+  }
+
+  function buildEnhancedProductCard(product, compact){
+    const images = getProductImagesSafe(product);
+    const imageUrl = images[0] || '';
+    const stock = getProductStockSafe(product);
+    const status = getProductStatusMeta(product);
+    const condition = productConditionLabel(product);
+    const productId = getProductIdSafe(product);
+    const location = product?.preferredCodLocation || product?.codLocation || '-';
+    const sellerBadge = getVerificationBadgeHtml(product?.sellerId || product?.sellerEmail || '');
+    const sellerName = esc(product?.sellerName || 'Seller');
+    const title = esc(product?.productName || 'Product');
+    return `
+      <div onclick="showProductDetailModal('${esc(productId)}')" class="group bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer fade-in border border-navy-100 dark:border-navy-700">
+        <div class="aspect-[4/3] bg-navy-100 dark:bg-navy-700 overflow-hidden">
+          ${imageUrl ? `<img src="${esc(imageUrl)}" alt="${title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">` : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-box text-5xl text-navy-400 dark:text-navy-300"></i></div>`}
+        </div>
+        <div class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="font-semibold text-base leading-tight line-clamp-2">${title}</h3>
+            <span class="${status.cls} sop-status-pill">${status.short}</span>
+          </div>
+          <p class="text-accent-orange font-bold text-xl mt-2">RM ${Number(product?.price || 0).toFixed(2)}</p>
+          <div class="sop-product-meta">
+            <span class="sop-soft-badge bg-navy-100 dark:bg-navy-700 text-navy-700 dark:text-navy-100"><i class="fas fa-box-open"></i>Qty: ${stock}</span>
+            <span class="sop-soft-badge bg-navy-100 dark:bg-navy-700 text-navy-700 dark:text-navy-100"><i class="fas fa-tag"></i>${condition}</span>
+          </div>
+          ${compact ? '' : `<p class="sop-mini-muted mt-3"><i class="fas fa-location-dot mr-1"></i>COD: ${esc(location)}</p>`}
+          <div class="mt-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-medium truncate">${sellerName}</p>
+              ${sellerBadge || `<p class="sop-mini-muted">Posted ${esc(formatShortDate(product?.createdAt))}</p>`}
+            </div>
+            ${sellerBadge ? `<div class="shrink-0">${sellerBadge}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const prevRenderProducts = typeof window.renderProducts === 'function' ? window.renderProducts : (typeof renderProducts === 'function' ? renderProducts : null);
+  renderProducts = function(){
+    const container = document.getElementById('products-grid');
+    const noProducts = document.getElementById('no-products');
+    if (!container || !noProducts) { if (prevRenderProducts) return prevRenderProducts.apply(this, arguments); return; }
+    let products = getProductsSafe().slice();
+    const search = String(document.getElementById('search-input')?.value || '').toLowerCase();
+    const category = document.getElementById('category-filter')?.value || '';
+    const sort = document.getElementById('sort-filter')?.value || 'newest';
+    if (search) {
+      products = products.filter(p => String(p.productName || '').toLowerCase().includes(search) || String(p.description || '').toLowerCase().includes(search));
+    }
+    if (category) products = products.filter(p => p.category === category);
+    if (sort === 'price-low') products.sort((a,b) => Number(a.price||0) - Number(b.price||0));
+    else if (sort === 'price-high') products.sort((a,b) => Number(b.price||0) - Number(a.price||0));
+    else if (sort === 'rating') products.sort((a,b) => Number(b.rating||0) - Number(a.rating||0));
+    else products.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    if (!products.length) {
+      container.innerHTML = '';
+      noProducts.classList.remove('hidden');
+      return;
+    }
+    noProducts.classList.add('hidden');
+    container.innerHTML = products.map(product => buildEnhancedProductCard(product, false)).join('');
+  };
+  window.renderProducts = renderProducts;
+
+  const prevRenderTrendingProducts = typeof window.renderTrendingProducts === 'function' ? window.renderTrendingProducts : (typeof renderTrendingProducts === 'function' ? renderTrendingProducts : null);
+  renderTrendingProducts = function(){
+    const container = document.getElementById('trending-products');
+    if (!container) { if (prevRenderTrendingProducts) return prevRenderTrendingProducts.apply(this, arguments); return; }
+    const products = getProductsSafe().slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 8);
+    if (!products.length) {
+      container.innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i><p class="text-navy-500 dark:text-navy-400">No products available yet.</p></div>';
+      return;
+    }
+    container.innerHTML = products.map(product => buildEnhancedProductCard(product, true)).join('');
+  };
+  window.renderTrendingProducts = renderTrendingProducts;
+
+  showProductDetailModal = function(productId){
+    const product = getProductsSafe().find(item => String(getProductIdSafe(item)) === String(productId));
+    if (!product) { showToast('Product not found', 'error'); return; }
+    const images = getProductImagesSafe(product);
+    const mainImage = images[0] ? `<img src="${esc(images[0])}" alt="${esc(product.productName)}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-box text-6xl text-navy-400 dark:text-navy-300"></i></div>`;
+    const stock = getProductStockSafe(product);
+    const status = getProductStatusMeta(product);
+    const sellerUser = getUserByEmailSafe(product?.sellerId || '');
+    const sellerBadge = getVerificationBadgeHtml(sellerUser || product?.sellerId || '');
+    const sellerType = inferUserType(sellerUser);
+    const sellerTypeLabel = sellerType === 'student' ? 'Student seller' : sellerType === 'lecturer' ? 'Lecturer seller' : sellerType === 'staff' ? 'Staff seller' : 'Campus seller';
+    showModal(esc(product.productName || 'Product'), `
+      <div class="space-y-5">
+        <div class="rounded-2xl overflow-hidden bg-navy-100 dark:bg-navy-700 aspect-[4/3]">${mainImage}</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Price</p><p class="text-2xl font-bold text-accent-orange">RM ${Number(product.price || 0).toFixed(2)}</p></div>
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Status</p><p class="font-semibold">${status.label}</p></div>
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Product Condition</p><p class="font-semibold">${productConditionLabel(product)}</p></div>
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Quantity Available</p><p class="font-semibold">${stock}</p></div>
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">COD Location</p><p class="font-semibold">${esc(product.preferredCodLocation || product.codLocation || '-')}</p></div>
+          <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4"><p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Posted On</p><p class="font-semibold">${esc(formatShortDate(product.createdAt))}</p></div>
+        </div>
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p class="text-xs text-navy-500 dark:text-navy-300 mb-1">Seller</p>
+              <p class="font-semibold">${esc(product.sellerName || '-')}</p>
+              <p class="sop-mini-muted mt-1">${esc(sellerTypeLabel)}</p>
+            </div>
+            ${sellerBadge || ''}
+          </div>
+        </div>
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4">
+          <p class="text-sm font-semibold mb-2">Product Description</p>
+          <p class="text-sm text-navy-700 dark:text-navy-100 whitespace-pre-line leading-6">${esc(product.description || 'No product description.')}</p>
+        </div>
+        <div class="sop-upgrade-card">
+          <p class="font-semibold mb-2"><i class="fas fa-shield-halved mr-2 text-accent-orange"></i>Buy with confidence</p>
+          <ul class="sop-policy-list text-sm text-navy-700 dark:text-navy-100">
+            <li>Check the product condition and quantity in chat before COD</li>
+            <li>Use Message Admin if you suspect a scam, fake listing, or unsafe meetup request</li>
+          </ul>
+        </div>
+        <div class="flex gap-2 pt-1 flex-wrap">
+          <button onclick="addToCart('${esc(String(productId))}')" class="flex-1 btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold"><i class="fas fa-cart-plus mr-2"></i>Add to Cart</button>
+          <button onclick="startChat('${esc(product.sellerId || '')}')" class="px-4 py-3 bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 rounded-xl font-semibold transition-colors"><i class="fas fa-comment mr-2"></i>Chat Seller</button>
+          <button onclick="openReportModalV2('product','${esc(String(productId))}')" class="px-4 py-3 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 rounded-xl font-semibold transition-colors"><i class="fas fa-flag mr-2"></i>Report</button>
+        </div>
+      </div>
+    `);
+  };
+  window.showProductDetailModal = showProductDetailModal;
+
+  const prevRenderCart = typeof window.renderCart === 'function' ? window.renderCart : (typeof renderCart === 'function' ? renderCart : null);
+  renderCart = function(){
+    if (prevRenderCart) prevRenderCart.apply(this, arguments);
+    const cartSummary = document.getElementById('cart-summary');
+    const cartItems = getCartSafe();
+    const products = getProductsSafe();
+    if (!cartSummary) return;
+    let note = document.getElementById('seller-cart-notice-final');
+    if (!note) {
+      note = document.createElement('div');
+      note.id = 'seller-cart-notice-final';
+      note.className = 'mt-4 text-sm rounded-xl p-4 bg-blue-50 dark:bg-navy-700 text-navy-700 dark:text-navy-100';
+      cartSummary.parentElement.insertBefore(note, cartSummary);
+    }
+    if (!cartItems.length) { note.classList.add('hidden'); return; }
+    const sellerMap = {};
+    cartItems.forEach(item => {
+      const product = products.find(p => String(getProductIdSafe(p)) === String(item.cartProductId));
+      if (!product) return;
+      const sellerKey = normEmail(product.sellerId || '');
+      if (!sellerMap[sellerKey]) sellerMap[sellerKey] = { seller: product.sellerName || product.sellerId || 'Seller', count: 0 };
+      sellerMap[sellerKey].count += 1;
+    });
+    const groups = Object.values(sellerMap);
+    note.classList.remove('hidden');
+    note.innerHTML = `
+      <p class="font-semibold mb-2"><i class="fas fa-layer-group mr-2 text-accent-orange"></i>Cart grouped by seller</p>
+      <div class="space-y-1">${groups.map(group => `<p>• ${esc(group.seller)} — ${group.count} item(s)</p>`).join('')}</div>
+      <p class="mt-2 text-xs text-navy-500 dark:text-navy-300">Orders can only be submitted to one seller at a time, so please review this before checkout.</p>
+    `;
+  };
+  window.renderCart = renderCart;
+
+  const prevRenderCheckout = typeof window.renderCheckout === 'function' ? window.renderCheckout : (typeof renderCheckout === 'function' ? renderCheckout : null);
+  renderCheckout = function(){
+    if (prevRenderCheckout) prevRenderCheckout.apply(this, arguments);
+    const summary = document.getElementById('checkout-summary');
+    const items = typeof getActiveCheckoutItems === 'function' ? getActiveCheckoutItems() : [];
+    if (!summary) return;
+    let groupBox = document.getElementById('checkout-seller-groups-final');
+    if (!groupBox) {
+      groupBox = document.createElement('div');
+      groupBox.id = 'checkout-seller-groups-final';
+      groupBox.className = 'mt-4 pt-4 border-t border-navy-200 dark:border-navy-600 space-y-3';
+      summary.appendChild(groupBox);
+    }
+    if (!items.length) { groupBox.innerHTML = ''; return; }
+    const groups = groupCheckoutItemsBySeller(items);
+    groupBox.innerHTML = `
+      ${groups.length > 1 ? `<div class="rounded-xl p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-200 text-sm"><i class="fas fa-circle-exclamation mr-2"></i>Multiple sellers detected. The system still allows one seller per order, so please checkout seller by seller.</div>` : ''}
+      <div>
+        <p class="font-semibold mb-2">Grouped by Seller</p>
+        <div class="space-y-3">
+          ${groups.map(group => `
+            <div class="rounded-xl p-3 bg-white/70 dark:bg-navy-800 border border-navy-200 dark:border-navy-600">
+              <div class="flex items-center justify-between gap-3 mb-2">
+                <div>
+                  <p class="font-medium">${esc(group.label)}</p>
+                  ${getVerificationBadgeHtml(group.sellerKey) || ''}
+                </div>
+                <span class="text-sm font-semibold text-accent-orange">RM ${Number(group.total || 0).toFixed(2)}</span>
+              </div>
+              <div class="space-y-1 text-sm text-navy-600 dark:text-navy-200">
+                ${group.items.map(entry => `<p>• ${esc(entry.product?.productName || 'Product')} — Qty: ${Number(entry.quantity || 1)} — ${productConditionLabel(entry.product)} — ${getProductStatusMeta(entry.product).short}</p>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  };
+  window.renderCheckout = renderCheckout;
+
+  openReportModalV2 = function(targetType, targetId){
+    if (!window.currentUser) {
+      showToast('Please log in first', 'warning');
+      if (typeof navigateTo === 'function') navigateTo('login');
+      return;
+    }
+    showModal('Report Issue', `
+      <div class="space-y-4">
+        <div class="sop-upgrade-card">
+          <p class="font-semibold mb-1"><i class="fas fa-flag mr-2 text-red-500"></i>Structured report reasons</p>
+          <p class="text-sm text-navy-600 dark:text-navy-300">Choose the closest reason so the admin panel can review the issue faster and more clearly.</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Report Category</label>
+          <select id="report-category-v2" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0">
+            <option value="False information">False information</option>
+            <option value="Scam / suspicious deal">Scam / suspicious deal</option>
+            <option value="Prohibited item">Prohibited item</option>
+            <option value="Inappropriate content">Inappropriate content</option>
+            <option value="Buyer / seller did not show up">Buyer / seller did not show up</option>
+            <option value="Harassment / rude behaviour">Harassment / rude behaviour</option>
+            <option value="Unsafe COD request">Unsafe COD request</option>
+            <option value="Last-minute cancellation">Last-minute cancellation</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Description</label>
+          <textarea id="report-note-v2" rows="5" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Explain what happened, when it happened, and why it should be reviewed."></textarea>
+        </div>
+        <div class="rounded-xl p-3 bg-navy-50 dark:bg-navy-700 text-sm text-navy-600 dark:text-navy-200">
+          <p class="font-semibold mb-1">Useful details to include</p>
+          <p>Product name, agreed COD time/location, price discussed, and any suspicious chat behaviour.</p>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700">Close</button>
+          <button type="button" onclick="submitReportV2('${esc(String(targetType))}','${esc(String(targetId))}')" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white">Submit Report</button>
+        </div>
+      </div>
+    `);
+  };
+  window.openReportModalV2 = openReportModalV2;
+
+  const prevShowAddProductModal = typeof window.showAddProductModal === 'function' ? window.showAddProductModal : (typeof showAddProductModal === 'function' ? showAddProductModal : null);
+  showAddProductModal = function(){
+    if (prevShowAddProductModal) prevShowAddProductModal.apply(this, arguments);
+    setTimeout(() => {
+      const form = document.getElementById('add-product-form-v2');
+      if (!form || document.getElementById('add-product-policy-box-final')) return;
+      const panel = document.createElement('div');
+      panel.id = 'add-product-policy-box-final';
+      panel.className = 'sop-upgrade-card';
+      panel.innerHTML = '<p class="font-semibold mb-1"><i class="fas fa-ban mr-2 text-red-500"></i>Before publishing</p><p class="text-sm text-navy-600 dark:text-navy-200">Do not list prohibited, fake, dangerous, offensive, or stolen items. Clear condition, stock, and COD details improve buyer trust.</p>';
+      form.insertAdjacentElement('afterbegin', panel);
+    }, 60);
+  };
+  window.showAddProductModal = showAddProductModal;
+
+  function openAdminChatDirect(){
+    if (!window.currentUser) {
+      showToast('Please log in to message admin', 'warning');
+      if (typeof navigateTo === 'function') navigateTo('login');
+      return;
+    }
+    if (typeof navigateTo === 'function') navigateTo('chat');
+    setTimeout(() => {
+      if (typeof openChat === 'function') openChat(FINAL_ADMIN_EMAIL);
+      ensureQuickReplies();
+    }, 150);
+  }
+  window.openAdminChatDirect = openAdminChatDirect;
+
+  function patchMessageAdminButtons(){
+    const floating = document.getElementById('admin-floating-button');
+    if (floating && !floating.dataset.finalPatched) {
+      floating.dataset.finalPatched = 'true';
+      floating.href = '#';
+      floating.target = '';
+      floating.rel = '';
+      floating.onclick = function(ev){ ev.preventDefault(); openAdminChatDirect(); };
+      floating.innerHTML = '<i class="fas fa-comments text-lg"></i><span class="hidden md:inline font-semibold">Message Admin</span>';
+      floating.className = 'bg-accent-orange hover:bg-accent-orangeHover text-white rounded-full shadow-xl px-4 py-3 flex items-center gap-2';
+    }
+    Array.from(document.querySelectorAll('button,a')).forEach(el => {
+      const text = (el.textContent || '').trim().toLowerCase();
+      if (text === 'message admin' && el.id !== 'admin-floating-button') {
+        el.onclick = function(ev){ ev.preventDefault?.(); openAdminChatDirect(); };
+        if (el.tagName === 'A') el.setAttribute('href', '#');
+      }
+    });
+  }
+
+  function ensureQuickReplies(){
+    const composer = document.getElementById('chat-composer');
+    if (!composer || document.getElementById('chat-quick-replies-final')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'chat-quick-replies-final';
+    wrap.className = 'sop-quick-replies';
+    const replies = [
+      'Available',
+      'Can COD at 5 PM',
+      'Price fixed',
+      'Still available?',
+      'Please share product condition details',
+      'Message Admin'
+    ];
+    wrap.innerHTML = replies.map(reply => `<button type="button" class="sop-quick-reply" data-reply="${esc(reply)}">${esc(reply)}</button>`).join('');
+    composer.insertAdjacentElement('afterbegin', wrap);
+    wrap.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-reply]');
+      if (!button) return;
+      const text = button.getAttribute('data-reply') || '';
+      if (text === 'Message Admin') {
+        openAdminChatDirect();
+        return;
+      }
+      const input = document.getElementById('chat-input');
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    });
+  }
+
+  const prevOpenChat = typeof window.openChat === 'function' ? window.openChat : (typeof openChat === 'function' ? openChat : null);
+  openChat = function(email){
+    if (prevOpenChat) prevOpenChat.apply(this, arguments);
+    const header = document.getElementById('chat-with');
+    const badge = getVerificationBadgeHtml(email);
+    if (header && badge) {
+      const nameText = header.textContent || '';
+      header.innerHTML = `<div class="flex items-center gap-2 flex-wrap"><span>${esc(nameText.replace(/\s+/g,' ').trim())}</span>${badge}</div>`;
+    }
+    ensureQuickReplies();
+  };
+  window.openChat = openChat;
+
+  const prevNavigateTo = typeof window.navigateTo === 'function' ? window.navigateTo : (typeof navigateTo === 'function' ? navigateTo : null);
+  navigateTo = function(page){
+    const result = prevNavigateTo ? prevNavigateTo.apply(this, arguments) : undefined;
+    setTimeout(() => {
+      bindFinalRegisterSubmit();
+      renderPolicyPanels();
+      patchMessageAdminButtons();
+      if (page === 'chat') ensureQuickReplies();
+      if (page === 'cart' && typeof renderCart === 'function') renderCart();
+      if (page === 'checkout' && typeof renderCheckout === 'function') renderCheckout();
+    }, 80);
+    return result;
+  };
+  window.navigateTo = navigateTo;
+
+  function runFinalUpgrade(){
+    bindFinalRegisterSubmit();
+    renderPolicyPanels();
+    patchMessageAdminButtons();
+    if (window.currentPage === 'chat') ensureQuickReplies();
+  }
+
+  document.addEventListener('DOMContentLoaded', runFinalUpgrade);
+  setTimeout(runFinalUpgrade, 150);
+  setTimeout(runFinalUpgrade, 700);
 })();
 </script>
 
