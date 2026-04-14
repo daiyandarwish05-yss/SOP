@@ -294,7 +294,7 @@
                 <p id="banner-tagline" class="text-lg md:text-xl text-navy-200 mb-6">Platform Jual Beli Komuniti Politeknik Nilai Anda</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                   <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white px-8 py-3 rounded-xl font-semibold shadow-lg">
-                    <i class="fas fa-shopping-bag mr-2"></i> Mula Membeli
+                    <i class="fas fa-shopping-bag mr-2"></i> Start Shopping
                   </button>
                   <button onclick="navigateTo('register')" class="btn-primary bg-white text-navy-800 px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-navy-100">
                     <i class="fas fa-user-plus mr-2"></i> Daftar Akaun
@@ -437,7 +437,7 @@
           <div id="cart-empty" class="hidden text-center py-12 bg-white dark:bg-navy-800 rounded-2xl shadow-lg">
             <i class="fas fa-shopping-cart text-6xl text-navy-300 mb-4"></i>
             <p class="text-navy-500 dark:text-navy-400 mb-4">Troli anda kosong</p>
-            <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">Mula Membeli</button>
+            <button onclick="navigateTo('products')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">Start Shopping</button>
           </div>
           <div id="cart-summary" class="hidden bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg">
             <div class="flex justify-between items-center mb-4">
@@ -461,7 +461,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2" for="cod-dept">Jabatan / Kursus</label>
+              <label class="block text-sm font-medium mb-2" for="cod-dept">Department / Course</label>
               <input type="text" id="cod-dept" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: JP, JKM" />
             </div>
 
@@ -483,7 +483,7 @@
             </div>
 
             <div id="checkout-summary" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-4 mt-4">
-              <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
+              <h3 class="font-semibold mb-2">Summaryan Pesanan</h3>
               <div id="checkout-items" class="text-sm space-y-1 mb-2"></div>
               <div class="border-t border-navy-200 dark:border-navy-600 pt-2 mt-2">
                 <div class="flex justify-between font-bold">
@@ -512,7 +512,7 @@
               <div class="px-5 py-4 border-b border-navy-100 dark:border-navy-700 bg-white dark:bg-navy-800">
                 <div class="flex items-center justify-between gap-3">
                   <div>
-                    <h3 class="font-semibold text-lg">Perbualan</h3>
+                    <h3 class="font-semibold text-lg">Conversations</h3>
                     <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Tekan pengguna untuk buka ruang mesej</p>
                   </div>
                   <div class="w-11 h-11 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center text-accent-orange">
@@ -687,7 +687,7 @@
                 <div>
                   <p class="text-sm text-navy-500 dark:text-navy-400">Penilaian</p>
                   <p id="seller-rating-score" class="text-2xl font-bold">⭐ 0.0</p>
-                  <p id="seller-rating-count" class="text-xs text-navy-400 mt-1">Belum ada ulasan</p>
+                  <p id="seller-rating-count" class="text-xs text-navy-400 mt-1">No reviews yet</p>
                 </div>
                 <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
                   <i class="fas fa-star text-yellow-600"></i>
@@ -703,7 +703,7 @@
             <div id="seller-products" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             <div id="seller-no-products" class="hidden p-8 text-center">
               <i class="fas fa-box-open text-4xl text-navy-300 mb-2"></i>
-              <p class="text-navy-500 dark:text-navy-400">Anda belum ada produk. Tambah produk pertama anda!</p>
+              <p class="text-navy-500 dark:text-navy-400">You do not have any products yet. Add your first product!</p>
             </div>
           </div>
 
@@ -873,7 +873,7 @@
       if (!firebaseReady || !storage) throw new Error('Firebase Storage belum siap.');
 
       if (!['image/jpeg', 'image/png'].includes(imageData.file.type)) {
-        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+        throw new Error('Invalid format. JPG/PNG only.');
       }
 
       if (imageData.file.size > 5 * 1024 * 1024) {
@@ -924,7 +924,7 @@
       if (!firebaseReady || !storage) throw new Error('Firebase Storage belum siap');
 
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        throw new Error('Format tidak sah. Hanya JPG/PNG.');
+        throw new Error('Invalid format. JPG/PNG only.');
       }
 
       if (file.size > 5 * 1024 * 1024) {
@@ -1823,7 +1823,7 @@ function renderChatList() {
     container.innerHTML = `
       <div class="p-4 text-center text-navy-500">
         <i class="fas fa-comments text-2xl mb-2"></i>
-        <p class="text-sm">Tiada perbualan</p>
+        <p class="text-sm">No conversations</p>
         <p class="text-xs mt-1">Mesej penjual melalui halaman produk</p>
       </div>
     `;
@@ -2585,10 +2585,10 @@ Sebab penolakan: ${reason}`;
             <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Masukkan detail produk seperti keadaan barang, saiz, warna, atau maklumat tambahan."></textarea>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maks 5MB setiap gambar)</span></label>
+            <label class="block text-sm font-medium mb-2">Product Images <span class="text-xs text-navy-400">(JPG/PNG, max 5MB per image)</span></label>
             <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
               <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
-              <p class="text-sm font-medium">Klik untuk pilih gambar atau seret & lepas</p>
+              <p class="text-sm font-medium">Click to choose images or drag and drop</p>
               <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar bagi satu produk</p>
               <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
             </div>
@@ -2739,7 +2739,7 @@ Sebab penolakan: ${reason}`;
       const file = files[0];
 
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        showToast('Hanya JPG atau PNG dibenarkan', 'error');
+        showToast('Only JPG or PNG files are allowed', 'error');
         return;
       }
 
@@ -3178,7 +3178,7 @@ function renderProfile() {
             <p class="text-sm text-navy-600 dark:text-navy-200 leading-6 whitespace-pre-line">${escapeHtml(review.comment || '')}</p>
           </div>
         `).join('')
-      : `<div class="bg-white dark:bg-navy-800 border border-dashed border-navy-300 dark:border-navy-600 rounded-xl p-4 text-sm text-navy-500 dark:text-navy-300">Belum ada ulasan untuk produk ini.</div>`;
+      : `<div class="bg-white dark:bg-navy-800 border border-dashed border-navy-300 dark:border-navy-600 rounded-xl p-4 text-sm text-navy-500 dark:text-navy-300">No reviews yet untuk produk ini.</div>`;
 
     const reviewFormHtml = !currentUser
       ? `<p class="text-sm text-navy-500 dark:text-navy-300">Log masuk sebagai pembeli untuk memberi ulasan.</p>`
@@ -3253,7 +3253,7 @@ function renderProfile() {
             <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Penilaian Pengguna</p>
             <div class="flex items-center justify-between gap-3">
               <div>
-                <p class="font-semibold">${summary.count ? summary.average.toFixed(1) + ' / 5.0' : 'Belum ada ulasan'}</p>
+                <p class="font-semibold">${summary.count ? summary.average.toFixed(1) + ' / 5.0' : 'No reviews yet'}</p>
                 <p class="text-xs text-navy-500 dark:text-navy-400">${summary.count} ulasan</p>
               </div>
               ${summary.count ? renderStarIcons(summary.average, 'text-base') : ''}
@@ -3270,7 +3270,7 @@ function renderProfile() {
           <div class="flex items-center justify-between gap-3 mb-3">
             <div>
               <p class="text-base font-semibold">Ulasan Pengguna</p>
-              <p class="text-xs text-navy-500 dark:text-navy-300">Ulasan produk boleh dibuat melalui sejarah pembelian di bahagian profil.</p>
+              <p class="text-xs text-navy-500 dark:text-navy-300">Product reviews can be submitted through the purchase history section in the profile page.</p>
             </div>
           </div>
           <div class="space-y-3 max-h-72 overflow-y-auto pr-1">${reviewsHtml}</div>
@@ -3388,10 +3388,10 @@ function renderProfile() {
           <p class="text-green-600 dark:text-green-200">Produk baharu akan dipaparkan sebagai <strong>Masih Tersedia</strong>. Anda boleh tukar kepada <strong>Sudah Dijual</strong> di Panel Jualan Saya.</p>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maksimum 5 gambar, setiap satu maks 5MB)</span></label>
+          <label class="block text-sm font-medium mb-2">Product Images <span class="text-xs text-navy-400">(JPG/PNG, maximum 5 images, each up to 5MB)</span></label>
           <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
             <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
-            <p class="text-sm font-medium">Klik untuk pilih gambar atau seret & lepas</p>
+            <p class="text-sm font-medium">Click to choose images or drag and drop</p>
             <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar untuk setiap produk</p>
             <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
           </div>
@@ -3747,7 +3747,7 @@ function renderProfile() {
       : `
         <div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-navy-500 dark:text-navy-300">
           <i class="fas fa-receipt text-4xl mb-3"></i>
-          <p class="font-medium mb-1">Belum ada sejarah pembelian</p>
+          <p class="font-medium mb-1">No purchase history yet</p>
           <p class="text-sm">Produk yang anda beli akan dipaparkan di sini supaya mudah untuk anda semak semula dan beri ulasan.</p>
         </div>
       `;
@@ -3865,7 +3865,7 @@ function renderProfile() {
     if (!firebaseReady || !storage) throw new Error('Firebase Storage belum siap.');
 
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      throw new Error('Format tidak sah. Hanya JPG/PNG.');
+      throw new Error('Invalid format. JPG/PNG only.');
     }
 
     if (file.size > 5 * 1024 * 1024) {
@@ -4117,8 +4117,8 @@ function renderProfile() {
       container.innerHTML = `
         <div class="p-4 text-center text-navy-500">
           <i class="fas fa-comments text-2xl mb-2"></i>
-          <p class="text-sm">Tiada perbualan</p>
-          <p class="text-xs mt-1">Mulakan mesej melalui halaman produk</p>
+          <p class="text-sm">No conversations</p>
+          <p class="text-xs mt-1">Start a message from the product page</p>
         </div>
       `;
       return;
@@ -4388,7 +4388,7 @@ function renderProfile() {
           <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-navy-100 dark:bg-navy-700 flex items-center justify-center text-accent-orange">
             <i class="fas fa-comments text-xl"></i>
           </div>
-          <p class="text-sm font-medium">Tiada perbualan lagi</p>
+          <p class="text-sm font-medium">No conversations lagi</p>
           <p class="text-xs mt-1 text-navy-400">Tekan butang chat pada produk untuk mula mesej</p>
         </div>
       `;
@@ -5118,7 +5118,7 @@ function renderProfile() {
       countEl.textContent = `${summary.count} ulasan pengguna`;
     } else {
       scoreEl.textContent = '⭐ 0.0';
-      countEl.textContent = 'Belum ada ulasan';
+      countEl.textContent = 'No reviews yet';
     }
   }
 
@@ -5308,7 +5308,7 @@ function renderProfile() {
   }
 
   function getProductStatusLabelEnhanced(product) {
-    return getProductStock(product) > 0 ? `Stok: ${getProductStock(product)}` : 'Stok Habis';
+    return getProductStock(product) > 0 ? `Stok: ${getProductStock(product)}` : 'Out of Stock';
   }
 
   function escapeHtmlSafe(value) {
@@ -5588,10 +5588,10 @@ function renderProfile() {
           <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal."></textarea>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maksimum 5MB setiap gambar)</span></label>
+          <label class="block text-sm font-medium mb-2">Product Images <span class="text-xs text-navy-400">(JPG/PNG, maximum 5MB per image)</span></label>
           <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
             <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
-            <p class="text-sm font-medium">Klik untuk pilih gambar atau seret dan lepas</p>
+            <p class="text-sm font-medium">Click to choose images or drag and drop</p>
             <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar bagi satu produk</p>
             <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
           </div>
@@ -5738,7 +5738,7 @@ function renderProfile() {
             : `<div class="w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700"><i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i></div>`
           }
           <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${sold ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}">
-            ${sold ? 'Stok Habis' : 'Stok ' + stock}
+            ${sold ? 'Out of Stock' : 'Stok ' + stock}
           </div>
         </div>
         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-10 pb-4">
@@ -5767,7 +5767,7 @@ function renderProfile() {
       infoGrid.insertAdjacentHTML('beforeend', `
         <div id="product-stock-card" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
           <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Status Stok</p>
-          <p class="font-semibold ${sold ? 'text-red-500' : 'text-green-500'}">${sold ? 'Stok Habis' : 'Masih Ada (' + stock + ')'}</p>
+          <p class="font-semibold ${sold ? 'text-red-500' : 'text-green-500'}">${sold ? 'Out of Stock' : 'Available (' + stock + ')'}</p>
         </div>
       `);
     }
@@ -5783,7 +5783,7 @@ function renderProfile() {
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <p class="text-sm font-semibold">Kuantiti Pembelian</p>
-            <p class="text-xs text-navy-500 dark:text-navy-300">Pilih jumlah yang ingin dibeli.</p>
+            <p class="text-xs text-navy-500 dark:text-navy-300">Select the quantity you want to buy.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="setModalQuantity(-1, ${Math.max(stock,1)})" class="w-10 h-10 rounded-full bg-white dark:bg-navy-800 border border-navy-200 dark:border-navy-600">-</button>
@@ -5798,7 +5798,7 @@ function renderProfile() {
     const addToCartButton = actionRow.querySelector('button[onclick^="addToCart"]');
     if (addToCartButton) {
       addToCartButton.setAttribute('onclick', `addToCart('${productId}', getModalSelectedQuantity())`);
-      addToCartButton.innerHTML = `<i class="fas fa-cart-plus mr-2"></i>${sold ? 'Stok Habis' : 'Tambah ke Troli'}`;
+      addToCartButton.innerHTML = `<i class="fas fa-cart-plus mr-2"></i>${sold ? 'Out of Stock' : 'Tambah ke Troli'}`;
       if (sold) {
         addToCartButton.disabled = true;
         addToCartButton.className = 'flex-1 btn-primary bg-gray-400 cursor-not-allowed text-white py-3 rounded-xl font-semibold';
@@ -5969,7 +5969,7 @@ function renderProfile() {
     if (!document.getElementById('meet-date')) {
       const meetDateWrap = document.createElement('div');
       meetDateWrap.innerHTML = `
-        <label class="block text-sm font-medium mb-2" for="meet-date">Tarikh Pertemuan</label>
+        <label class="block text-sm font-medium mb-2" for="meet-date">Meeting Date</label>
         <input type="date" id="meet-date" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
       `;
       const locationWrap = document.getElementById('cod-location')?.parentElement;
@@ -5979,7 +5979,7 @@ function renderProfile() {
     if (!document.getElementById('meet-time')) {
       const meetTimeWrap = document.createElement('div');
       meetTimeWrap.innerHTML = `
-        <label class="block text-sm font-medium mb-2" for="meet-time">Masa Pertemuan</label>
+        <label class="block text-sm font-medium mb-2" for="meet-time">Meeting Time</label>
         <input type="time" id="meet-time" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
       `;
       const meetDateParent = document.getElementById('meet-date')?.parentElement;
@@ -6134,7 +6134,7 @@ function renderProfile() {
               Tempahan anda telah dihantar kepada penjual. Sila tunggu pengesahan daripada penjual.
             </p>
             <button onclick="closeModal(); navigateTo('profile')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
-              Lihat Tempahan Saya
+              View My Orders
             </button>
           </div>
         `);
@@ -6405,14 +6405,14 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       section.innerHTML = `
         <div class="flex items-center justify-between gap-3 mb-4">
           <div>
-            <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
-            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Senarai tempahan yang telah anda hantar kepada penjual.</p>
+            <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>My Orders</h2>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">A list of orders you have sent to sellers.</p>
           </div>
         </div>
         <div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-navy-500 dark:text-navy-300">
           <i class="fas fa-receipt text-4xl mb-3"></i>
-          <p class="font-medium mb-1">Belum ada tempahan</p>
-          <p class="text-sm">Apabila anda membuat tempahan, rekodnya akan dipaparkan di sini.</p>
+          <p class="font-medium mb-1">No orders yet</p>
+          <p class="text-sm">When you place an order, the records will appear here.</p>
         </div>
       `;
       return;
@@ -6421,7 +6421,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     section.innerHTML = `
       <div class="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
+          <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>My Orders</h2>
           <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Pantau status tempahan dan batalkan jika perlu.</p>
         </div>
         <span class="px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 text-sm font-semibold">${myOrders.length} tempahan</span>
@@ -6525,7 +6525,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
               ${outOfStock.slice(0, 8).map(product => `
                 <div class="flex items-center justify-between gap-3 rounded-xl bg-navy-50 dark:bg-navy-700 p-3">
                   <span>${escapeHtmlSafe(product.productName)}</span>
-                  <span class="font-semibold text-red-500">Stok Habis</span>
+                  <span class="font-semibold text-red-500">Out of Stock</span>
                 </div>
               `).join('')}
             </div>
@@ -7138,14 +7138,14 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       section.innerHTML = `
         <div class="flex items-center justify-between gap-3 mb-4">
           <div>
-            <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
-            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Senarai tempahan yang telah anda hantar kepada penjual.</p>
+            <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>My Orders</h2>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">A list of orders you have sent to sellers.</p>
           </div>
         </div>
         <div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-navy-500 dark:text-navy-300">
           <i class="fas fa-receipt text-4xl mb-3"></i>
-          <p class="font-medium mb-1">Belum ada tempahan</p>
-          <p class="text-sm">Apabila anda membuat tempahan, rekodnya akan dipaparkan di sini.</p>
+          <p class="font-medium mb-1">No orders yet</p>
+          <p class="text-sm">When you place an order, the records will appear here.</p>
         </div>
       `;
       return;
@@ -7154,7 +7154,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     section.innerHTML = `
       <div class="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
+          <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>My Orders</h2>
           <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Pantau status tempahan, hubungi penjual, atau laporkan isu kepada admin.</p>
         </div>
         <span class="px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 text-sm font-semibold">${myOrders.length} tempahan</span>
@@ -7365,7 +7365,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
                 <div class="admin-panel-list custom-scrollbar space-y-2 text-sm">
                   ${[
                     ...lowStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-orange-500">Baki ${getProductStockV2(product)}</span></div>`),
-                    ...outOfStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-red-500">Stok Habis</span></div>`)
+                    ...outOfStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-red-500">Out of Stock</span></div>`)
                   ].join('')}
                 </div>
               ` : `<div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-sm text-navy-500 dark:text-navy-300">Tiada produk stok rendah atau habis.</div>`}
@@ -7479,10 +7479,10 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
           <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal."></textarea>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maksimum 5MB setiap gambar)</span></label>
+          <label class="block text-sm font-medium mb-2">Product Images <span class="text-xs text-navy-400">(JPG/PNG, maximum 5MB per image)</span></label>
           <div id="add-product-dropzone-v2" class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors">
             <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
-            <p class="text-sm font-medium">Klik untuk pilih gambar atau seret dan lepas</p>
+            <p class="text-sm font-medium">Click to choose images or drag and drop</p>
             <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar bagi satu produk</p>
             <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
           </div>
@@ -7914,7 +7914,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
           <select id="admin-product-filter-v3" class="sop-soft-select">
             <option value="all" ${adminMonitorStateV3.productStock === 'all' ? 'selected' : ''}>Semua Stok</option>
             <option value="low" ${adminMonitorStateV3.productStock === 'low' ? 'selected' : ''}>Stok Rendah</option>
-            <option value="out" ${adminMonitorStateV3.productStock === 'out' ? 'selected' : ''}>Stok Habis</option>
+            <option value="out" ${adminMonitorStateV3.productStock === 'out' ? 'selected' : ''}>Out of Stock</option>
             <option value="normal" ${adminMonitorStateV3.productStock === 'normal' ? 'selected' : ''}>Stok Normal</option>
           </select>
           <button onclick="applyAdminProductFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
@@ -7993,7 +7993,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
             </div>
           </div>
           <div class="sop-list-card">
-            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Stok Habis</h4><span class="sop-data-pill">${outOfStock.length}</span></div>
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Out of Stock</h4><span class="sop-data-pill">${outOfStock.length}</span></div>
             <div class="space-y-2 text-sm ${outOfStock.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
               ${outOfStock.length ? outOfStock.slice(0,8).map(product => `<div class="flex items-center justify-between gap-3"><span class="truncate">${escV3(product.productName)}</span><span class="font-semibold text-red-500">Habis</span></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
             </div>
@@ -8134,11 +8134,11 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
       </div>
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
-          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Prestasi Produk</h2><span id="seller-performance-badge-v3" class="sop-data-pill">0 produk</span></div>
+          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Product Performance</h2><span id="seller-performance-badge-v3" class="sop-data-pill">0 products</span></div>
           <div id="seller-performance-v3" class="p-4 space-y-3"></div>
         </div>
         <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
-          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Aktiviti Terkini</h2><span class="sop-data-pill">Ringkas</span></div>
+          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Recent Activity</h2><span class="sop-data-pill">Summary</span></div>
           <div id="seller-activity-v3" class="p-4 space-y-3"></div>
         </div>
       </div>
@@ -8214,7 +8214,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
             </div>
           </div>
         </div>
-      `).join('') : `<div class="sop-section-empty">Belum ada prestasi produk untuk dipaparkan.</div>`;
+      `).join('') : `<div class="sop-section-empty">No product performance to display yet.</div>`;
     }
     const activityBox = document.getElementById('seller-activity-v3');
     if (activityBox) {
@@ -8230,12 +8230,12 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
             </div>
           </div>
         </div>
-      `).join('') : `<div class="sop-section-empty">Belum ada aktiviti jualan untuk dipaparkan.</div>`;
+      `).join('') : `<div class="sop-section-empty">No sales activity to display yet.</div>`;
     }
     const ratingCountEl = document.getElementById('seller-rating-count');
     const ratingScoreEl = document.getElementById('seller-rating-score');
     if (ratingScoreEl && reviewSummary.count) ratingScoreEl.textContent = `⭐ ${reviewSummary.average.toFixed(1)}`;
-    if (ratingCountEl) ratingCountEl.textContent = reviewSummary.count ? `${reviewSummary.count} ulasan pengguna` : 'Belum ada ulasan';
+    if (ratingCountEl) ratingCountEl.textContent = reviewSummary.count ? `${reviewSummary.count} ulasan pengguna` : 'No reviews yet';
   }
 
   const prevRenderSellerV3 = window.renderSellerDashboard;
@@ -8410,7 +8410,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 
 <script>
 (function() {
-  const exactMap = {"Selamat Datang ke SHOP ONLINE POLY!": "Welcome to SHOP ONLINE POLY!", "Platform Jual Beli Komuniti Politeknik Nilai Anda": "Your Politeknik Nilai Community Marketplace", "Daftar Akaun": "Create Account", "Daftar sekarang": "Register now", "Daftar Sekarang": "Register Now", "Log Masuk": "Log In", "Log masuk": "Log in", "Log masuk berjaya!": "Logged in successfully!", "Log keluar berjaya": "Logged out successfully", "Kata Laluan": "Password", "Lupa kata laluan": "Forgot password", "Lupa Kata Laluan": "Forgot Password", "Simpan Kata Laluan Baharu": "Save New Password", "Ulang kata laluan baharu": "Repeat new password", "Belum ada akaun?": "Don't have an account yet?", "Sudah ada akaun?": "Already have an account?", "Sertai komuniti S.O.P hari ini!": "Join the S.O.P community today!", "Nama Penuh": "Full Name", "Nama penuh anda": "Your full name", "Email": "Email", "E-mel": "Email", "Emel": "Email", "Minimum 6 aksara": "Minimum 6 characters", "Satu Akaun untuk Membeli & Menjual": "One Account for Buying & Selling", "Semua pengguna boleh membeli produk dan juga menjual produk menggunakan akaun yang sama.": "All users can buy and sell products using the same account.", "Utama": "Home", "Produk": "Products", "Troli": "Cart", "Troli Saya": "My Cart", "Troli anda kosong": "Your cart is empty", "Teruskan Tempahan": "Proceed to Order", "Mesej": "Messages", "Berbincang terus dengan penjual untuk urusan yang lebih lancar.": "Chat directly with the seller for a smoother transaction.", "Kategori Produk": "Product Categories", "Semua Kategori": "All Categories", "Semua": "All", "Produk Trending": "Trending Products", "Lihat Semua": "View All", "Terbaru": "Newest", "Harga: Rendah ke Tinggi": "Price: Low to High", "Harga: Tinggi ke Rendah": "Price: High to Low", "Tiada produk dijumpai": "No products found", "Tiada produk yang sepadan dengan carian anda.": "No products match your search.", "Tambah ke Troli": "Add to Cart", "Ditambah ke troli!": "Added to cart!", "Produk berjaya ditambah ke troli": "Product added to cart successfully", "Sila log masuk untuk menambah ke troli": "Please log in to add to cart", "Sila log masuk untuk menambah produk ke troli": "Please log in to add products to your cart", "Anda tidak boleh membeli produk sendiri": "You cannot buy your own product", "Produk ini telah kehabisan stok": "This product is out of stock", "Produk ini sudah dijual dan tidak boleh ditambah ke troli": "This product has already been sold and cannot be added to the cart", "Kuantiti Produk": "Product Quantity", "Jumlah Stok": "Stock Quantity", "Harga (RM)": "Price (RM)", "Keadaan Produk": "Product Condition", "Baharu": "New", "Terpakai": "Used", "Kategori": "Category", "Akademik": "Academic", "Elektronik": "Electronics", "Peribadi": "Personal", "Makanan": "Food", "Perkhidmatan": "Services", "Lain-lain": "Others", "Lokasi COD": "COD Location", "Lokasi COD Dicadangkan": "Suggested COD Location", "Masa COD Dicadangkan": "Suggested COD Time", "Pilih lokasi": "Select a location", "Contoh: Kafeteria Utama Politeknik Nilai": "Example: Main Cafeteria, Politeknik Nilai", "Keterangan Produk": "Product Description", "Tiada keterangan produk.": "No product description.", "Contoh: Kalkulator Saintifik": "Example: Scientific Calculator", "Contoh: 25.00": "Example: 25.00", "Contoh: 12.30 tengah hari - 2.00 petang": "Example: 12:30 PM - 2:00 PM", "Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal.": "Enter product information in clear and formal language.", "Masukkan detail produk seperti keadaan barang, saiz, warna, atau maklumat tambahan.": "Enter product details such as item condition, size, color, or additional information.", "Gambar Produk": "Product Images", "Tambah Produk": "Add Product", "Terbitkan Produk": "Publish Product", "Produk berjaya diterbitkan": "Product published successfully", "Produk diterbitkan": "Product Published", "Produk berjaya dimuat naik.": "Product uploaded successfully.", "✅ Produk berjaya ditambah!": "✅ Product added successfully!", "Padam Produk?": "Delete Product?", "Produk telah dipadam": "Product deleted", "Produk berjaya dipadam oleh admin": "Product deleted by admin", "Padam": "Delete", "Padam produk": "Delete product", "Padam produk yang tidak sesuai atau tidak patuh kepada peraturan sistem.": "Delete products that are inappropriate or violate platform rules.", "Pengguna S.O.P": "S.O.P User", "Pengguna": "User", "Penjual": "Seller", "Pembeli": "Buyer", "Penilaian Pengguna": "User Rating", "Tiada Ulasan": "No Reviews", "Ulasan Pembelian": "Purchase Review", "Ulasan Anda": "Your Review", "Pilih bintang": "Select star rating", "Hantar Ulasan": "Submit Review", "Kemaskini Ulasan": "Update Review", "Sila log masuk untuk memberi ulasan": "Please log in to leave a review", "Penjual tidak boleh memberi ulasan pada produk sendiri": "Sellers cannot review their own products", "Ulasan hanya boleh dibuat selepas anda membeli produk ini": "Reviews can only be submitted after you purchase this product", "Ulasan hanya boleh dibuat selepas pembelian berjaya": "Reviews can only be submitted after a successful purchase", "Maklumat Produk": "Product Information", "Harga": "Price", "Penilaian Penjual": "Seller Rating", "Tandakan Masih Tersedia": "Mark as Available", "Tandakan Sudah Dijual": "Mark as Sold", "Status produk berjaya ditukar kepada": "Product status successfully changed to", "Hanya pemilik produk boleh menukar status ini": "Only the product owner can change this status", "Profil Saya": "My Profile", "Profil Pengguna": "User Profile", "Jumlah Produk": "Total Products", "Produk Pengguna": "User Products", "Pengguna ini belum menambah produk.": "This user has not added any products yet.", "Klik produk untuk lihat maklumat penuh.": "Click a product to view full details.", "Lihat Profil Penjual": "View Seller Profile", "Chat Pengguna": "Chat User", "Tekan pengguna untuk buka ruang mesej": "Click a user to open the chat", "Pilih perbualan": "Select conversation", "Pilih perbualan untuk mula mesej": "Select a conversation to start messaging", "Sila log masuk untuk mesej": "Please log in to use messages", "Tawaran Diterima": "Offer Accepted", "Tawaran Ditolak": "Offer Rejected", "✅ Tawaran diterima": "✅ Offer accepted", "❌ Tawaran ditolak": "❌ Offer rejected", "Tiada notifikasi": "No notifications", "Tiada tawaran setakat ini": "No offers yet", "Tiada tempahan daripada pembeli setakat ini.": "No buyer orders at the moment.", "Tiada item untuk dibuat tempahan.": "No items available for checkout.", "Tawaran tidak dijumpai": "Offer not found", "Tawaran telah ditolak dan dihantar ke ruang mesej": "The offer has been rejected and sent to the chat", "Terima": "Accept", "Tolak": "Reject", "Sahkan Tolak": "Confirm Rejection", "Batal": "Cancel", "Tiada sebab diberikan.": "No reason provided.", "Sebab penolakan:": "Rejection reason:", "Contoh: Masa COD tidak sesuai, harga terlalu rendah, atau produk sudah ditempah.": "Example: COD time is not suitable, price is too low, or the product has already been reserved.", "Maksimum 5 gambar sahaja untuk satu produk": "Maximum 5 images are allowed for one product", "Sebahagian gambar ditolak:": "Some images were rejected:", "Firebase belum siap. Sila periksa konfigurasi.": "Firebase is not ready. Please check the configuration.", "Firebase belum siap. Sila semak konfigurasi.": "Firebase is not ready. Please check the configuration.", "Email atau kata laluan tidak sah": "Invalid email or password", "E-mel atau kata laluan tidak sah": "Invalid email or password", "Email sudah didaftarkan": "Email is already registered", "Pendaftaran hanya dibenarkan menggunakan e-mel rasmi @polinilai.edu.my.": "Registration is only allowed using an official @polinilai.edu.my email address.", "Pendaftaran berjaya! Sila log masuk.": "Registration successful! Please log in.", "Pendaftaran berjaya. Sila log masuk.": "Registration successful. Please log in.", "Ralat semasa pendaftaran:": "Registration error:", "Akaun anda sedang digantung oleh admin.": "Your account has been suspended by the admin.", "Akaun anda sedang digantung oleh admin. Sila hubungi admin untuk bantuan.": "Your account has been suspended by the admin. Please contact admin for assistance.", "Hubungi Admin": "Contact Admin", "Panel Admin": "Admin Panel", "Panel Pemantauan Admin": "Admin Monitoring Panel", "Akses panel admin hanya untuk pentadbir.": "Admin panel access is for administrators only.", "Aduan": "Reports", "Aduan Terbuka": "Open Reports", "Laporkan Produk": "Report Product", "Laporkan Isu": "Report Issue", "Kategori Aduan": "Report Category", "Maklumat palsu": "False information", "Produk tidak sesuai": "Inappropriate product", "Scam": "Scam", "Pembeli / penjual tidak hadir": "Buyer / seller did not show up", "Pembatalan saat akhir": "Last-minute cancellation", "Kawalan Pengguna": "User Management", "Moderasi Produk": "Product Moderation", "Stok Rendah": "Low Stock", "Stok Habis": "Out of Stock", "Jumlah Pengguna": "Total Users", "Tempahan Menunggu": "Pending Orders", "Tempahan Selesai": "Completed Orders", "Tempahan Dibatalkan": "Cancelled Orders", "Jualan Berjaya": "Successful Sales", "Prestasi Produk": "Product Performance", "Aktiviti Jualan Terkini": "Recent Sales Activity", "Cari aduan, produk, atau pelapor": "Search reports, products, or reporter", "Cari nama atau e-mel pengguna": "Search user name or email", "Cari nama produk, kategori, atau penjual": "Search product name, category, or seller", "Semua Status": "All Statuses", "Semua Pengguna": "All Users", "Semua Stok": "All Stock", "Terbuka": "Open", "Digantung": "Suspended", "Gantung": "Suspend", "Aktifkan": "Reactivate", "Tanda Selesai": "Mark as Resolved", "Aduan telah ditandakan selesai": "Report marked as resolved", "Akaun admin tidak boleh digantung melalui panel ini.": "Admin accounts cannot be suspended through this panel.", "Akaun pengguna digantung": "User account suspended", "Akaun pengguna diaktifkan semula": "User account reactivated", "Pengguna tidak dijumpai": "User not found", "Maklumat pengguna tidak dijumpai": "User information not found", "Sedang memuat naik gambar profil...": "Uploading profile image...", "Gambar profil berjaya dikemas kini": "Profile image updated successfully", "Isi Butiran Tempahan": "Enter Order Details", "Hantar Tempahan": "Send Order", "Ringkasan Pesanan": "Order Summary", "No Telefon": "Phone Number", "Harga Cadangan Pembeli (pilihan)": "Buyer Suggested Price (optional)", "Buat masa ini, satu tempahan hanya dibenarkan untuk seorang penjual sahaja.": "At the moment, one order is only allowed for one seller.", "Tempahan Berjaya Dihantar": "Order Sent Successfully", "Tempahan tidak dijumpai": "Order not found", "Tempahan ini tidak lagi berada dalam status menunggu": "This order is no longer in pending status", "Dibatalkan": "Cancelled", "Diterima": "Accepted", "Ditolak": "Rejected", "Selesai": "Completed", "Pembelian Selesai": "Purchase Completed", "Lihat Mesej": "View Messages", "Mesej Pembeli": "Buyer Messages", "Cari produk...": "Search products...", "Nama Produk": "Product Name", "Status Produk": "Product Status", "Tersedia": "Available", "Sudah Dijual": "Sold", "Panel Jualan Saya": "My Seller Panel"};
+  const exactMap = {"Selamat Datang ke SHOP ONLINE POLY!": "Welcome to SHOP ONLINE POLY!", "Platform Jual Beli Komuniti Politeknik Nilai Anda": "Your Politeknik Nilai Community Marketplace", "Daftar Akaun": "Create Account", "Daftar sekarang": "Register now", "Daftar Sekarang": "Register Now", "Log Masuk": "Log In", "Log masuk": "Log in", "Log masuk berjaya!": "Logged in successfully!", "Log keluar berjaya": "Logged out successfully", "Kata Laluan": "Password", "Lupa kata laluan": "Forgot password", "Lupa Kata Laluan": "Forgot Password", "Simpan Kata Laluan Baharu": "Save New Password", "Ulang kata laluan baharu": "Repeat new password", "Belum ada akaun?": "Don't have an account yet?", "Sudah ada akaun?": "Already have an account?", "Sertai komuniti S.O.P hari ini!": "Join the S.O.P community today!", "Nama Penuh": "Full Name", "Nama penuh anda": "Your full name", "Email": "Email", "E-mel": "Email", "Emel": "Email", "Minimum 6 aksara": "Minimum 6 characters", "Satu Akaun untuk Membeli & Menjual": "One Account for Buying & Selling", "Semua pengguna boleh membeli produk dan juga menjual produk menggunakan akaun yang sama.": "All users can buy and sell products using the same account.", "Utama": "Home", "Produk": "Products", "Troli": "Cart", "Troli Saya": "My Cart", "Troli anda kosong": "Your cart is empty", "Teruskan Tempahan": "Proceed to Order", "Mesej": "Messages", "Berbincang terus dengan penjual untuk urusan yang lebih lancar.": "Chat directly with the seller for a smoother transaction.", "Kategori Produk": "Product Categories", "Semua Kategori": "All Categories", "Semua": "All", "Produk Trending": "Trending Products", "Lihat Semua": "View All", "Terbaru": "Newest", "Harga: Rendah ke Tinggi": "Price: Low to High", "Harga: Tinggi ke Rendah": "Price: High to Low", "Tiada produk dijumpai": "No products found", "Tiada produk yang sepadan dengan carian anda.": "No products match your search.", "Tambah ke Troli": "Add to Cart", "Ditambah ke troli!": "Added to cart!", "Produk berjaya ditambah ke troli": "Product added to cart successfully", "Sila log masuk untuk menambah ke troli": "Please log in to add to cart", "Sila log masuk untuk menambah produk ke troli": "Please log in to add products to your cart", "Anda tidak boleh membeli produk sendiri": "You cannot buy your own product", "Produk ini telah kehabisan stok": "This product is out of stock", "Produk ini sudah dijual dan tidak boleh ditambah ke troli": "This product has already been sold and cannot be added to the cart", "Kuantiti Produk": "Product Quantity", "Jumlah Stok": "Stock Quantity", "Harga (RM)": "Price (RM)", "Keadaan Produk": "Product Condition", "Baharu": "New", "Terpakai": "Used", "Kategori": "Category", "Akademik": "Academic", "Elektronik": "Electronics", "Peribadi": "Personal", "Makanan": "Food", "Perkhidmatan": "Services", "Lain-lain": "Others", "Lokasi COD": "COD Location", "Lokasi COD Dicadangkan": "Suggested COD Location", "Masa COD Dicadangkan": "Suggested COD Time", "Pilih lokasi": "Select a location", "Contoh: Kafeteria Utama Politeknik Nilai": "Example: Main Cafeteria, Politeknik Nilai", "Keterangan Produk": "Product Description", "Tiada keterangan produk.": "No product description.", "Contoh: Kalkulator Saintifik": "Example: Scientific Calculator", "Contoh: 25.00": "Example: 25.00", "Contoh: 12.30 tengah hari - 2.00 petang": "Example: 12:30 PM - 2:00 PM", "Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal.": "Enter product information in clear and formal language.", "Masukkan detail produk seperti keadaan barang, saiz, warna, atau maklumat tambahan.": "Enter product details such as item condition, size, color, or additional information.", "Product Images": "Product Images", "Tambah Produk": "Add Product", "Terbitkan Produk": "Publish Product", "Produk berjaya diterbitkan": "Product published successfully", "Produk diterbitkan": "Product Published", "Produk berjaya dimuat naik.": "Product uploaded successfully.", "✅ Produk berjaya ditambah!": "✅ Product added successfully!", "Padam Produk?": "Delete Product?", "Produk telah dipadam": "Product deleted", "Produk berjaya dipadam oleh admin": "Product deleted by admin", "Padam": "Delete", "Padam produk": "Delete product", "Padam produk yang tidak sesuai atau tidak patuh kepada peraturan sistem.": "Delete products that are inappropriate or violate platform rules.", "Pengguna S.O.P": "S.O.P User", "Pengguna": "User", "Penjual": "Seller", "Pembeli": "Buyer", "Penilaian Pengguna": "User Rating", "Tiada Ulasan": "No Reviews", "Ulasan Pembelian": "Purchase Review", "Ulasan Anda": "Your Review", "Pilih bintang": "Select star rating", "Hantar Ulasan": "Submit Review", "Kemaskini Ulasan": "Update Review", "Sila log masuk untuk memberi ulasan": "Please log in to leave a review", "Penjual tidak boleh memberi ulasan pada produk sendiri": "Sellers cannot review their own products", "Ulasan hanya boleh dibuat selepas anda membeli produk ini": "Reviews can only be submitted after you purchase this product", "Ulasan hanya boleh dibuat selepas pembelian berjaya": "Reviews can only be submitted after a successful purchase", "Maklumat Produk": "Product Information", "Harga": "Price", "Penilaian Penjual": "Seller Rating", "Tandakan Masih Tersedia": "Mark as Available", "Tandakan Sudah Dijual": "Mark as Sold", "Status produk berjaya ditukar kepada": "Product status successfully changed to", "Hanya pemilik produk boleh menukar status ini": "Only the product owner can change this status", "Profil Saya": "My Profile", "Profil Pengguna": "User Profile", "Jumlah Produk": "Total Products", "Produk Pengguna": "User Products", "Pengguna ini belum menambah produk.": "This user has not added any products yet.", "Klik produk untuk lihat maklumat penuh.": "Click a product to view full details.", "Lihat Profil Penjual": "View Seller Profile", "Chat Pengguna": "Chat User", "Tekan pengguna untuk buka ruang mesej": "Click a user to open the chat", "Pilih perbualan": "Select conversation", "Pilih perbualan untuk mula mesej": "Select a conversation to start messaging", "Sila log masuk untuk mesej": "Please log in to use messages", "Tawaran Diterima": "Offer Accepted", "Tawaran Ditolak": "Offer Rejected", "✅ Tawaran diterima": "✅ Offer accepted", "❌ Tawaran ditolak": "❌ Offer rejected", "Tiada notifikasi": "No notifications", "Tiada tawaran setakat ini": "No offers yet", "Tiada tempahan daripada pembeli setakat ini.": "No buyer orders at the moment.", "Tiada item untuk dibuat tempahan.": "No items available for checkout.", "Tawaran tidak dijumpai": "Offer not found", "Tawaran telah ditolak dan dihantar ke ruang mesej": "The offer has been rejected and sent to the chat", "Terima": "Accept", "Tolak": "Reject", "Sahkan Tolak": "Confirm Rejection", "Batal": "Cancel", "Tiada sebab diberikan.": "No reason provided.", "Sebab penolakan:": "Rejection reason:", "Contoh: Masa COD tidak sesuai, harga terlalu rendah, atau produk sudah ditempah.": "Example: COD time is not suitable, price is too low, or the product has already been reserved.", "Maksimum 5 gambar sahaja untuk satu produk": "Maximum 5 images are allowed for one product", "Sebahagian gambar ditolak:": "Some images were rejected:", "Firebase belum siap. Sila periksa konfigurasi.": "Firebase is not ready. Please check the configuration.", "Firebase belum siap. Sila semak konfigurasi.": "Firebase is not ready. Please check the configuration.", "Email atau kata laluan tidak sah": "Invalid email or password", "E-mel atau kata laluan tidak sah": "Invalid email or password", "Email sudah didaftarkan": "Email is already registered", "Pendaftaran hanya dibenarkan menggunakan e-mel rasmi @polinilai.edu.my.": "Registration is only allowed using an official @polinilai.edu.my email address.", "Pendaftaran berjaya! Sila log masuk.": "Registration successful! Please log in.", "Pendaftaran berjaya. Sila log masuk.": "Registration successful. Please log in.", "Ralat semasa pendaftaran:": "Registration error:", "Akaun anda sedang digantung oleh admin.": "Your account has been suspended by the admin.", "Akaun anda sedang digantung oleh admin. Sila hubungi admin untuk bantuan.": "Your account has been suspended by the admin. Please contact admin for assistance.", "Hubungi Admin": "Contact Admin", "Panel Admin": "Admin Panel", "Panel Pemantauan Admin": "Admin Monitoring Panel", "Akses panel admin hanya untuk pentadbir.": "Admin panel access is for administrators only.", "Aduan": "Reports", "Aduan Terbuka": "Open Reports", "Laporkan Produk": "Report Product", "Laporkan Isu": "Report Issue", "Kategori Aduan": "Report Category", "Maklumat palsu": "False information", "Produk tidak sesuai": "Inappropriate product", "Scam": "Scam", "Pembeli / penjual tidak hadir": "Buyer / seller did not show up", "Pembatalan saat akhir": "Last-minute cancellation", "Kawalan Pengguna": "User Management", "Moderasi Produk": "Product Moderation", "Stok Rendah": "Low Stock", "Out of Stock": "Out of Stock", "Jumlah Pengguna": "Total Users", "Tempahan Menunggu": "Pending Orders", "Tempahan Selesai": "Completed Orders", "Tempahan Dibatalkan": "Cancelled Orders", "Jualan Berjaya": "Successful Sales", "Product Performance": "Product Performance", "Aktiviti Jualan Terkini": "Recent Sales Activity", "Cari aduan, produk, atau pelapor": "Search reports, products, or reporter", "Cari nama atau e-mel pengguna": "Search user name or email", "Cari nama produk, kategori, atau penjual": "Search product name, category, or seller", "Semua Status": "All Statuses", "Semua Pengguna": "All Users", "Semua Stok": "All Stock", "Terbuka": "Open", "Digantung": "Suspended", "Gantung": "Suspend", "Aktifkan": "Reactivate", "Tanda Selesai": "Mark as Resolved", "Aduan telah ditandakan selesai": "Report marked as resolved", "Akaun admin tidak boleh digantung melalui panel ini.": "Admin accounts cannot be suspended through this panel.", "Akaun pengguna digantung": "User account suspended", "Akaun pengguna diaktifkan semula": "User account reactivated", "Pengguna tidak dijumpai": "User not found", "Maklumat pengguna tidak dijumpai": "User information not found", "Sedang memuat naik gambar profil...": "Uploading profile image...", "Gambar profil berjaya dikemas kini": "Profile image updated successfully", "Isi Butiran Tempahan": "Enter Order Details", "Hantar Tempahan": "Send Order", "Summaryan Pesanan": "Order Summary", "No Telefon": "Phone Number", "Harga Cadangan Pembeli (pilihan)": "Buyer Suggested Price (optional)", "Buat masa ini, satu tempahan hanya dibenarkan untuk seorang penjual sahaja.": "At the moment, one order is only allowed for one seller.", "Tempahan Berjaya Dihantar": "Order Sent Successfully", "Tempahan tidak dijumpai": "Order not found", "Tempahan ini tidak lagi berada dalam status menunggu": "This order is no longer in pending status", "Dibatalkan": "Cancelled", "Diterima": "Accepted", "Ditolak": "Rejected", "Selesai": "Completed", "Pembelian Selesai": "Purchase Completed", "Lihat Mesej": "View Messages", "Mesej Pembeli": "Buyer Messages", "Cari produk...": "Search products...", "Nama Produk": "Product Name", "Status Produk": "Product Status", "Tersedia": "Available", "Sudah Dijual": "Sold", "Panel Jualan Saya": "My Seller Panel"};
   const regexRules = [["Contoh:", "Example:"], ["Anda:", "You:"], ["Pelapor:", "Reporter:"], ["Sasaran:", "Target:"], ["Pengguna berkaitan:", "Related user:"], ["Produk:", "Product:"], ["Penjual:", "Seller:"], ["Pembeli:", "Buyer:"], ["Diterima:", "Accepted:"], ["Ditolak:", "Rejected:"], ["Dibatalkan:", "Cancelled:"], ["Selesai:", "Completed:"], ["Tarikh selesai:", "Completion date:"], ["Sebab penolakan:", "Rejection reason:"], ["Sebab:", "Reason:"], ["Stok semasa:", "Current stock:"], ["Stok:", "Stock:"], ["Kuantiti:", "Quantity:"], ["Jumlah:", "Total:"], ["Penilaian", "Rating"], ["ulasan pengguna", "user reviews"], ["ulasan produk", "product reviews"], ["Produk dibeli:", "Purchased product:"], ["Produk dalam tawaran:", "Product in offer:"], ["Kuantiti melebihi stok semasa\\. Baki stok ialah (\\d+)\\.", "Quantity exceeds current stock. Remaining stock is $1."], ["Stok tidak mencukupi\\. Baki stok ialah (\\d+)\\.", "Insufficient stock. Remaining stock is $1."], ["Kuantiti tidak boleh melebihi stok semasa \\((\\d+)\\)", "Quantity cannot exceed the current stock ($1)"], ["Stok bagi (.+?) tidak mencukupi\\. Baki stok ialah (\\d+)\\.", "Stock for $1 is insufficient. Remaining stock is $2."], ["Kuantiti minimum pembelian untuk produk ini ialah (\\d+)\\.", "The minimum purchase quantity for this product is $1."], ["Kuantiti maksimum pembelian untuk produk ini ialah (\\d+)\\.", "The maximum purchase quantity for this product is $1."], ["Minimum pembelian: (\\d+) unit\\. Maksimum pembelian: (\\d+) unit\\.", "Minimum purchase: $1 unit. Maximum purchase: $2 units."], ["Ralat semasa ", "Error while "], ["Ralat memadam ", "Error deleting "], ["Ralat mengemas kini ", "Error updating "], ["Ralat menambah ", "Error adding "], ["Ralat memuat naik ", "Error uploading "], ["berjaya dipadam", "deleted successfully"], ["berjaya dikemas kini", "updated successfully"], ["berjaya ditambah", "added successfully"], ["berjaya dihantar", "sent successfully"], ["berjaya", "successfully"]];
   const exactEntries = Object.entries(exactMap).sort((a, b) => b[0].length - a[0].length);
 
@@ -8544,60 +8544,66 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
 <script>
 (function() {
   const extraMap = {
-    "Perbualan": "Conversations",
-    "Tiada perbualan": "No conversations",
-    "Tiada perbualan lagi": "No conversations yet",
+    "Conversations": "Conversations",
+    "No conversations": "No conversations",
+    "No conversations lagi": "No conversations yet",
     "Pilih perbualan": "Select conversation",
     "Pilih perbualan untuk mula mesej": "Select a conversation to start messaging",
     "Mulakan perbualan": "Start a conversation",
     "Mulakan perbualan dengan pengguna ini": "Start a conversation with this user",
-    "Mulakan mesej melalui halaman produk": "Start a message from the product page",
+    "Start a message from the product page": "Start a message from the product page",
     "Mesej penjual melalui halaman produk": "Message the seller from the product page",
     "Tekan butang chat pada produk untuk mula mesej": "Click the chat button on a product to start messaging",
     "Tekan pengguna untuk buka ruang mesej": "Click a user to open the chat",
     "Mesej": "Messages",
+    "order completed": "order completed",
+    "order accepted": "order accepted",
+    "order rejected": "order rejected",
+    "order cancelled": "order cancelled",
+    "maximum 5MB per image": "maximum 5MB per image",
+    "0 ulasan": "0 reviews",
     "Belum dibaca": "Unread",
     "Belum ada mesej": "No messages yet",
 
     "Chat Terus": "Direct Chat",
-    "Mula Membeli": "Start Shopping",
+    "Start Shopping": "Start Shopping",
     "Lihat Semua": "View All",
     "Cari produk...": "Search products...",
     "Tiada produk dijumpai": "No products found",
     "Belum ada produk. Jadilah penjual pertama!": "No products yet. Be the first seller!",
-    "Anda belum ada produk. Tambah produk pertama anda!": "You do not have any products yet. Add your first product!",
+    "You do not have any products yet. Add your first product!": "You do not have any products yet. Add your first product!",
 
-    "Sejarah Buyeran": "Purchase History",
+    "Purchase History": "Purchase History",
     "Sejarah Pembelian": "Purchase History",
     "Lihat semula barang yang pernah anda beli dan beri ulasan kepada penjual.": "Review the items you have purchased and leave feedback for the seller.",
-    "Belum ada sejarah pembelian": "No purchase history yet",
+    "No purchase history yet": "No purchase history yet",
     "Produk yang anda beli akan dipaparkan di sini supaya mudah untuk anda semak semula dan beri ulasan.": "Products you purchase will appear here so you can review them and leave feedback.",
 
-    "Tempahan Saya": "My Orders",
-    "Senarai tempahan yang telah anda hantar kepada penjual.": "A list of orders you have sent to sellers.",
-    "Belum ada tempahan": "No orders yet",
-    "Apabila anda membuat tempahan, rekodnya akan dipaparkan di sini.": "When you place an order, the records will appear here.",
+    "My Orders": "My Orders",
+    "A list of orders you have sent to sellers.": "A list of orders you have sent to sellers.",
+    "No orders yet": "No orders yet",
+    "When you place an order, the records will appear here.": "When you place an order, the records will appear here.",
     "Tempahan daripada Buyer": "Orders from Buyers",
     "Tempahan daripada Pembeli": "Orders from Buyers",
-    "Lihat Tempahan Saya": "View My Orders",
+    "View My Orders": "View My Orders",
     "Tiada tempahan daripada pembeli setakat ini.": "No buyer orders at the moment.",
     "Tiada item untuk dibuat tempahan.": "No items available for checkout.",
 
-    "Aktiviti Terkini": "Recent Activity",
-    "Ringkas": "Summary",
-    "Belum ada aktiviti jualan untuk dipaparkan.": "No sales activity to display yet.",
-    "Belum ada prestasi produk untuk dipaparkan.": "No product performance to display yet.",
-    "Prestasi Produk": "Product Performance",
+    "Recent Activity": "Recent Activity",
+    "Summary": "Summary",
+    "No sales activity to display yet.": "No sales activity to display yet.",
+    "No product performance to display yet.": "No product performance to display yet.",
+    "Product Performance": "Product Performance",
     "Aktiviti Jualan Terkini": "Recent Sales Activity",
     "Panel Jualan Saya": "My Seller Panel",
     "Tambah Produk": "Add Product",
     "Produk Saya": "My Products",
-    "Products Saya": "My Products",
+    "My Products": "My Products",
 
-    "Ulasan User": "User Reviews",
-    "Belum ada ulasan": "No reviews yet",
-    "Belum ada ulasan untuk produk ini.": "No reviews for this product yet.",
-    "Ulasan produk boleh dibuat melalui sejarah pembelian di bahagian profil.": "Product reviews can be submitted through the purchase history section in the profile page.",
+    "User Reviews": "User Reviews",
+    "No reviews yet": "No reviews yet",
+    "No reviews yet untuk produk ini.": "No reviews for this product yet.",
+    "Product reviews can be submitted through the purchase history section in the profile page.": "Product reviews can be submitted through the purchase history section in the profile page.",
     "Penilaian Pengguna": "User Rating",
     "Penilaian Penjual": "Seller Rating",
     "Ulasan Anda": "Your Review",
@@ -8607,38 +8613,38 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     "Belum Diulas": "Not Reviewed Yet",
     "Pembelian Selesai": "Purchase Completed",
 
-    "Masih Ada": "Available",
-    "Stok Habis": "Out of Stock",
+    "Available": "Available",
+    "Out of Stock": "Out of Stock",
     "Tersedia": "Available",
     "Sudah Dijual": "Sold",
     "Status Stok": "Stock Status",
     "Tiada keterangan produk.": "No product description.",
     "Keterangan Produk": "Product Description",
 
-    "Kuantiti Buyeran": "Purchase Quantity",
-    "Pilih jumlah yang ingin dibeli.": "Select the quantity you want to buy.",
+    "Purchase Quantity": "Purchase Quantity",
+    "Select the quantity you want to buy.": "Select the quantity you want to buy.",
     "Beli Terus": "Buy Now",
     "Tidak Boleh Dibeli": "Unavailable for Purchase",
     "Tambah ke Troli": "Add to Cart",
     "Lihat Profil Penjual": "View Seller Profile",
     "Laporkan Produk": "Report Product",
 
-    "Gambar Produk": "Product Images",
-    "Klik untuk pilih gambar atau seret & lepas": "Click to choose images or drag and drop",
-    "Klik untuk pilih gambar atau seret dan lepas": "Click to choose images or drag and drop",
+    "Product Images": "Product Images",
+    "Click to choose images or drag and drop": "Click to choose images or drag and drop",
+    "Click to choose images or drag and drop": "Click to choose images or drag and drop",
     "Maksimum 5 gambar bagi satu produk": "Maximum 5 images per product",
     "Maksimum 5 gambar untuk setiap produk": "Maximum 5 images for each product",
-    "maksimum 5MB setiap gambar": "maximum 5MB per image",
-    "maks 5MB setiap gambar": "max 5MB per image",
+    "maximum 5MB per image": "maximum 5MB per image",
+    "max 5MB per image": "max 5MB per image",
     "gambar dipilih": "images selected",
 
-    "Jabatan / Kursus": "Department / Course",
+    "Department / Course": "Department / Course",
     "Jabatan/Kursus": "Department/Course",
-    "Tarikh Pertemuan": "Meeting Date",
-    "Masa Pertemuan": "Meeting Time",
+    "Meeting Date": "Meeting Date",
+    "Meeting Time": "Meeting Time",
     "Sila pilih lokasi COD": "Please select a COD location",
     "Harga Cadangan Pembeli (pilihan)": "Buyer Suggested Price (optional)",
-    "Ringkasan Pesanan": "Order Summary",
+    "Summaryan Pesanan": "Order Summary",
     "No Telefon": "Phone Number",
     "Nama Pengguna": "User Name",
     "Pengguna S.O.P": "S.O.P User",
@@ -8696,7 +8702,7 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     [/\bProduk:\s*/gi, "Product: "],
     [/\bStok:\s*/gi, "Stock: "],
     [/\bStok semasa:\s*/gi, "Current stock: "],
-    [/\bMasih Ada\s*\((\d+)\)/g, "Available ($1)"],
+    [/\bAvailable\s*\((\d+)\)/g, "Available ($1)"],
     [/\bBelum dibaca\s*\((\d+)\)/g, "Unread ($1)"],
     [/\b(\d+)\s+gambar\b/g, "$1 images"],
     [/\bTiada notifikasi\b/g, "No notifications"],
@@ -8713,6 +8719,19 @@ Masa pertemuan: ${offer.meetingTime || '-'}`;
     [/\bberjaya dikemas kini\b/g, "updated successfully"],
     [/\bberjaya dihantar\b/g, "sent successfully"],
     [/\bberjaya diterima\b/g, "accepted successfully"],
+    [/\border completed\b/gi, "order completed"],
+    [/\border accepted\b/gi, "order accepted"],
+    [/\border rejected\b/gi, "order rejected"],
+    [/\border cancelled\b/gi, "order cancelled"],
+    [/\bselesai\b/gi, "completed"],
+    [/\bditerima\b/gi, "accepted"],
+    [/\bditolak\b/gi, "rejected"],
+    [/\bdibatalkan\b/gi, "cancelled"],
+    [/\bPTG\b/g, "PM"],
+    [/\bPG\b/g, "AM"],
+    [/\b(\d+)\s+produk\b/gi, "$1 products"],
+    [/\b(\d+)\s+ulasan\b/gi, "$1 reviews"],
+    [/\b(\d+)\s+pengguna\b/gi, "$1 users"],
     [/\bberjaya\b/g, "successfully"],
     [/\bgambar\b/g, "image"],
     [/\btempahan\b/gi, "order"],
