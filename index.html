@@ -115,14 +115,100 @@
       animation: fadeIn 0.3s ease;
       max-height: 90vh;
       overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.35);
     }
     .dark .modal-content { background: #1e293b; }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .modal-body { min-width: 0; }
+    .modal-content.modal-fullscreen {
+      width: min(96vw, 1560px);
+      max-width: none;
+      height: 94vh;
+      max-height: 94vh;
+      padding: 0;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-content.modal-fullscreen .modal-header {
+      margin-bottom: 0;
+      padding: 22px 24px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: inherit;
+    }
+    .modal-content.modal-fullscreen .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 24px;
+    }
+    .admin-panel-shell { height: 100%; }
+    .admin-panel-section {
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.08);
+      padding: 20px;
+      min-width: 0;
+    }
+    .dark .admin-panel-section { background: rgba(15, 23, 42, 0.22); }
+    .admin-panel-list {
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+    .admin-panel-card {
+      border-radius: 18px;
+      background: rgba(51, 78, 104, 0.12);
+      padding: 14px;
+    }
+    .dark .admin-panel-card { background: rgba(51, 78, 104, 0.45); }
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.65) transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.55);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.8); }
     body { box-sizing: border-box; }
 
     .conversation-item { transition: all 0.2s ease; }
     .conversation-item:hover { transform: translateY(-1px); }
     .chat-message-bubble { word-break: break-word; }
     @media (max-width: 767px) {
+      .modal-content.modal-fullscreen {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+      .modal-content.modal-fullscreen .modal-header {
+        padding: 18px 16px;
+      }
+      .modal-content.modal-fullscreen .modal-body {
+        padding: 16px;
+      }
+      .admin-panel-section {
+        padding: 16px;
+        border-radius: 18px;
+      }
+      .admin-panel-list {
+        max-height: 300px;
+      }
       .chat-marketplace-shell {
         height: calc(100vh - 180px);
         min-height: calc(100vh - 180px);
@@ -169,7 +255,6 @@
                 <span id="cart-badge" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
               </a>
               <a href="#" onclick="navigateTo('chat')" class="nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors"><i class="fas fa-comments mr-1"></i> Mesej</a>
-              <div id="auth-nav"></div>
             </div>
           </div>
 
@@ -178,6 +263,8 @@
               <i class="fas fa-moon dark:hidden"></i>
               <i class="fas fa-sun hidden dark:block"></i>
             </button>
+
+            <div id="auth-nav" class="hidden md:flex items-center gap-3 justify-end"></div>
 
             <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-navy-600 dark:text-white">
               <i class="fas fa-bars text-xl"></i>
@@ -319,10 +406,8 @@
 
               <select id="category-filter" onchange="searchProducts()" class="px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
                 <option value="">Semua Kategori</option>
-                <option value="Akademik">📚 Akademik</option>
-                <option value="Elektronik">💻 Elektronik</option>
-                <option value="Asrama">🏠 Asrama</option>
-                <option value="Peribadi">👕 Peribadi</option>
+                                <option value="Elektronik">💻 Elektronik</option>
+                                <option value="Peribadi">👕 Peribadi</option>
                 <option value="Makanan">🍪 Makanan</option>
                 <option value="Perkhidmatan">💼 Perkhidmatan</option>
                 <option value="Lain-lain">📦 Lain-lain</option>
@@ -360,7 +445,7 @@
               <span id="cart-total" class="text-2xl font-bold text-accent-orange">RM 0.00</span>
             </div>
             <button onclick="navigateTo('checkout')" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">
-              <i class="fas fa-paper-plane mr-2"></i> Teruskan Hantar Tawaran
+              <i class="fas fa-paper-plane mr-2"></i> Teruskan Tempahan
             </button>
           </div>
         </div>
@@ -393,7 +478,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2" for="offer-price">Harga Tawaran Pembeli (pilihan)</label>
+              <label class="block text-sm font-medium mb-2" for="offer-price">Harga Cadangan Pembeli (pilihan)</label>
               <input type="number" id="offer-price" min="0" step="0.01" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="Contoh: 25.00" />
             </div>
 
@@ -409,7 +494,7 @@
             </div>
 
             <button type="submit" class="w-full btn-primary bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold mt-4">
-              <i class="fas fa-paper-plane mr-2"></i> Hantar Offer
+              <i class="fas fa-paper-plane mr-2"></i> Hantar Tempahan
             </button>
           </form>
         </div>
@@ -490,7 +575,7 @@
             <form id="login-form" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium mb-2" for="login-email">Email</label>
-                <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my" />
+                <input type="email" id="login-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="nama@polinilai.edu.my" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="login-password">Kata Laluan</label>
@@ -527,7 +612,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="reg-email">Email</label>
-                <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="contoh@politeknik.edu.my" />
+                <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange" placeholder="nama@polinilai.edu.my" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2" for="reg-password">Kata Laluan</label>
@@ -624,7 +709,7 @@
 
           <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden mt-6">
             <div class="p-4 bg-navy-100 dark:bg-navy-700 flex justify-between items-center">
-              <h2 class="font-semibold">Tawaran daripada Pembeli</h2>
+              <h2 class="font-semibold">Tempahan daripada Pembeli</h2>
             </div>
             <div id="seller-offers" class="p-4 space-y-4"></div>
           </div>
@@ -682,6 +767,11 @@
     let firebaseReady = false;
 
     let currentUser = null;
+    Object.defineProperty(window, 'currentUser', {
+      configurable: true,
+      get() { return currentUser; },
+      set(value) { currentUser = value; }
+    });
     let allData = [];
     let currentChatWith = null;
     let currentPage = 'home';
@@ -2483,10 +2573,8 @@ Sebab penolakan: ${reason}`;
           <div>
             <label class="block text-sm font-medium mb-1">Kategori</label>
             <select id="prod-category" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
-              <option value="Akademik">📚 Akademik</option>
-              <option value="Elektronik">💻 Elektronik</option>
-              <option value="Asrama">🏠 Asrama</option>
-              <option value="Peribadi">👕 Peribadi</option>
+                            <option value="Elektronik">💻 Elektronik</option>
+                            <option value="Peribadi">👕 Peribadi</option>
               <option value="Makanan">🍪 Makanan</option>
               <option value="Perkhidmatan">💼 Perkhidmatan</option>
               <option value="Lain-lain">📦 Lain-lain</option>
@@ -2773,18 +2861,24 @@ function renderProfile() {
       }, 3000);
     }
 
-    function showModal(title, content) {
+    function showModal(title, content, options = {}) {
       const container = document.getElementById('modal-container');
+      const modalClass = options.modalClass || '';
+      const overlayClass = options.overlayClass || '';
+      const headerClass = options.headerClass || '';
+      const bodyClass = options.bodyClass || '';
       container.innerHTML = `
-        <div class="modal-overlay" onclick="closeModal()">
-          <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold">${title}</h3>
-              <button onclick="closeModal()" class="text-navy-400 hover:text-navy-600">
+        <div class="modal-overlay ${overlayClass}" onclick="closeModal()">
+          <div class="modal-content ${modalClass}" onclick="event.stopPropagation()">
+            <div class="modal-header ${headerClass}">
+              <h3 class="text-lg md:text-2xl font-bold leading-tight">${title}</h3>
+              <button onclick="closeModal()" class="w-10 h-10 rounded-full flex items-center justify-center text-navy-400 hover:text-navy-600 hover:bg-navy-100 dark:hover:bg-navy-700 transition-colors">
                 <i class="fas fa-times"></i>
               </button>
             </div>
-            ${content}
+            <div class="modal-body ${bodyClass}">
+              ${content}
+            </div>
           </div>
         </div>
       `;
@@ -3278,10 +3372,8 @@ function renderProfile() {
         <div>
           <label class="block text-sm font-medium mb-1">Kategori</label>
           <select id="prod-category" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
-            <option value="Akademik">📚 Akademik</option>
-            <option value="Elektronik">💻 Elektronik</option>
-            <option value="Asrama">🏠 Asrama</option>
-            <option value="Peribadi">👕 Peribadi</option>
+                        <option value="Elektronik">💻 Elektronik</option>
+                        <option value="Peribadi">👕 Peribadi</option>
             <option value="Makanan">🍪 Makanan</option>
             <option value="Perkhidmatan">💼 Perkhidmatan</option>
             <option value="Lain-lain">📦 Lain-lain</option>
@@ -5166,6 +5258,3177 @@ function renderProfile() {
   requestAnimationFrame(() => {
     updateSellerRatingCard();
     fixChatMobileSizing(false);
+  });
+})();
+</script>
+
+
+<script>
+(function () {
+  const POLI_DOMAIN = '@polinilai.edu.my';
+  const ADMIN_EMAILS = ['admin@polinilai.edu.my', 'daiyandarwish05@polinilai.edu.my'];
+  const ADMIN_PHONE_DISPLAY = '+6019-540 2353';
+  const ADMIN_PHONE_WA = '60195402353';
+
+  function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+  }
+
+  function isPoliEmail(email) {
+    return normalizeEmail(email).endsWith(POLI_DOMAIN);
+  }
+
+  function isAdminUser(userOrEmail) {
+    const email = normalizeEmail(typeof userOrEmail === 'string' ? userOrEmail : userOrEmail?.email);
+    return ADMIN_EMAILS.includes(email) || email.startsWith('admin@');
+  }
+
+  function getProductSafe(productId) {
+    return allData.find(item => item.type === 'product' && ((item.__firebaseId === productId) || (item.id === productId))) || null;
+  }
+
+  function getProductSafeId(product) {
+    return product ? (product.__firebaseId || product.id) : '';
+  }
+
+  function getProductStock(product) {
+    const raw = Number(product?.stockAvailable ?? product?.stockQuantity ?? product?.stock ?? 1);
+    if (Number.isNaN(raw)) return 0;
+    return Math.max(0, raw);
+  }
+
+  function getProductInitialStock(product) {
+    const raw = Number(product?.stockQuantity ?? product?.stockAvailable ?? product?.stock ?? 1);
+    if (Number.isNaN(raw)) return 1;
+    return Math.max(1, raw);
+  }
+
+  function getProductStatus(product) {
+    return getProductStock(product) > 0 ? 'available' : 'sold';
+  }
+
+  function getProductStatusLabelEnhanced(product) {
+    return getProductStock(product) > 0 ? `Stok: ${getProductStock(product)}` : 'Stok Habis';
+  }
+
+  function escapeHtmlSafe(value) {
+    if (typeof escapeHtml === 'function') return escapeHtml(value ?? '');
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function formatDateSafe(value) {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('ms-MY', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function formatTimeSafe(value) {
+    if (!value) return '-';
+    return value;
+  }
+
+  function getModalSelectedQuantity() {
+    const input = document.getElementById('product-qty-input');
+    const qty = Number(input?.value || 1);
+    return Number.isFinite(qty) && qty > 0 ? Math.floor(qty) : 1;
+  }
+
+  function setModalQuantity(nextQty, maxQty) {
+    const input = document.getElementById('product-qty-input');
+    if (!input) return;
+    const current = Number(input.value || 1);
+    const newValue = Math.max(1, Math.min(maxQty, current + nextQty));
+    input.value = newValue;
+  }
+
+  function getCartExistingQty(productId) {
+    if (!currentUser) return 0;
+    const actualProductId = productId;
+    const existingItem = allData.find(item =>
+      item.type === 'cart' &&
+      item.cartUserId === currentUser.email &&
+      item.cartProductId === actualProductId
+    );
+    return Number(existingItem?.quantity || 0);
+  }
+
+  function cleanupCategoryOptions() {
+    ['category-filter', 'prod-category'].forEach((id) => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      Array.from(select.options).forEach((option) => {
+        if (['Akademik', 'Asrama'].includes(option.value)) option.remove();
+      });
+    });
+  }
+
+  function addAuthHelperButtons() {
+    const loginForm = document.getElementById('login-form');
+    if (!loginForm || document.getElementById('auth-helper-row')) return;
+
+    const row = document.createElement('div');
+    row.id = 'auth-helper-row';
+    row.className = 'flex flex-wrap items-center justify-start gap-3 mt-4 text-sm';
+    row.innerHTML = `
+      <button type="button" onclick="openForgotPasswordModal()" class="text-accent-orange hover:underline font-medium">Lupa kata laluan</button>
+    `;
+    loginForm.insertAdjacentElement('afterend', row);
+
+    const registerEmail = document.getElementById('reg-email');
+    if (registerEmail && !document.getElementById('reg-email-note')) {
+      const note = document.createElement('p');
+      note.id = 'reg-email-note';
+      note.className = 'text-xs text-navy-500 dark:text-navy-300 mt-2';
+      note.textContent = 'Pendaftaran hanya dibenarkan menggunakan e-mel rasmi @polinilai.edu.my.';
+      registerEmail.parentElement.appendChild(note);
+    }
+  }
+
+  function cloneAndBindAuthForms() {
+    const loginForm = document.getElementById('login-form');
+    if (loginForm && !loginForm.dataset.enhancedAuthBound) {
+      const loginClone = loginForm.cloneNode(true);
+      loginForm.replaceWith(loginClone);
+      loginClone.dataset.enhancedAuthBound = 'true';
+      loginClone.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = normalizeEmail(document.getElementById('login-email')?.value);
+        const password = document.getElementById('login-password')?.value || '';
+
+        if (!isPoliEmail(email)) {
+          showToast('Sila gunakan e-mel rasmi @polinilai.edu.my', 'warning');
+          return;
+        }
+
+        const users = getUsers();
+        const user = users.find(u => normalizeEmail(u.email) === email && u.password === password);
+        if (!user) {
+          showToast('E-mel atau kata laluan tidak sah', 'error');
+          return;
+        }
+
+        currentUser = {
+          name: user.name,
+          email: normalizeEmail(user.email),
+          role: isAdminUser(user) ? 'admin' : 'user',
+          profileImageUrl: user.profileImageUrl || user.avatarUrl || ''
+        };
+        localStorage.setItem('sop_user', JSON.stringify(currentUser));
+        updateAuthNav();
+        showToast('Log masuk berjaya', 'success');
+        navigateTo('home');
+      });
+    }
+
+    const registerForm = document.getElementById('register-form');
+    if (registerForm && !registerForm.dataset.enhancedAuthBound) {
+      const registerClone = registerForm.cloneNode(true);
+      registerForm.replaceWith(registerClone);
+      registerClone.dataset.enhancedAuthBound = 'true';
+      registerClone.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = String(document.getElementById('reg-name')?.value || '').trim();
+        const email = normalizeEmail(document.getElementById('reg-email')?.value);
+        const password = document.getElementById('reg-password')?.value || '';
+
+        if (!name) {
+          showToast('Sila isi nama penuh', 'warning');
+          return;
+        }
+
+        if (!isPoliEmail(email)) {
+          showToast('Pendaftaran hanya dibenarkan menggunakan e-mel @polinilai.edu.my', 'warning');
+          return;
+        }
+
+        if (password.length < 6) {
+          showToast('Kata laluan mestilah sekurang-kurangnya 6 aksara', 'warning');
+          return;
+        }
+
+        const users = getUsers();
+        if (users.find(u => normalizeEmail(u.email) === email)) {
+          showToast('E-mel sudah didaftarkan', 'error');
+          return;
+        }
+
+        if (!firebaseReady) {
+          showToast('Firebase belum siap. Sila semak konfigurasi.', 'error');
+          return;
+        }
+
+        try {
+          const createdAt = new Date().toISOString();
+          const payload = {
+            name,
+            email,
+            password,
+            role: isAdminUser(email) ? 'admin' : 'user',
+            type: 'user',
+            createdAt
+          };
+
+          const userId = await saveToFirebase('users', payload);
+          allData.push({
+            ...payload,
+            __firebaseId: userId,
+            id: userId,
+            __collection: 'users'
+          });
+
+          showToast('Pendaftaran berjaya. Sila log masuk.', 'success');
+          navigateTo('login');
+        } catch (error) {
+          showToast('Ralat semasa pendaftaran: ' + error.message, 'error');
+        }
+      });
+    }
+
+    addAuthHelperButtons();
+  }
+
+  window.openForgotPasswordModal = function () {
+    showModal('Lupa Kata Laluan', `
+      <form id="forgot-password-form" class="space-y-4">
+        <p class="text-sm text-navy-600 dark:text-navy-300">Masukkan e-mel rasmi Politeknik Nilai dan tetapkan kata laluan baharu.</p>
+        <div>
+          <label class="block text-sm font-medium mb-2">E-mel</label>
+          <input type="email" id="forgot-email" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="nama@polinilai.edu.my">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Kata laluan baharu</label>
+          <input type="password" id="forgot-new-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Minimum 6 aksara">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Sahkan kata laluan baharu</label>
+          <input type="password" id="forgot-confirm-password" required minlength="6" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Ulang kata laluan baharu">
+        </div>
+        <button type="submit" class="w-full bg-accent-orange hover:bg-accent-orangeHover text-white py-3 rounded-xl font-semibold">Simpan Kata Laluan Baharu</button>
+      </form>
+    `);
+
+    document.getElementById('forgot-password-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = normalizeEmail(document.getElementById('forgot-email')?.value);
+      const newPassword = document.getElementById('forgot-new-password')?.value || '';
+      const confirmPassword = document.getElementById('forgot-confirm-password')?.value || '';
+
+      if (!isPoliEmail(email)) {
+        showToast('Sila gunakan e-mel rasmi @polinilai.edu.my', 'warning');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        showToast('Kata laluan baharu mesti sekurang-kurangnya 6 aksara', 'warning');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showToast('Pengesahan kata laluan tidak sepadan', 'warning');
+        return;
+      }
+
+      const user = getUsers().find(item => normalizeEmail(item.email) === email);
+      if (!user || !user.__firebaseId) {
+        showToast('Akaun tidak dijumpai', 'error');
+        return;
+      }
+
+      try {
+        await updateInFirebase('users', user.__firebaseId, { password: newPassword, updatedAt: new Date().toISOString() });
+        user.password = newPassword;
+        closeModal();
+        showToast('Kata laluan berjaya dikemas kini', 'success');
+      } catch (error) {
+        showToast('Ralat semasa mengemas kini kata laluan: ' + error.message, 'error');
+      }
+    });
+  };
+
+  window.openResetPasswordModal = function () {
+    openForgotPasswordModal();
+  };
+
+  window.showAddProductModal = function () {
+    uploadedImages = [];
+    showModal('Tambah Produk', `
+      <form id="add-product-form" class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
+        <div>
+          <label class="block text-sm font-medium mb-1">Nama Produk</label>
+          <input type="text" id="prod-name" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: Kalkulator Saintifik">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Harga (RM)</label>
+            <input type="number" id="prod-price" required min="0" step="0.01" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: 25.00">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Jumlah Stok</label>
+            <input type="number" id="prod-stock" required min="1" step="1" value="1" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: 5">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Kategori</label>
+          <select id="prod-category" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+            <option value="Elektronik">💻 Elektronik</option>
+            <option value="Peribadi">👕 Peribadi</option>
+            <option value="Makanan">🍪 Makanan</option>
+            <option value="Perkhidmatan">💼 Perkhidmatan</option>
+            <option value="Lain-lain">📦 Lain-lain</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Keterangan</label>
+          <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maksimum 5MB setiap gambar)</span></label>
+          <div class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
+            <p class="text-sm font-medium">Klik untuk pilih gambar atau seret dan lepas</p>
+            <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar bagi satu produk</p>
+            <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
+          </div>
+          <div id="image-preview" class="mt-3"></div>
+          <div id="upload-status" class="mt-2 text-sm"></div>
+        </div>
+        <button type="submit" id="submit-btn" class="w-full btn-primary bg-accent-orange text-white py-2 rounded-lg font-medium">
+          <i class="fas fa-plus mr-2"></i> Terbitkan Produk
+        </button>
+      </form>
+    `);
+
+    cleanupCategoryOptions();
+
+    setTimeout(() => {
+      const fileInput = document.getElementById('file-input');
+      if (!fileInput) return;
+
+      const dropZone = fileInput.parentElement;
+
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('bg-navy-100', 'dark:bg-navy-600');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+        handleFiles(e.dataTransfer.files);
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+        fileInput.value = '';
+      });
+
+      const addForm = document.getElementById('add-product-form');
+      addForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!firebaseReady) {
+          showToast('Firebase belum dikonfigurasi dengan sempurna', 'error');
+          return;
+        }
+
+        if (!currentUser) {
+          showToast('Sila log masuk terlebih dahulu', 'warning');
+          return;
+        }
+
+        if (!uploadedImages.length) {
+          showToast('Sila muat naik sekurang-kurangnya satu gambar produk', 'warning');
+          return;
+        }
+
+        const stockQty = Number(document.getElementById('prod-stock')?.value || 0);
+        if (!Number.isFinite(stockQty) || stockQty < 1) {
+          showToast('Jumlah stok mestilah sekurang-kurangnya 1', 'warning');
+          return;
+        }
+
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sedang memproses...';
+        }
+
+        try {
+          const imageUrls = [];
+          for (const image of uploadedImages) {
+            const url = await uploadImageToFirebase(image);
+            imageUrls.push(url);
+          }
+
+          const createdAt = new Date().toISOString();
+          const payload = {
+            type: 'product',
+            productName: document.getElementById('prod-name')?.value || '',
+            price: parseFloat(document.getElementById('prod-price')?.value || '0'),
+            category: document.getElementById('prod-category')?.value || 'Lain-lain',
+            description: document.getElementById('prod-desc')?.value || '',
+            image_url: imageUrls[0] || '',
+            image_urls: imageUrls,
+            sellerId: currentUser.email,
+            sellerName: currentUser.name,
+            rating: 5,
+            stockQuantity: stockQty,
+            stockAvailable: stockQty,
+            availabilityStatus: stockQty > 0 ? 'available' : 'sold',
+            createdAt
+          };
+
+          const productId = await saveToFirebase('products', payload);
+          allData.push({
+            ...payload,
+            __firebaseId: productId,
+            id: productId,
+            __collection: 'products'
+          });
+
+          closeModal();
+          showToast('Produk berjaya diterbitkan', 'success');
+          uploadedImages = [];
+          renderUI();
+        } catch (error) {
+          showToast('Ralat semasa menerbitkan produk: ' + error.message, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Terbitkan Produk';
+          }
+        }
+      });
+    }, 80);
+  };
+
+  function getCategoryIcon(category) {
+    return {
+      'Elektronik': 'fa-laptop',
+      'Peribadi': 'fa-shirt',
+      'Makanan': 'fa-cookie-bite',
+      'Perkhidmatan': 'fa-briefcase',
+      'Lain-lain': 'fa-layer-group'
+    }[category] || 'fa-box';
+  }
+
+  window.createProductCard = function (product) {
+    const productId = getProductSafeId(product);
+    const images = typeof getProductImages === 'function' ? getProductImages(product) : [];
+    const imageUrl = images[0] || null;
+    const icon = getCategoryIcon(product.category);
+    const stock = getProductStock(product);
+    const sold = stock <= 0;
+
+    return `
+      <div onclick="showProductDetailModal('${productId}')" class="group relative bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer fade-in ${sold ? 'opacity-95' : ''}">
+        <div class="aspect-[4/5] bg-navy-100 dark:bg-navy-700 overflow-hidden relative">
+          ${imageUrl
+            ? `<img src="${imageUrl}" alt="${escapeHtmlSafe(product.productName)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700&quot;><i class=&quot;fas ${icon} text-5xl text-navy-400 dark:text-navy-300&quot;></i></div>'">`
+            : `<div class="w-full h-full flex items-center justify-center bg-navy-100 dark:bg-navy-700"><i class="fas ${icon} text-5xl text-navy-400 dark:text-navy-300"></i></div>`
+          }
+          <div class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${sold ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}">
+            ${sold ? 'Stok Habis' : 'Stok ' + stock}
+          </div>
+        </div>
+        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pt-10 pb-4">
+          <h3 class="text-white font-semibold text-sm md:text-base leading-tight line-clamp-2">${escapeHtmlSafe(product.productName)}</h3>
+          <p class="text-orange-300 font-bold text-lg md:text-xl mt-1">RM ${Number(product.price || 0).toFixed(2)}</p>
+        </div>
+      </div>
+    `;
+  };
+
+  window.createTrendingProductCard = function (product) {
+    return window.createProductCard(product);
+  };
+
+  const previousShowProductDetailModalFinal = window.showProductDetailModal;
+  window.showProductDetailModal = function (productId) {
+    previousShowProductDetailModalFinal(productId);
+    const product = getProductSafe(productId);
+    const modalContent = document.querySelector('#modal-container .modal-content');
+    if (!product || !modalContent) return;
+
+    const stock = getProductStock(product);
+    const sold = stock <= 0;
+    const infoGrid = modalContent.querySelector('.grid.grid-cols-1.md\\:grid-cols-2');
+    if (infoGrid && !modalContent.querySelector('#product-stock-card')) {
+      infoGrid.insertAdjacentHTML('beforeend', `
+        <div id="product-stock-card" class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+          <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Status Stok</p>
+          <p class="font-semibold ${sold ? 'text-red-500' : 'text-green-500'}">${sold ? 'Stok Habis' : 'Masih Ada (' + stock + ')'}</p>
+        </div>
+      `);
+    }
+
+    const actionRow = modalContent.querySelector('button[onclick^="addToCart"]')?.parentElement;
+    if (!actionRow) return;
+
+    if (!modalContent.querySelector('#product-qty-wrapper')) {
+      const qtyWrap = document.createElement('div');
+      qtyWrap.id = 'product-qty-wrapper';
+      qtyWrap.className = 'bg-navy-50 dark:bg-navy-700 rounded-xl p-3 mt-3';
+      qtyWrap.innerHTML = `
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <p class="text-sm font-semibold">Kuantiti Pembelian</p>
+            <p class="text-xs text-navy-500 dark:text-navy-300">Pilih jumlah yang ingin dibeli.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="setModalQuantity(-1, ${Math.max(stock,1)})" class="w-10 h-10 rounded-full bg-white dark:bg-navy-800 border border-navy-200 dark:border-navy-600">-</button>
+            <input type="number" id="product-qty-input" min="1" max="${Math.max(stock,1)}" value="1" class="w-20 text-center px-3 py-2 rounded-xl bg-white dark:bg-navy-800 border border-navy-200 dark:border-navy-600">
+            <button type="button" onclick="setModalQuantity(1, ${Math.max(stock,1)})" class="w-10 h-10 rounded-full bg-white dark:bg-navy-800 border border-navy-200 dark:border-navy-600">+</button>
+          </div>
+        </div>
+      `;
+      actionRow.parentElement.insertBefore(qtyWrap, actionRow);
+    }
+
+    const addToCartButton = actionRow.querySelector('button[onclick^="addToCart"]');
+    if (addToCartButton) {
+      addToCartButton.setAttribute('onclick', `addToCart('${productId}', getModalSelectedQuantity())`);
+      addToCartButton.innerHTML = `<i class="fas fa-cart-plus mr-2"></i>${sold ? 'Stok Habis' : 'Tambah ke Troli'}`;
+      if (sold) {
+        addToCartButton.disabled = true;
+        addToCartButton.className = 'flex-1 btn-primary bg-gray-400 cursor-not-allowed text-white py-3 rounded-xl font-semibold';
+      }
+    }
+
+    if (!modalContent.querySelector('#buy-now-btn')) {
+      const buyNowButton = document.createElement('button');
+      buyNowButton.id = 'buy-now-btn';
+      buyNowButton.type = 'button';
+      buyNowButton.setAttribute('onclick', `buyNow('${productId}')`);
+      buyNowButton.className = sold
+        ? 'flex-1 bg-gray-400 cursor-not-allowed text-white py-3 rounded-xl font-semibold'
+        : 'flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold';
+      buyNowButton.innerHTML = `<i class="fas fa-bolt mr-2"></i>${sold ? 'Tidak Boleh Dibeli' : 'Beli Terus'}`;
+      if (sold) buyNowButton.disabled = true;
+      actionRow.prepend(buyNowButton);
+    }
+  };
+
+  window.addToCart = async function (productId, quantity = 1) {
+    if (!currentUser) {
+      showToast('Sila log masuk untuk menambah produk ke troli', 'warning');
+      navigateTo('login');
+      return;
+    }
+
+    const product = getProductSafe(productId);
+    if (!product) {
+      showToast('Produk tidak dijumpai', 'error');
+      return;
+    }
+
+    if (normalizeEmail(product.sellerId) === normalizeEmail(currentUser.email)) {
+      showToast('Anda tidak boleh membeli produk sendiri', 'warning');
+      return;
+    }
+
+    const actualProductId = getProductSafeId(product);
+    const qty = Math.max(1, Math.floor(Number(quantity || 1)));
+    const availableStock = getProductStock(product);
+    const existingQty = getCartExistingQty(actualProductId);
+
+    if (availableStock <= 0) {
+      showToast('Produk ini telah kehabisan stok', 'warning');
+      return;
+    }
+
+    if ((existingQty + qty) > availableStock) {
+      showToast(`Kuantiti melebihi stok semasa. Baki stok ialah ${availableStock}.`, 'warning');
+      return;
+    }
+
+    const existingItem = allData.find(item =>
+      item.type === 'cart' &&
+      item.cartProductId === actualProductId &&
+      item.cartUserId === currentUser.email
+    );
+
+    if (!firebaseReady) {
+      showToast('Firebase belum siap', 'error');
+      return;
+    }
+
+    try {
+      if (existingItem) {
+        const newQty = Number(existingItem.quantity || 0) + qty;
+        await updateInFirebase('cart', existingItem.__firebaseId, { quantity: newQty });
+        existingItem.quantity = newQty;
+      } else {
+        const createdAt = new Date().toISOString();
+        const cartId = await saveToFirebase('cart', {
+          type: 'cart',
+          cartUserId: currentUser.email,
+          cartProductId: actualProductId,
+          quantity: qty,
+          createdAt
+        });
+
+        allData.push({
+          type: 'cart',
+          __firebaseId: cartId,
+          id: cartId,
+          __collection: 'cart',
+          cartUserId: currentUser.email,
+          cartProductId: actualProductId,
+          quantity: qty,
+          createdAt
+        });
+      }
+
+      showToast('Produk berjaya ditambah ke troli', 'success');
+      renderUI();
+    } catch (error) {
+      showToast('Ralat semasa menambah produk ke troli: ' + error.message, 'error');
+    }
+  };
+
+  const previousUpdateCartQtyFinal = window.updateCartQty;
+  window.updateCartQty = async function (cartId, change) {
+    const item = allData.find(row => row.type === 'cart' && row.__firebaseId === cartId);
+    if (!item) return previousUpdateCartQtyFinal ? previousUpdateCartQtyFinal.apply(this, arguments) : undefined;
+
+    const product = getProductSafe(item.cartProductId);
+    const maxStock = getProductStock(product);
+    const nextQty = Number(item.quantity || 1) + Number(change || 0);
+
+    if (nextQty > maxStock) {
+      showToast(`Kuantiti tidak boleh melebihi stok semasa (${maxStock})`, 'warning');
+      return;
+    }
+
+    return previousUpdateCartQtyFinal ? previousUpdateCartQtyFinal.apply(this, arguments) : undefined;
+  };
+
+  function getActiveCheckoutItems() {
+    if (window.__sopDirectBuyItem) {
+      const product = getProductSafe(window.__sopDirectBuyItem.productId);
+      if (!product) return [];
+      return [{
+        __direct: true,
+        __firebaseId: 'direct-buy-item',
+        cartProductId: getProductSafeId(product),
+        quantity: Number(window.__sopDirectBuyItem.quantity || 1),
+        product
+      }];
+    }
+
+    return getCartItems().map(item => ({
+      ...item,
+      product: getProductSafe(item.cartProductId)
+    })).filter(item => !!item.product);
+  }
+
+  window.buyNow = function (productId) {
+    if (!currentUser) {
+      showToast('Sila log masuk terlebih dahulu', 'warning');
+      navigateTo('login');
+      return;
+    }
+
+    const product = getProductSafe(productId);
+    if (!product) {
+      showToast('Produk tidak dijumpai', 'error');
+      return;
+    }
+
+    const qty = getModalSelectedQuantity();
+    if (qty > getProductStock(product)) {
+      showToast(`Stok tidak mencukupi. Baki stok ialah ${getProductStock(product)}.`, 'warning');
+      return;
+    }
+
+    window.__sopDirectBuyItem = {
+      productId: getProductSafeId(product),
+      quantity: qty
+    };
+
+    closeModal();
+    navigateTo('checkout');
+    setTimeout(() => renderCheckout(), 80);
+  };
+
+  function ensureCheckoutFields() {
+    const form = document.getElementById('checkout-form');
+    if (!form) return;
+
+    if (!document.getElementById('meet-date')) {
+      const meetDateWrap = document.createElement('div');
+      meetDateWrap.innerHTML = `
+        <label class="block text-sm font-medium mb-2" for="meet-date">Tarikh Pertemuan</label>
+        <input type="date" id="meet-date" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
+      `;
+      const locationWrap = document.getElementById('cod-location')?.parentElement;
+      locationWrap?.insertAdjacentElement('afterend', meetDateWrap);
+    }
+
+    if (!document.getElementById('meet-time')) {
+      const meetTimeWrap = document.createElement('div');
+      meetTimeWrap.innerHTML = `
+        <label class="block text-sm font-medium mb-2" for="meet-time">Masa Pertemuan</label>
+        <input type="time" id="meet-time" required class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0 focus:ring-2 focus:ring-accent-orange">
+      `;
+      const meetDateParent = document.getElementById('meet-date')?.parentElement;
+      meetDateParent?.insertAdjacentElement('afterend', meetTimeWrap);
+    }
+
+    const heading = document.querySelector('#page-checkout h1');
+    if (heading) heading.innerHTML = '<i class="fas fa-clipboard-check mr-2 text-accent-orange"></i>Isi Butiran Tempahan';
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Hantar Tempahan';
+  }
+
+  window.renderCheckout = function () {
+    ensureCheckoutFields();
+
+    const itemsContainer = document.getElementById('checkout-items');
+    const totalEl = document.getElementById('checkout-total');
+    if (!itemsContainer || !totalEl) return;
+
+    const checkoutItems = getActiveCheckoutItems();
+    let total = 0;
+
+    itemsContainer.innerHTML = checkoutItems.map(item => {
+      const product = item.product;
+      if (!product) return '';
+      const itemTotal = Number(product.price || 0) * Number(item.quantity || 1);
+      total += itemTotal;
+      return `
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="font-medium">${escapeHtmlSafe(product.productName)}</p>
+            <p class="text-xs text-navy-500 dark:text-navy-300">Kuantiti: ${Number(item.quantity || 1)} • ${getProductStatusLabelEnhanced(product)}</p>
+          </div>
+          <span>RM ${itemTotal.toFixed(2)}</span>
+        </div>
+      `;
+    }).join('') || '<p class="text-sm text-navy-500 dark:text-navy-300">Tiada item untuk dibuat tempahan.</p>';
+
+    totalEl.textContent = `RM ${total.toFixed(2)}`;
+  };
+
+  function bindCheckoutForm() {
+    const checkoutForm = document.getElementById('checkout-form');
+    if (!checkoutForm || checkoutForm.dataset.enhancedCheckoutBound) return;
+
+    const checkoutClone = checkoutForm.cloneNode(true);
+    checkoutForm.replaceWith(checkoutClone);
+    checkoutClone.dataset.enhancedCheckoutBound = 'true';
+    ensureCheckoutFields();
+
+    checkoutClone.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = currentUser?.name || 'Pembeli';
+      const phone = document.getElementById('cod-phone')?.value || '';
+      const dept = document.getElementById('cod-dept')?.value || '';
+      const location = document.getElementById('cod-location')?.value || '';
+      const meetDate = document.getElementById('meet-date')?.value || '';
+      const meetTime = document.getElementById('meet-time')?.value || '';
+      const offerPrice = parseFloat(document.getElementById('offer-price')?.value || '0');
+      const checkoutItems = getActiveCheckoutItems();
+
+      if (!location || !meetDate || !meetTime) {
+        showToast('Sila lengkapkan lokasi, tarikh, dan masa pertemuan', 'warning');
+        return;
+      }
+
+      if (!checkoutItems.length) {
+        showToast('Tiada item untuk dibuat tempahan', 'warning');
+        return;
+      }
+
+      const uniqueSellers = [...new Set(checkoutItems.map(item => normalizeEmail(item.product?.sellerId)).filter(Boolean))];
+      if (uniqueSellers.length > 1) {
+        showToast('Buat masa ini, satu tempahan hanya dibenarkan untuk seorang penjual sahaja.', 'warning');
+        return;
+      }
+
+      for (const item of checkoutItems) {
+        const stock = getProductStock(item.product);
+        if (Number(item.quantity || 0) > stock) {
+          showToast(`Stok bagi ${item.product.productName} tidak mencukupi. Baki stok ialah ${stock}.`, 'warning');
+          return;
+        }
+      }
+
+      if (!firebaseReady) {
+        showToast('Firebase belum siap. Sila semak konfigurasi.', 'error');
+        return;
+      }
+
+      try {
+        const createdAt = new Date().toISOString();
+        const offerCode = 'ORD-' + Date.now();
+
+        const offerItems = checkoutItems.map(item => ({
+          productId: getProductSafeId(item.product),
+          productName: item.product?.productName || 'Produk',
+          sellerId: item.product?.sellerId || '',
+          sellerName: item.product?.sellerName || '',
+          quantity: Number(item.quantity || 1),
+          originalPrice: Number(item.product?.price || 0)
+        }));
+
+        const totalOriginal = offerItems.reduce((sum, item) => sum + (Number(item.originalPrice || 0) * Number(item.quantity || 1)), 0);
+        const finalOfferPrice = offerPrice > 0 ? offerPrice : totalOriginal;
+
+        const payload = {
+          type: 'offer',
+          offerId: offerCode,
+          buyerEmail: currentUser.email,
+          buyerName: name,
+          buyerPhone: phone,
+          buyerDept: dept,
+          codLocation: location,
+          meetingDate: meetDate,
+          meetingTime: meetTime,
+          offerPrice: finalOfferPrice,
+          totalOriginal,
+          offerStatus: 'pending',
+          items: offerItems,
+          createdAt,
+          purchaseMode: window.__sopDirectBuyItem ? 'direct_buy' : 'cart'
+        };
+
+        const offerId = await saveToFirebase('offers', payload);
+        allData.push({
+          ...payload,
+          __firebaseId: offerId,
+          id: offerId,
+          __collection: 'offers'
+        });
+
+        if (window.__sopDirectBuyItem) {
+          window.__sopDirectBuyItem = null;
+        } else {
+          for (const item of checkoutItems) {
+            if (item.__firebaseId && !item.__direct) {
+              await deleteFromFirebase('cart', item.__firebaseId);
+            }
+          }
+          allData = allData.filter(item => !(item.type === 'cart' && item.cartUserId === currentUser.email));
+        }
+
+        showModal('Tempahan Berjaya Dihantar', `
+          <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-paper-plane text-blue-600 text-3xl"></i>
+            </div>
+            <p class="text-navy-600 dark:text-navy-300 mb-4">
+              Tempahan anda telah dihantar kepada penjual. Sila tunggu pengesahan daripada penjual.
+            </p>
+            <button onclick="closeModal(); navigateTo('profile')" class="btn-primary bg-accent-orange text-white px-6 py-2 rounded-xl">
+              Lihat Tempahan Saya
+            </button>
+          </div>
+        `);
+
+        renderUI();
+        renderProfile();
+      } catch (error) {
+        showToast('Ralat semasa menghantar tempahan: ' + error.message, 'error');
+      }
+    });
+  }
+
+  window.getOfferStatusLabel = function (status) {
+    return {
+      pending: 'Menunggu',
+      accepted: 'Diterima',
+      rejected: 'Ditolak',
+      cancelled: 'Dibatalkan'
+    }[status] || status;
+  };
+
+  window.getOfferStatusClass = function (status) {
+    return status === 'accepted'
+      ? 'text-green-600'
+      : status === 'rejected'
+      ? 'text-red-600'
+      : status === 'cancelled'
+      ? 'text-gray-500'
+      : 'text-yellow-600';
+  };
+
+  window.acceptOffer = async function (offerFirebaseId) {
+    if (!firebaseReady) {
+      showToast('Firebase belum siap.', 'error');
+      return;
+    }
+
+    const offer = allData.find(item => item.type === 'offer' && item.__firebaseId === offerFirebaseId);
+    if (!offer) {
+      showToast('Tempahan tidak dijumpai', 'error');
+      return;
+    }
+
+    if (offer.offerStatus !== 'pending') {
+      showToast('Tempahan ini tidak lagi berada dalam status menunggu', 'warning');
+      return;
+    }
+
+    for (const row of (offer.items || [])) {
+      const product = getProductSafe(row.productId);
+      const stock = getProductStock(product);
+      if (!product || Number(row.quantity || 0) > stock) {
+        showToast(`Stok bagi ${row.productName || 'produk'} tidak mencukupi untuk menerima tempahan ini.`, 'warning');
+        return;
+      }
+    }
+
+    try {
+      const acceptedAt = new Date().toISOString();
+      await updateInFirebase('offers', offerFirebaseId, {
+        offerStatus: 'accepted',
+        acceptedAt
+      });
+
+      offer.offerStatus = 'accepted';
+      offer.acceptedAt = acceptedAt;
+
+      for (const row of (offer.items || [])) {
+        const product = getProductSafe(row.productId);
+        if (!product) continue;
+        const currentStock = getProductStock(product);
+        const nextStock = Math.max(0, currentStock - Number(row.quantity || 0));
+        const productId = getProductSafeId(product);
+        await updateInFirebase('products', productId, {
+          stockQuantity: getProductInitialStock(product),
+          stockAvailable: nextStock,
+          availabilityStatus: nextStock > 0 ? 'available' : 'sold'
+        });
+        product.stockQuantity = getProductInitialStock(product);
+        product.stockAvailable = nextStock;
+        product.availabilityStatus = nextStock > 0 ? 'available' : 'sold';
+      }
+
+      const enrichedOfferItems = (offer.items || []).map(item => {
+        const product = getProductSafe(item.productId);
+        return { ...item, image_url: product?.image_url || '' };
+      });
+
+      const itemListText = enrichedOfferItems.map((item, index) => `${index + 1}. ${item.productName} x${item.quantity}`).join('\n');
+
+      const autoMessage =
+`✅ Tempahan diterima oleh penjual
+
+Produk dibeli:
+${itemListText}
+
+Harga tempahan: RM ${Number(offer.offerPrice || 0).toFixed(2)}
+Lokasi COD: ${offer.codLocation}
+Tarikh pertemuan: ${offer.meetingDate || '-'}
+Masa pertemuan: ${offer.meetingTime || '-'}
+No telefon pembeli: ${offer.buyerPhone}
+Jabatan/Kursus: ${offer.buyerDept}
+
+Sila teruskan perbincangan dalam ruang mesej ini untuk urusan serahan barang.`;
+
+      const messagePayload = {
+        type: 'message',
+        messageFrom: currentUser.email,
+        messageTo: offer.buyerEmail,
+        messageText: autoMessage,
+        imageUrl: '',
+        messageType: 'offer_accepted',
+        relatedOfferId: offer.offerId,
+        offerItems: enrichedOfferItems,
+        offerPrice: offer.offerPrice || 0,
+        codLocation: offer.codLocation || '',
+        meetingDate: offer.meetingDate || '',
+        meetingTime: offer.meetingTime || '',
+        isRead: false,
+        createdAt: acceptedAt
+      };
+
+      const messageId = await saveToFirebase('messages', messagePayload);
+      allData.push({
+        ...messagePayload,
+        __firebaseId: messageId,
+        id: messageId,
+        __collection: 'messages'
+      });
+
+      await loadDataFromFirebase();
+      navigateTo('chat');
+      openChat(offer.buyerEmail);
+      showToast('Tempahan berjaya diterima', 'success');
+    } catch (error) {
+      showToast('Ralat semasa menerima tempahan: ' + error.message, 'error');
+    }
+  };
+
+  window.cancelOfferByBuyer = async function (offerFirebaseId) {
+    if (!firebaseReady) {
+      showToast('Firebase belum siap.', 'error');
+      return;
+    }
+
+    const offer = allData.find(item => item.type === 'offer' && item.__firebaseId === offerFirebaseId);
+    if (!offer) {
+      showToast('Tempahan tidak dijumpai', 'error');
+      return;
+    }
+
+    if (!['pending', 'accepted'].includes(offer.offerStatus)) {
+      showToast('Tempahan ini tidak boleh dibatalkan lagi', 'warning');
+      return;
+    }
+
+    showModal('Batalkan Tempahan', `
+      <div class="space-y-4">
+        <p class="text-sm text-navy-600 dark:text-navy-300">Nyatakan sebab pembatalan supaya penjual dapat memahaminya dengan jelas.</p>
+        <textarea id="cancel-offer-reason" rows="4" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Contoh: Saya ada hal kecemasan dan tidak dapat hadir semasa waktu pertemuan."></textarea>
+        <div class="flex justify-end gap-2">
+          <button onclick="closeModal()" class="px-4 py-2 bg-navy-200 dark:bg-navy-700 rounded-lg">Tutup</button>
+          <button onclick="confirmCancelOfferByBuyer('${offerFirebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg">Sahkan Pembatalan</button>
+        </div>
+      </div>
+    `);
+  };
+
+  window.confirmCancelOfferByBuyer = async function (offerFirebaseId) {
+    const offer = allData.find(item => item.type === 'offer' && item.__firebaseId === offerFirebaseId);
+    if (!offer) return;
+
+    const reason = String(document.getElementById('cancel-offer-reason')?.value || '').trim() || 'Pembeli tidak dapat meneruskan tempahan.';
+    const cancelledAt = new Date().toISOString();
+
+    try {
+      await updateInFirebase('offers', offerFirebaseId, {
+        offerStatus: 'cancelled',
+        cancelledAt,
+        cancelledBy: 'buyer',
+        cancellationReason: reason
+      });
+
+      const wasAccepted = offer.offerStatus === 'accepted';
+      offer.offerStatus = 'cancelled';
+      offer.cancelledAt = cancelledAt;
+      offer.cancelledBy = 'buyer';
+      offer.cancellationReason = reason;
+
+      if (wasAccepted) {
+        for (const row of (offer.items || [])) {
+          const product = getProductSafe(row.productId);
+          if (!product) continue;
+          const restoredStock = getProductStock(product) + Number(row.quantity || 0);
+          const initialStock = getProductInitialStock(product);
+          const finalStock = Math.min(restoredStock, initialStock);
+          const productId = getProductSafeId(product);
+          await updateInFirebase('products', productId, {
+            stockQuantity: initialStock,
+            stockAvailable: finalStock,
+            availabilityStatus: finalStock > 0 ? 'available' : 'sold'
+          });
+          product.stockQuantity = initialStock;
+          product.stockAvailable = finalStock;
+          product.availabilityStatus = finalStock > 0 ? 'available' : 'sold';
+        }
+      }
+
+      const sellerEmail = offer.items?.[0]?.sellerId || '';
+      if (sellerEmail) {
+        const cancelMessage =
+`❌ Tempahan dibatalkan oleh pembeli
+
+Sebab pembatalan:
+${reason}
+
+Lokasi COD: ${offer.codLocation}
+Tarikh pertemuan: ${offer.meetingDate || '-'}
+Masa pertemuan: ${offer.meetingTime || '-'}`;
+
+        const messagePayload = {
+          type: 'message',
+          messageFrom: currentUser.email,
+          messageTo: sellerEmail,
+          messageText: cancelMessage,
+          imageUrl: '',
+          messageType: 'text',
+          relatedOfferId: offer.offerId,
+          isRead: false,
+          createdAt: cancelledAt
+        };
+
+        const messageId = await saveToFirebase('messages', messagePayload);
+        allData.push({
+          ...messagePayload,
+          __firebaseId: messageId,
+          id: messageId,
+          __collection: 'messages'
+        });
+      }
+
+      closeModal();
+      showToast('Tempahan berjaya dibatalkan', 'success');
+      renderProfile();
+      renderUI();
+    } catch (error) {
+      showToast('Ralat semasa membatalkan tempahan: ' + error.message, 'error');
+    }
+  };
+
+  function renderBuyerOrdersSection() {
+    const profileWrapper = document.querySelector('#page-profile .max-w-2xl');
+    if (!profileWrapper || !currentUser) return;
+
+    let section = document.getElementById('buyer-order-management-section');
+    if (!section) {
+      section = document.createElement('div');
+      section.id = 'buyer-order-management-section';
+      section.className = 'mt-6 bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg';
+      profileWrapper.appendChild(section);
+    }
+
+    const myOrders = getOffers()
+      .filter(offer => normalizeEmail(offer.buyerEmail) === normalizeEmail(currentUser.email))
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+    if (!myOrders.length) {
+      section.innerHTML = `
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Senarai tempahan yang telah anda hantar kepada penjual.</p>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-navy-500 dark:text-navy-300">
+          <i class="fas fa-receipt text-4xl mb-3"></i>
+          <p class="font-medium mb-1">Belum ada tempahan</p>
+          <p class="text-sm">Apabila anda membuat tempahan, rekodnya akan dipaparkan di sini.</p>
+        </div>
+      `;
+      return;
+    }
+
+    section.innerHTML = `
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
+          <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Pantau status tempahan dan batalkan jika perlu.</p>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 text-sm font-semibold">${myOrders.length} tempahan</span>
+      </div>
+      <div class="space-y-4">
+        ${myOrders.map((offer) => {
+          const itemsHtml = (offer.items || []).map(item => `
+            <li>${escapeHtmlSafe(item.productName)} x${Number(item.quantity || 1)}</li>
+          `).join('');
+          const canCancel = ['pending', 'accepted'].includes(offer.offerStatus);
+          return `
+            <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4 bg-navy-50 dark:bg-navy-700/40">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                <div>
+                  <p class="font-semibold">${escapeHtmlSafe(offer.offerId || 'Tempahan')}</p>
+                  <ul class="list-disc pl-5 mt-2 text-sm text-navy-600 dark:text-navy-200">${itemsHtml}</ul>
+                  <div class="mt-3 text-sm text-navy-500 dark:text-navy-300 space-y-1">
+                    <p>Lokasi COD: <strong>${escapeHtmlSafe(offer.codLocation || '-')}</strong></p>
+                    <p>Tarikh pertemuan: <strong>${escapeHtmlSafe(offer.meetingDate || '-')}</strong></p>
+                    <p>Masa pertemuan: <strong>${escapeHtmlSafe(offer.meetingTime || '-')}</strong></p>
+                    <p>Jumlah: <strong>RM ${Number(offer.offerPrice || 0).toFixed(2)}</strong></p>
+                  </div>
+                  ${offer.cancellationReason ? `<p class="text-sm mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl"><strong>Sebab pembatalan:</strong> ${escapeHtmlSafe(offer.cancellationReason)}</p>` : ''}
+                </div>
+                <div class="text-left md:text-right">
+                  <span class="${getOfferStatusClass(offer.offerStatus)} font-semibold">${getOfferStatusLabel(offer.offerStatus)}</span>
+                  <p class="text-xs text-navy-400 mt-2">${typeof formatDateTime === 'function' ? formatDateTime(offer.createdAt) : formatDateSafe(offer.createdAt)}</p>
+                  <div class="mt-3 flex flex-wrap md:justify-end gap-2">
+                    ${canCancel ? `<button onclick="cancelOfferByBuyer('${offer.__firebaseId}')" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium"><i class="fas fa-ban mr-2"></i>Batalkan Tempahan</button>` : ''}
+                    <button onclick="navigateTo('chat')" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-800 hover:bg-navy-200 dark:hover:bg-navy-700 text-sm font-medium"><i class="fas fa-comments mr-2"></i>Lihat Mesej</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  window.openAdminMonitor = function () {
+    if (!currentUser || !isAdminUser(currentUser)) {
+      showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      return;
+    }
+
+    const usersCount = getUsers().length;
+    const products = getProducts();
+    const offers = getOffers();
+
+    const lowStock = products.filter(product => getProductStock(product) > 0 && getProductStock(product) <= 3);
+    const outOfStock = products.filter(product => getProductStock(product) <= 0);
+    const pendingOffers = offers.filter(offer => offer.offerStatus === 'pending');
+    const cancelledOffers = offers.filter(offer => offer.offerStatus === 'cancelled');
+
+    showModal('Panel Pemantauan Admin', `
+      <div class="space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Pengguna</p>
+            <p class="text-2xl font-bold">${usersCount}</p>
+          </div>
+          <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Produk</p>
+            <p class="text-2xl font-bold">${products.length}</p>
+          </div>
+          <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Menunggu</p>
+            <p class="text-2xl font-bold">${pendingOffers.length}</p>
+          </div>
+          <div class="rounded-2xl p-4 bg-navy-50 dark:bg-navy-700">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Dibatalkan</p>
+            <p class="text-2xl font-bold">${cancelledOffers.length}</p>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <h3 class="font-semibold">Produk Stok Rendah</h3>
+            <span class="text-sm text-navy-500 dark:text-navy-300">${lowStock.length} produk</span>
+          </div>
+          ${lowStock.length ? `
+            <div class="space-y-2 text-sm">
+              ${lowStock.slice(0, 8).map(product => `
+                <div class="flex items-center justify-between gap-3 rounded-xl bg-navy-50 dark:bg-navy-700 p-3">
+                  <span>${escapeHtmlSafe(product.productName)}</span>
+                  <span class="font-semibold text-orange-500">Baki ${getProductStock(product)}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : `<p class="text-sm text-navy-500 dark:text-navy-300">Tiada produk stok rendah buat masa ini.</p>`}
+        </div>
+
+        <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <h3 class="font-semibold">Produk Kehabisan Stok</h3>
+            <span class="text-sm text-navy-500 dark:text-navy-300">${outOfStock.length} produk</span>
+          </div>
+          ${outOfStock.length ? `
+            <div class="space-y-2 text-sm">
+              ${outOfStock.slice(0, 8).map(product => `
+                <div class="flex items-center justify-between gap-3 rounded-xl bg-navy-50 dark:bg-navy-700 p-3">
+                  <span>${escapeHtmlSafe(product.productName)}</span>
+                  <span class="font-semibold text-red-500">Stok Habis</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : `<p class="text-sm text-navy-500 dark:text-navy-300">Tiada produk yang habis stok.</p>`}
+        </div>
+
+        <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <h3 class="font-semibold">Hubungi Admin</h3>
+            <span class="text-sm text-navy-500 dark:text-navy-300">${ADMIN_PHONE_DISPLAY}</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="https://wa.me/${ADMIN_PHONE_WA}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white font-medium">
+              <i class="fab fa-whatsapp mr-2"></i>WhatsApp Admin
+            </a>
+            <button type="button" onclick="closeModal(); navigateTo('seller')" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 font-medium">
+              <i class="fas fa-chart-line mr-2"></i>Lihat Dashboard Penjual
+            </button>
+          </div>
+        </div>
+      </div>
+    `);
+  };
+
+  function injectAdminNav() {
+    const desktopContainer = document.getElementById('auth-nav');
+    const mobileContainer = document.getElementById('auth-nav-mobile');
+
+    document.getElementById('admin-nav-button')?.remove();
+    document.getElementById('admin-nav-button-mobile')?.remove();
+
+    if (!currentUser || !isAdminUser(currentUser)) return;
+
+    if (desktopContainer) {
+      const btn = document.createElement('a');
+      btn.href = '#';
+      btn.id = 'admin-nav-button';
+      btn.className = 'nav-link text-navy-600 dark:text-navy-200 hover:text-accent-orange transition-colors';
+      btn.innerHTML = '<i class="fas fa-user-shield mr-1"></i> Panel Admin';
+      btn.onclick = (e) => {
+        e.preventDefault();
+        openAdminMonitor();
+      };
+      desktopContainer.prepend(btn);
+    }
+
+    if (mobileContainer) {
+      const btnMobile = document.createElement('a');
+      btnMobile.href = '#';
+      btnMobile.id = 'admin-nav-button-mobile';
+      btnMobile.className = 'text-navy-600 dark:text-navy-200 py-2';
+      btnMobile.innerHTML = '<i class="fas fa-user-shield mr-2"></i> Panel Admin';
+      btnMobile.onclick = (e) => {
+        e.preventDefault();
+        openAdminMonitor();
+      };
+      mobileContainer.prepend(btnMobile);
+    }
+  }
+
+  const previousUpdateAuthNavFinal = window.updateAuthNav;
+  window.updateAuthNav = function () {
+    if (typeof previousUpdateAuthNavFinal === 'function') previousUpdateAuthNavFinal.apply(this, arguments);
+    injectAdminNav();
+  };
+
+  const previousRenderProfileFinal = window.renderProfile;
+  window.renderProfile = function () {
+    if (typeof previousRenderProfileFinal === 'function') previousRenderProfileFinal.apply(this, arguments);
+    renderBuyerOrdersSection();
+  };
+
+  const previousNavigateToFinal = window.navigateTo;
+  window.navigateTo = function (page) {
+    const result = previousNavigateToFinal.apply(this, arguments);
+    cleanupCategoryOptions();
+    cloneAndBindAuthForms();
+    if (page === 'checkout') {
+      ensureCheckoutFields();
+      bindCheckoutForm();
+      renderCheckout();
+    }
+    if (page === 'profile') {
+      renderBuyerOrdersSection();
+    }
+    return result;
+  };
+
+  function runEnhancements() {
+    cleanupCategoryOptions();
+    cloneAndBindAuthForms();
+    bindCheckoutForm();
+    updateAuthNav();
+    if (currentPage === 'checkout') renderCheckout();
+    if (currentPage === 'profile') renderBuyerOrdersSection();
+  }
+
+  document.addEventListener('DOMContentLoaded', runEnhancements);
+  setTimeout(runEnhancements, 100);
+  setTimeout(runEnhancements, 600);
+})();
+</script>
+
+
+
+<script>
+(function () {
+  function normalizeEmailV2(email) {
+    return String(email || '').trim().toLowerCase();
+  }
+
+  function escapeHtmlV2(value) {
+    if (typeof escapeHtml === 'function') return escapeHtml(value ?? '');
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function isPoliEmailV2(email) {
+    return normalizeEmailV2(email).endsWith('@polinilai.edu.my');
+  }
+
+  function isAdminUserV2(userOrEmail) {
+    const email = normalizeEmailV2(typeof userOrEmail === 'string' ? userOrEmail : userOrEmail?.email);
+    return email === 'admin@polinilai.edu.my' || email === 'daiyandarwish05@polinilai.edu.my' || email.startsWith('admin@');
+  }
+
+  function getUsersV2() {
+    return typeof getUsers === 'function' ? getUsers() : allData.filter(item => item.type === 'user');
+  }
+
+  function syncKnownAdminsV2() {
+    const users = getUsersV2();
+    users.forEach(user => {
+      if (isAdminUserV2(user) && user.role !== 'admin') {
+        user.role = 'admin';
+      }
+    });
+    if (currentUser && isAdminUserV2(currentUser)) {
+      currentUser.role = 'admin';
+    }
+  }
+
+  function getProductsV2() {
+    return typeof getProducts === 'function' ? getProducts() : allData.filter(item => item.type === 'product');
+  }
+
+  function getOffersV2() {
+    return typeof getOffers === 'function' ? getOffers() : allData.filter(item => item.type === 'offer');
+  }
+
+  function getReportsV2() {
+    return allData.filter(item => item.type === 'report').sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+
+  function getUserByEmailV2(email) {
+    return getUsersV2().find(user => normalizeEmailV2(user.email) === normalizeEmailV2(email));
+  }
+
+  function getProductByIdV2(productId) {
+    return allData.find(item => item.type === 'product' && ((item.__firebaseId === productId) || (item.id === productId))) || null;
+  }
+
+  function getProductIdV2(product) {
+    return product ? (product.__firebaseId || product.id) : '';
+  }
+
+  function getProductStockV2(product) {
+    const raw = Number(product?.stockAvailable ?? product?.stockQuantity ?? product?.stock ?? 0);
+    return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+  }
+
+  function getOfferLabelV2(status) {
+    return {
+      pending: 'Menunggu',
+      accepted: 'Diterima',
+      rejected: 'Ditolak',
+      cancelled: 'Dibatalkan',
+      completed: 'Selesai'
+    }[status] || status || '-';
+  }
+
+  function getOfferClassV2(status) {
+    return status === 'accepted'
+      ? 'text-green-600'
+      : status === 'rejected'
+      ? 'text-red-600'
+      : status === 'cancelled'
+      ? 'text-gray-500'
+      : status === 'completed'
+      ? 'text-blue-600'
+      : 'text-yellow-600';
+  }
+
+  window.getOfferStatusLabel = getOfferLabelV2;
+  window.getOfferStatusClass = getOfferClassV2;
+
+  function currentUserRecordV2() {
+    return currentUser ? getUserByEmailV2(currentUser.email) : null;
+  }
+
+  function isCurrentUserSuspendedV2() {
+    const record = currentUserRecordV2();
+    return !!record?.isSuspended;
+  }
+
+  function guardSuspendedActionV2() {
+    if (!currentUser) return false;
+    if (!isCurrentUserSuspendedV2()) return false;
+    showToast('Akaun anda sedang digantung oleh admin. Sila hubungi admin untuk bantuan.', 'error');
+    return true;
+  }
+
+  function formatDateTimeV2(value) {
+    try {
+      if (typeof formatDateTime === 'function') return formatDateTime(value);
+    } catch (e) {}
+    const d = new Date(value || '');
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toLocaleString('ms-MY');
+  }
+
+  function statusBadgeTextV2(text, extraClass='') {
+    return `<span class="${extraClass} font-semibold">${escapeHtmlV2(text)}</span>`;
+  }
+
+  window.setModalQuantity = function (delta, maxQty) {
+    const input = document.getElementById('product-qty-input');
+    if (!input) return;
+    const minQty = Math.max(1, Number(input.min || 1));
+    const current = Math.max(minQty, Number(input.value || minQty));
+    const maxAllowed = Math.max(minQty, Number(maxQty || input.max || minQty));
+    const next = Math.min(maxAllowed, Math.max(minQty, current + Number(delta || 0)));
+    input.value = next;
+  };
+
+  async function handleEnhancedLoginV2() {
+    const email = normalizeEmailV2(document.getElementById('login-email')?.value);
+    const password = document.getElementById('login-password')?.value || '';
+
+    if (!isPoliEmailV2(email)) {
+      showToast('Sila gunakan e-mel rasmi @polinilai.edu.my', 'warning');
+      return;
+    }
+
+    const user = getUsersV2().find(u => normalizeEmailV2(u.email) === email && u.password === password);
+    if (!user) {
+      showToast('E-mel atau kata laluan tidak sah', 'error');
+      return;
+    }
+
+    if (user.isSuspended) {
+      showToast('Akaun ini telah digantung oleh admin. Sila hubungi admin untuk bantuan.', 'error');
+      return;
+    }
+
+    currentUser = {
+      name: user.name,
+      email: normalizeEmailV2(user.email),
+      role: isAdminUserV2(user) ? 'admin' : 'user',
+      profileImageUrl: user.profileImageUrl || user.avatarUrl || ''
+    };
+    localStorage.setItem('sop_user', JSON.stringify(currentUser));
+    if (typeof updateAuthNav === 'function') updateAuthNav();
+    showToast('Log masuk berjaya', 'success');
+    if (typeof navigateTo === 'function') navigateTo('home');
+  }
+
+  document.addEventListener('submit', function (e) {
+    if (e.target && e.target.id === 'login-form') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      handleEnhancedLoginV2();
+      return;
+    }
+
+    if (e.target && e.target.id === 'checkout-form' && guardSuspendedActionV2()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, true);
+
+  const prevAddToCartV2 = window.addToCart;
+  if (typeof prevAddToCartV2 === 'function') {
+    window.addToCart = async function (productId, quantity = 1) {
+      if (guardSuspendedActionV2()) return;
+      const product = getProductByIdV2(productId);
+      if (product) {
+        const minQty = Math.max(1, Number(product.minOrderQty || 1));
+        const stock = getProductStockV2(product);
+        const maxQty = Math.min(stock, Number(product.maxOrderQty || stock || 1));
+        const chosen = Number(quantity || 1);
+        if (chosen < minQty) {
+          showToast(`Kuantiti minimum pembelian untuk produk ini ialah ${minQty}.`, 'warning');
+          return;
+        }
+        if (chosen > maxQty) {
+          showToast(`Kuantiti maksimum pembelian untuk produk ini ialah ${maxQty}.`, 'warning');
+          return;
+        }
+      }
+      return await prevAddToCartV2.apply(this, arguments);
+    };
+  }
+
+  const prevBuyNowV2 = window.buyNow;
+  if (typeof prevBuyNowV2 === 'function') {
+    window.buyNow = function (productId) {
+      if (guardSuspendedActionV2()) return;
+      const product = getProductByIdV2(productId);
+      const input = document.getElementById('product-qty-input');
+      const chosen = Number(input?.value || 1);
+      if (product) {
+        const minQty = Math.max(1, Number(product.minOrderQty || 1));
+        const stock = getProductStockV2(product);
+        const maxQty = Math.min(stock, Number(product.maxOrderQty || stock || 1));
+        if (chosen < minQty) {
+          showToast(`Kuantiti minimum pembelian untuk produk ini ialah ${minQty}.`, 'warning');
+          return;
+        }
+        if (chosen > maxQty) {
+          showToast(`Kuantiti maksimum pembelian untuk produk ini ialah ${maxQty}.`, 'warning');
+          return;
+        }
+      }
+      return prevBuyNowV2.apply(this, arguments);
+    };
+  }
+
+  const prevSendMessageV2 = window.sendMessage;
+  if (typeof prevSendMessageV2 === 'function') {
+    window.sendMessage = async function () {
+      if (guardSuspendedActionV2()) return;
+      return await prevSendMessageV2.apply(this, arguments);
+    };
+  }
+
+  function buildProductExtraFieldsV2(product) {
+    const condition = product?.productCondition || '-';
+    const codLocation = product?.preferredCodLocation || '-';
+    const codTime = product?.preferredCodTime || '-';
+    const minQty = Math.max(1, Number(product?.minOrderQty || 1));
+    const stock = getProductStockV2(product);
+    const maxQtyRaw = Number(product?.maxOrderQty || stock || 1);
+    const maxQty = Math.max(minQty, Math.min(stock || maxQtyRaw || minQty, maxQtyRaw || stock || minQty));
+    return `
+      <div id="product-extra-info-v2" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+          <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Keadaan Produk</p>
+          <p class="font-semibold">${escapeHtmlV2(condition)}</p>
+        </div>
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+          <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Lokasi COD Dicadangkan</p>
+          <p class="font-semibold">${escapeHtmlV2(codLocation)}</p>
+        </div>
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+          <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Masa COD Dicadangkan</p>
+          <p class="font-semibold">${escapeHtmlV2(codTime)}</p>
+        </div>
+        <div class="bg-navy-50 dark:bg-navy-700 rounded-xl p-3">
+          <p class="text-navy-500 dark:text-navy-300 text-xs mb-1">Had Pembelian</p>
+          <p class="font-semibold">Minimum ${minQty} • Maksimum ${maxQty}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  const prevShowProductDetailModalV2 = window.showProductDetailModal;
+  if (typeof prevShowProductDetailModalV2 === 'function') {
+    window.showProductDetailModal = function (productId) {
+      prevShowProductDetailModalV2.apply(this, arguments);
+      const product = getProductByIdV2(productId);
+      const modal = document.querySelector('#modal-container .modal-content');
+      if (!modal || !product) return;
+
+      const stock = getProductStockV2(product);
+      const minQty = Math.max(1, Number(product.minOrderQty || 1));
+      const maxQty = Math.max(minQty, Math.min(stock || minQty, Number(product.maxOrderQty || stock || minQty)));
+
+      document.getElementById('product-extra-info-v2')?.remove();
+      const descBlock = modal.querySelector('.space-y-4') || modal;
+      descBlock.insertAdjacentHTML('beforeend', buildProductExtraFieldsV2(product));
+
+      const qtyInput = document.getElementById('product-qty-input');
+      if (qtyInput) {
+        qtyInput.min = String(minQty);
+        qtyInput.max = String(maxQty);
+        qtyInput.value = String(minQty);
+      }
+
+      const qtyWrapper = document.getElementById('product-qty-wrapper');
+      if (qtyWrapper && !document.getElementById('product-qty-note-v2')) {
+        const note = document.createElement('p');
+        note.id = 'product-qty-note-v2';
+        note.className = 'text-xs text-navy-500 dark:text-navy-300 mt-2';
+        note.textContent = `Minimum pembelian: ${minQty} unit. Maksimum pembelian: ${maxQty} unit.`;
+        qtyWrapper.appendChild(note);
+      }
+
+      const actionRow = modal.querySelector('#buy-now-btn')?.parentElement || modal.querySelector('button[onclick^="addToCart"]')?.parentElement;
+      if (actionRow && !document.getElementById('report-product-btn-v2')) {
+        const reportBtn = document.createElement('button');
+        reportBtn.id = 'report-product-btn-v2';
+        reportBtn.type = 'button';
+        reportBtn.className = 'w-full mt-3 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 py-3 rounded-xl font-semibold';
+        reportBtn.innerHTML = '<i class="fas fa-flag mr-2"></i>Laporkan Produk';
+        reportBtn.onclick = () => openReportModalV2('product', productId);
+        actionRow.parentElement.appendChild(reportBtn);
+      }
+    };
+  }
+
+  window.openReportModalV2 = function (targetType, targetId) {
+    if (!currentUser) {
+      showToast('Sila log masuk terlebih dahulu', 'warning');
+      navigateTo('login');
+      return;
+    }
+
+    showModal('Laporkan Isu', `
+      <div class="space-y-4">
+        <p class="text-sm text-navy-600 dark:text-navy-300">Sila nyatakan sebab laporan dengan jelas supaya admin boleh membuat semakan.</p>
+        <div>
+          <label class="block text-sm font-medium mb-2">Kategori Aduan</label>
+          <select id="report-category-v2" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0">
+            <option value="Maklumat palsu">Maklumat palsu</option>
+            <option value="Produk tidak sesuai">Produk tidak sesuai</option>
+            <option value="Scam / penipuan">Scam / penipuan</option>
+            <option value="Pembeli / penjual tidak hadir">Pembeli / penjual tidak hadir</option>
+            <option value="Pembatalan saat akhir">Pembatalan saat akhir</option>
+            <option value="Lain-lain">Lain-lain</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Penerangan</label>
+          <textarea id="report-note-v2" rows="4" class="w-full px-4 py-3 bg-navy-50 dark:bg-navy-700 rounded-xl border-0" placeholder="Terangkan isu yang berlaku secara ringkas dan jelas."></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-700">Tutup</button>
+          <button type="button" onclick="submitReportV2('${targetType}','${targetId}')" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white">Hantar Aduan</button>
+        </div>
+      </div>
+    `);
+  };
+
+  window.submitReportV2 = async function (targetType, targetId) {
+    if (!firebaseReady) {
+      showToast('Firebase belum siap.', 'error');
+      return;
+    }
+    const category = document.getElementById('report-category-v2')?.value || 'Lain-lain';
+    const note = String(document.getElementById('report-note-v2')?.value || '').trim();
+    const createdAt = new Date().toISOString();
+    const product = targetType === 'product' ? getProductByIdV2(targetId) : null;
+    const offer = targetType === 'order' ? allData.find(item => item.type === 'offer' && item.__firebaseId === targetId) : null;
+    const user = targetType === 'user' ? getUserByEmailV2(targetId) : null;
+
+    const payload = {
+      type: 'report',
+      reportTargetType: targetType,
+      reportTargetId: targetId,
+      reporterEmail: currentUser?.email || '',
+      reporterName: currentUser?.name || '',
+      category,
+      note,
+      status: 'open',
+      createdAt,
+      relatedProductName: product?.productName || '',
+      relatedUserEmail: user?.email || product?.sellerId || offer?.buyerEmail || '',
+      relatedOfferId: offer?.offerId || '',
+      relatedProductId: product ? getProductIdV2(product) : (offer?.items?.[0]?.productId || ''),
+      relatedSellerEmail: product?.sellerId || offer?.items?.[0]?.sellerId || ''
+    };
+
+    try {
+      const reportId = await saveToFirebase('reports', payload);
+      allData.push({ ...payload, __firebaseId: reportId, id: reportId, __collection: 'reports' });
+      closeModal();
+      showToast('Aduan berjaya dihantar kepada admin', 'success');
+    } catch (error) {
+      showToast('Ralat semasa menghantar aduan: ' + error.message, 'error');
+    }
+  };
+
+  window.completeOfferBySeller = async function (offerFirebaseId) {
+    if (!firebaseReady) {
+      showToast('Firebase belum siap.', 'error');
+      return;
+    }
+    const offer = allData.find(item => item.type === 'offer' && item.__firebaseId === offerFirebaseId);
+    if (!offer) {
+      showToast('Tempahan tidak dijumpai', 'error');
+      return;
+    }
+    if (offer.offerStatus !== 'accepted') {
+      showToast('Hanya tempahan yang telah diterima boleh ditandakan selesai.', 'warning');
+      return;
+    }
+
+    const completedAt = new Date().toISOString();
+    try {
+      await updateInFirebase('offers', offerFirebaseId, { offerStatus: 'completed', completedAt, completedBy: 'seller' });
+      offer.offerStatus = 'completed';
+      offer.completedAt = completedAt;
+      offer.completedBy = 'seller';
+
+      const messagePayload = {
+        type: 'message',
+        messageFrom: currentUser.email,
+        messageTo: offer.buyerEmail,
+        messageText: `✅ Tempahan ${offer.offerId || ''} telah ditandakan sebagai selesai oleh penjual. Terima kasih kerana menggunakan S.O.P.`,
+        imageUrl: '',
+        messageType: 'text',
+        relatedOfferId: offer.offerId || '',
+        isRead: false,
+        createdAt: completedAt
+      };
+      const messageId = await saveToFirebase('messages', messagePayload);
+      allData.push({ ...messagePayload, __firebaseId: messageId, id: messageId, __collection: 'messages' });
+
+      showToast('Tempahan telah ditandakan selesai', 'success');
+      if (typeof renderSellerOffers === 'function') renderSellerOffers();
+      if (typeof renderProfile === 'function') renderProfile();
+      if (typeof renderUI === 'function') renderUI();
+    } catch (error) {
+      showToast('Ralat semasa mengemas kini tempahan: ' + error.message, 'error');
+    }
+  };
+
+  window.renderSellerOffers = function () {
+    const container = document.getElementById('seller-offers');
+    if (!container || !currentUser) return;
+
+    const offers = getOffersV2()
+      .filter(offer => Array.isArray(offer.items) && offer.items.some(item => normalizeEmailV2(item.sellerId) === normalizeEmailV2(currentUser.email)))
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+    if (!offers.length) {
+      container.innerHTML = `<p class="text-navy-500 dark:text-navy-400 text-sm">Tiada tempahan daripada pembeli setakat ini.</p>`;
+      return;
+    }
+
+    container.innerHTML = offers.map(offer => {
+      const itemsHtml = (offer.items || []).map(item => `
+        <li>${escapeHtmlV2(item.productName)} x${Number(item.quantity || 1)}</li>
+      `).join('');
+      const canComplete = offer.offerStatus === 'accepted';
+      return `
+        <div class="border border-navy-200 dark:border-navy-700 rounded-2xl p-4 bg-white dark:bg-navy-800 shadow-sm">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+              <div>
+                <p class="font-semibold text-lg">${escapeHtmlV2(offer.buyerName || 'Pembeli')}</p>
+                <p class="text-sm text-navy-500 dark:text-navy-400">${escapeHtmlV2(offer.buyerEmail || '-')}</p>
+              </div>
+              <div class="text-left md:text-right">
+                <span class="${getOfferClassV2(offer.offerStatus)} font-semibold">${getOfferLabelV2(offer.offerStatus)}</span>
+                <p class="text-xs text-navy-400 mt-2">Dihantar: ${formatDateTimeV2(offer.createdAt)}</p>
+                ${offer.acceptedAt ? `<p class="text-xs text-navy-400">Diterima: ${formatDateTimeV2(offer.acceptedAt)}</p>` : ''}
+                ${offer.completedAt ? `<p class="text-xs text-navy-400">Selesai: ${formatDateTimeV2(offer.completedAt)}</p>` : ''}
+              </div>
+            </div>
+            <div class="rounded-xl bg-navy-50 dark:bg-navy-700/60 p-3">
+              <p class="text-sm font-medium mb-2">Butiran Tempahan</p>
+              <ul class="list-disc pl-5 text-sm text-navy-600 dark:text-navy-200 space-y-1">${itemsHtml}</ul>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm">
+                <p>Lokasi COD: <strong>${escapeHtmlV2(offer.codLocation || '-')}</strong></p>
+                <p>Tarikh: <strong>${escapeHtmlV2(offer.meetingDate || '-')}</strong></p>
+                <p>Masa: <strong>${escapeHtmlV2(offer.meetingTime || '-')}</strong></p>
+                <p>Jumlah: <strong class="text-accent-orange">RM ${Number(offer.offerPrice || 0).toFixed(2)}</strong></p>
+              </div>
+              ${offer.rejectionReason ? `<p class="text-sm mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl"><strong>Sebab penolakan:</strong> ${escapeHtmlV2(offer.rejectionReason)}</p>` : ''}
+              ${offer.cancellationReason ? `<p class="text-sm mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl"><strong>Sebab pembatalan:</strong> ${escapeHtmlV2(offer.cancellationReason)}</p>` : ''}
+            </div>
+            <div class="flex flex-wrap gap-2">
+              ${offer.offerStatus === 'pending' ? `
+                <button onclick="acceptOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm"><i class="fas fa-check mr-1"></i>Terima</button>
+                <button onclick="rejectOffer('${offer.__firebaseId}')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm"><i class="fas fa-times mr-1"></i>Tolak</button>
+              ` : ''}
+              ${canComplete ? `<button onclick="completeOfferBySeller('${offer.__firebaseId}')" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm"><i class="fas fa-check-double mr-1"></i>Tandakan Selesai</button>` : ''}
+              <button onclick="openBuyerChat('${offer.buyerEmail}')" class="px-4 py-2 bg-accent-orange hover:bg-accent-orangeHover text-white rounded-xl text-sm"><i class="fas fa-comments mr-1"></i>Mesej Pembeli</button>
+              <button onclick="openReportModalV2('user','${escapeHtmlV2(offer.buyerEmail || '')}')" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm"><i class="fas fa-flag mr-1"></i>Laporkan Pembeli</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  function renderBuyerOrdersSectionV2() {
+    const profileWrapper = document.querySelector('#page-profile .max-w-2xl');
+    if (!profileWrapper || !currentUser) return;
+
+    let section = document.getElementById('buyer-order-management-section');
+    if (!section) {
+      section = document.createElement('div');
+      section.id = 'buyer-order-management-section';
+      section.className = 'mt-6 bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-lg';
+      profileWrapper.appendChild(section);
+    }
+
+    const myOrders = getOffersV2()
+      .filter(offer => normalizeEmailV2(offer.buyerEmail) === normalizeEmailV2(currentUser.email))
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+    if (!myOrders.length) {
+      section.innerHTML = `
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Senarai tempahan yang telah anda hantar kepada penjual.</p>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-navy-500 dark:text-navy-300">
+          <i class="fas fa-receipt text-4xl mb-3"></i>
+          <p class="font-medium mb-1">Belum ada tempahan</p>
+          <p class="text-sm">Apabila anda membuat tempahan, rekodnya akan dipaparkan di sini.</p>
+        </div>
+      `;
+      return;
+    }
+
+    section.innerHTML = `
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-xl font-bold"><i class="fas fa-bag-shopping mr-2 text-accent-orange"></i>Tempahan Saya</h2>
+          <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Pantau status tempahan, hubungi penjual, atau laporkan isu kepada admin.</p>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 text-sm font-semibold">${myOrders.length} tempahan</span>
+      </div>
+      <div class="space-y-4">
+        ${myOrders.map(offer => {
+          const itemsHtml = (offer.items || []).map(item => `<li>${escapeHtmlV2(item.productName)} x${Number(item.quantity || 1)}</li>`).join('');
+          const canCancel = ['pending', 'accepted'].includes(offer.offerStatus);
+          return `
+            <div class="rounded-2xl border border-navy-200 dark:border-navy-700 p-4 bg-navy-50 dark:bg-navy-700/40">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                <div>
+                  <p class="font-semibold">${escapeHtmlV2(offer.offerId || 'Tempahan')}</p>
+                  <ul class="list-disc pl-5 mt-2 text-sm text-navy-600 dark:text-navy-200">${itemsHtml}</ul>
+                  <div class="mt-3 text-sm text-navy-500 dark:text-navy-300 space-y-1">
+                    <p>Lokasi COD: <strong>${escapeHtmlV2(offer.codLocation || '-')}</strong></p>
+                    <p>Tarikh pertemuan: <strong>${escapeHtmlV2(offer.meetingDate || '-')}</strong></p>
+                    <p>Masa pertemuan: <strong>${escapeHtmlV2(offer.meetingTime || '-')}</strong></p>
+                    <p>Jumlah: <strong>RM ${Number(offer.offerPrice || 0).toFixed(2)}</strong></p>
+                    ${offer.completedAt ? `<p>Tarikh selesai: <strong>${formatDateTimeV2(offer.completedAt)}</strong></p>` : ''}
+                  </div>
+                  ${offer.rejectionReason ? `<p class="text-sm mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl"><strong>Sebab penolakan:</strong> ${escapeHtmlV2(offer.rejectionReason)}</p>` : ''}
+                  ${offer.cancellationReason ? `<p class="text-sm mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl"><strong>Sebab pembatalan:</strong> ${escapeHtmlV2(offer.cancellationReason)}</p>` : ''}
+                </div>
+                <div class="text-left md:text-right">
+                  <span class="${getOfferClassV2(offer.offerStatus)} font-semibold">${getOfferLabelV2(offer.offerStatus)}</span>
+                  <p class="text-xs text-navy-400 mt-2">${formatDateTimeV2(offer.createdAt)}</p>
+                  <div class="mt-3 flex flex-wrap md:justify-end gap-2">
+                    ${canCancel ? `<button onclick="cancelOfferByBuyer('${offer.__firebaseId}')" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium"><i class="fas fa-ban mr-2"></i>Batalkan Tempahan</button>` : ''}
+                    <button onclick="navigateTo('chat')" class="px-4 py-2 rounded-xl bg-navy-100 dark:bg-navy-800 hover:bg-navy-200 dark:hover:bg-navy-700 text-sm font-medium"><i class="fas fa-comments mr-2"></i>Lihat Mesej</button>
+                    <button onclick="openReportModalV2('order','${offer.__firebaseId}')" class="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium"><i class="fas fa-flag mr-2"></i>Laporkan Isu</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  const previousRenderProfileV2 = window.renderProfile;
+  window.renderProfile = function () {
+    if (typeof previousRenderProfileV2 === 'function') previousRenderProfileV2.apply(this, arguments);
+    renderBuyerOrdersSectionV2();
+  };
+
+  window.resolveReportV2 = async function (reportId) {
+    const report = allData.find(item => item.type === 'report' && item.__firebaseId === reportId);
+    if (!report) return;
+    try {
+      await updateInFirebase('reports', reportId, {
+        status: 'resolved',
+        resolvedAt: new Date().toISOString(),
+        resolvedBy: currentUser?.email || 'admin'
+      });
+      report.status = 'resolved';
+      report.resolvedAt = new Date().toISOString();
+      report.resolvedBy = currentUser?.email || 'admin';
+      showToast('Aduan telah ditandakan selesai', 'success');
+      openAdminMonitor();
+    } catch (error) {
+      showToast('Ralat semasa mengemas kini aduan: ' + error.message, 'error');
+    }
+  };
+
+  window.toggleSuspendUserV2 = async function (email) {
+    const user = getUserByEmailV2(email);
+    if (!user || !user.__firebaseId) {
+      showToast('Pengguna tidak dijumpai', 'error');
+      return;
+    }
+    if (isAdminUserV2(user)) {
+      showToast('Akaun admin tidak boleh digantung melalui panel ini.', 'warning');
+      return;
+    }
+    const nextState = !user.isSuspended;
+    try {
+      await updateInFirebase('users', user.__firebaseId, {
+        isSuspended: nextState,
+        suspendedAt: nextState ? new Date().toISOString() : null,
+        suspendedBy: nextState ? (currentUser?.email || 'admin') : null
+      });
+      user.isSuspended = nextState;
+      user.suspendedAt = nextState ? new Date().toISOString() : null;
+      user.suspendedBy = nextState ? (currentUser?.email || 'admin') : null;
+      showToast(nextState ? 'Akaun pengguna digantung' : 'Akaun pengguna diaktifkan semula', 'success');
+      openAdminMonitor();
+    } catch (error) {
+      showToast('Ralat semasa mengemas kini pengguna: ' + error.message, 'error');
+    }
+  };
+
+  window.deleteProductByAdminV2 = async function (productId) {
+    const product = getProductByIdV2(productId);
+    if (!product || !product.__firebaseId) {
+      showToast('Produk tidak dijumpai', 'error');
+      return;
+    }
+    try {
+      await deleteFromFirebase('products', product.__firebaseId);
+      allData = allData.filter(item => !(item.type === 'product' && item.__firebaseId === product.__firebaseId));
+      showToast('Produk berjaya dipadam oleh admin', 'success');
+      if (typeof renderUI === 'function') renderUI();
+      openAdminMonitor();
+    } catch (error) {
+      showToast('Ralat semasa memadam produk: ' + error.message, 'error');
+    }
+  };
+
+  window.openAdminMonitor = function () {
+    if (!currentUser || !isAdminUserV2(currentUser)) {
+      showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      return;
+    }
+
+    const users = getUsersV2();
+    const products = getProductsV2();
+    const offers = getOffersV2();
+    const reports = getReportsV2();
+    const openReports = reports.filter(report => report.status !== 'resolved');
+    const lowStock = products.filter(product => getProductStockV2(product) > 0 && getProductStockV2(product) <= 3);
+    const outOfStock = products.filter(product => getProductStockV2(product) <= 0);
+    const pendingOffers = offers.filter(offer => offer.offerStatus === 'pending');
+    const suspendedUsers = users.filter(user => user.isSuspended);
+
+    showModal('Panel Pemantauan Admin', `
+      <div class="admin-panel-shell custom-scrollbar space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+          <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Pengguna</p>
+            <p class="text-3xl font-bold mt-2">${users.length}</p>
+          </div>
+          <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Jumlah Produk</p>
+            <p class="text-3xl font-bold mt-2">${products.length}</p>
+          </div>
+          <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Menunggu</p>
+            <p class="text-3xl font-bold mt-2">${pendingOffers.length}</p>
+          </div>
+          <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Aduan Terbuka</p>
+            <p class="text-3xl font-bold mt-2">${openReports.length}</p>
+          </div>
+          <div class="rounded-2xl p-5 bg-navy-50 dark:bg-navy-700/70 border border-navy-200 dark:border-navy-600">
+            <p class="text-sm text-navy-500 dark:text-navy-300">Akaun Digantung</p>
+            <p class="text-3xl font-bold mt-2">${suspendedUsers.length}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-5">
+          <section class="admin-panel-section">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-xl font-semibold">Aduan / Report</h3>
+                <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Semak aduan terbuka dan tandakan selesai selepas tindakan diambil.</p>
+              </div>
+              <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start md:self-auto">${reports.length} laporan</span>
+            </div>
+            ${reports.length ? `
+              <div class="admin-panel-list custom-scrollbar space-y-3 text-sm">
+                ${reports.map(report => `
+                  <div class="admin-panel-card border border-navy-100 dark:border-navy-600">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                          <p class="font-semibold text-base">${escapeHtmlV2(report.category || 'Aduan')}</p>
+                          <span class="text-xs px-2 py-1 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${report.status === 'resolved' ? 'Selesai' : 'Terbuka'}</span>
+                        </div>
+                        <p class="text-xs text-navy-500 dark:text-navy-300">Pelapor: ${escapeHtmlV2(report.reporterEmail || '-')} • Sasaran: ${escapeHtmlV2(report.reportTargetType || '-')}</p>
+                        ${report.relatedProductName ? `<p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Produk: ${escapeHtmlV2(report.relatedProductName)}</p>` : ''}
+                        ${report.relatedUserEmail ? `<p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Pengguna berkaitan: ${escapeHtmlV2(report.relatedUserEmail)}</p>` : ''}
+                        ${report.note ? `<p class="mt-3 leading-relaxed text-navy-700 dark:text-navy-100">${escapeHtmlV2(report.note)}</p>` : ''}
+                      </div>
+                      <div class="lg:text-right shrink-0">
+                        <p class="text-xs text-navy-400">${formatDateTimeV2(report.createdAt)}</p>
+                        ${report.status !== 'resolved' ? `<button onclick="resolveReportV2('${report.__firebaseId}')" class="mt-3 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium">Tanda Selesai</button>` : ''}
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-8 text-center text-sm text-navy-500 dark:text-navy-300">Belum ada aduan daripada pengguna.</div>`}
+          </section>
+
+          <div class="space-y-5">
+            <section class="admin-panel-section">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 class="text-xl font-semibold">Hubungi Admin</h3>
+                  <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Akses pantas untuk bantuan dan semakan pengurusan.</p>
+                </div>
+                <span class="text-sm text-navy-500 dark:text-navy-300">+6019-540 2353</span>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <a href="https://wa.me/60195402353" target="_blank" rel="noopener noreferrer" class="px-4 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-medium text-center"><i class="fab fa-whatsapp mr-2"></i>WhatsApp Admin</a>
+                <button type="button" onclick="closeModal(); navigateTo('seller')" class="px-4 py-3 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 font-medium text-center"><i class="fas fa-chart-line mr-2"></i>Lihat Dashboard Penjual</button>
+              </div>
+            </section>
+
+            <section class="admin-panel-section">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h3 class="text-xl font-semibold">Produk Stok Rendah / Habis</h3>
+                <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start sm:self-auto">${lowStock.length + outOfStock.length} produk</span>
+              </div>
+              ${lowStock.length || outOfStock.length ? `
+                <div class="admin-panel-list custom-scrollbar space-y-2 text-sm">
+                  ${[
+                    ...lowStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-orange-500">Baki ${getProductStockV2(product)}</span></div>`),
+                    ...outOfStock.map(product => `<div class="admin-panel-card flex items-center justify-between gap-3"><span class="font-medium">${escapeHtmlV2(product.productName)}</span><span class="font-semibold text-red-500">Stok Habis</span></div>`)
+                  ].join('')}
+                </div>
+              ` : `<div class="rounded-2xl border border-dashed border-navy-300 dark:border-navy-600 p-6 text-center text-sm text-navy-500 dark:text-navy-300">Tiada produk stok rendah atau habis.</div>`}
+            </section>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <section class="admin-panel-section">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-xl font-semibold">Kawalan Pengguna</h3>
+                <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Gantung atau aktifkan semula akaun pengguna mengikut keperluan.</p>
+              </div>
+              <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start sm:self-auto">${users.length} pengguna</span>
+            </div>
+            <div class="admin-panel-list custom-scrollbar space-y-3 text-sm">
+              ${users.map(user => `
+                <div class="admin-panel-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-semibold truncate">${escapeHtmlV2(user.name || '-')}</p>
+                    <p class="text-xs text-navy-500 dark:text-navy-300 break-all mt-1">${escapeHtmlV2(user.email || '-')}</p>
+                  </div>
+                  ${isAdminUserV2(user)
+                    ? `<span class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Admin</span>`
+                    : `<button onclick="toggleSuspendUserV2('${escapeHtmlV2(user.email || '')}')" class="shrink-0 px-4 py-2 rounded-xl ${user.isSuspended ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30'} text-xs font-medium">${user.isSuspended ? 'Aktifkan' : 'Gantung'}</button>`}
+                </div>
+              `).join('')}
+            </div>
+          </section>
+
+          <section class="admin-panel-section">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-xl font-semibold">Moderasi Produk</h3>
+                <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Padam produk yang tidak sesuai atau tidak patuh kepada peraturan sistem.</p>
+              </div>
+              <span class="text-sm px-3 py-1 rounded-full bg-navy-100 dark:bg-navy-700 font-medium self-start sm:self-auto">${products.length} produk</span>
+            </div>
+            <div class="admin-panel-list custom-scrollbar space-y-3 text-sm">
+              ${products.map(product => `
+                <div class="admin-panel-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-semibold">${escapeHtmlV2(product.productName || '-')}</p>
+                    <p class="text-xs text-navy-500 dark:text-navy-300 break-all mt-1">Penjual: ${escapeHtmlV2(product.sellerId || '-')}</p>
+                    <p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Stok semasa: ${getProductStockV2(product)}</p>
+                  </div>
+                  <button onclick="deleteProductByAdminV2('${product.__firebaseId}')" class="shrink-0 px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30 text-xs font-medium">Padam</button>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        </div>
+      </div>
+    `, {
+      modalClass: 'modal-fullscreen',
+      bodyClass: 'custom-scrollbar'
+    });
+  };
+
+  window.showAddProductModal = function () {
+    if (guardSuspendedActionV2()) return;
+    uploadedImages = [];
+    showModal('Tambah Produk', `
+      <form id="add-product-form-v2" class="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
+        <div>
+          <label class="block text-sm font-medium mb-1">Nama Produk</label>
+          <input type="text" id="prod-name" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: Kalkulator Saintifik">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Harga (RM)</label>
+            <input type="number" id="prod-price" required min="0" step="0.01" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: 25.00">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Jumlah Stok</label>
+            <input type="number" id="prod-stock" required min="1" step="1" value="1" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: 5">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Keadaan Produk</label>
+            <select id="prod-condition" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+              <option value="Baharu">Baharu</option>
+              <option value="Terpakai">Terpakai</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Kategori</label>
+            <select id="prod-category" required class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+              <option value="Elektronik">Elektronik</option>
+              <option value="Peribadi">Peribadi</option>
+              <option value="Makanan">Makanan</option>
+              <option value="Perkhidmatan">Perkhidmatan</option>
+              <option value="Lain-lain">Lain-lain</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Lokasi COD Dicadangkan</label>
+            <input type="text" id="prod-cod-location" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: Kafeteria Utama Politeknik Nilai">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Masa COD Dicadangkan</label>
+            <input type="text" id="prod-cod-time" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Contoh: 12.30 tengah hari - 2.00 petang">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Kuantiti Minimum Pembelian</label>
+            <input type="number" id="prod-min-order" min="1" step="1" value="1" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Kuantiti Maksimum Pembelian</label>
+            <input type="number" id="prod-max-order" min="1" step="1" value="1" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Keterangan Produk</label>
+          <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-navy-50 dark:bg-navy-700 rounded-lg border-0" placeholder="Masukkan maklumat produk dengan bahasa yang mudah difahami dan formal."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Gambar Produk <span class="text-xs text-navy-400">(JPG/PNG, maksimum 5MB setiap gambar)</span></label>
+          <div id="add-product-dropzone-v2" class="border-2 border-dashed border-navy-300 dark:border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-700 transition-colors">
+            <i class="fas fa-cloud-upload-alt text-2xl text-navy-400 mb-2"></i>
+            <p class="text-sm font-medium">Klik untuk pilih gambar atau seret dan lepas</p>
+            <p class="text-xs text-navy-500 dark:text-navy-400 mt-1">Maksimum 5 gambar bagi satu produk</p>
+            <input type="file" id="file-input" accept=".jpg,.jpeg,.png" multiple style="display:none;">
+          </div>
+          <div id="image-preview" class="mt-3"></div>
+          <div id="upload-status" class="mt-2 text-sm"></div>
+        </div>
+        <button type="submit" id="submit-btn-v2" class="w-full btn-primary bg-accent-orange text-white py-2 rounded-lg font-medium"><i class="fas fa-plus mr-2"></i>Terbitkan Produk</button>
+      </form>
+    `);
+
+    const dropZone = document.getElementById('add-product-dropzone-v2');
+    const fileInput = document.getElementById('file-input');
+    if (dropZone && fileInput) {
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('bg-navy-100', 'dark:bg-navy-600');
+      });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600'));
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-navy-100', 'dark:bg-navy-600');
+        if (typeof handleFiles === 'function') handleFiles(e.dataTransfer.files);
+      });
+      fileInput.addEventListener('change', (e) => {
+        if (typeof handleFiles === 'function') handleFiles(e.target.files);
+        fileInput.value = '';
+      });
+    }
+
+    document.getElementById('add-product-form-v2')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!firebaseReady) {
+        showToast('Firebase belum dikonfigurasi dengan sempurna', 'error');
+        return;
+      }
+      if (!currentUser) {
+        showToast('Sila log masuk terlebih dahulu', 'warning');
+        return;
+      }
+      if (!uploadedImages.length) {
+        showToast('Sila muat naik sekurang-kurangnya satu gambar produk', 'warning');
+        return;
+      }
+
+      const stockQty = Number(document.getElementById('prod-stock')?.value || 0);
+      const minQty = Math.max(1, Number(document.getElementById('prod-min-order')?.value || 1));
+      const maxQty = Math.max(1, Number(document.getElementById('prod-max-order')?.value || 1));
+      if (!Number.isFinite(stockQty) || stockQty < 1) {
+        showToast('Jumlah stok mestilah sekurang-kurangnya 1', 'warning');
+        return;
+      }
+      if (minQty > stockQty) {
+        showToast('Kuantiti minimum tidak boleh melebihi jumlah stok', 'warning');
+        return;
+      }
+      if (maxQty < minQty) {
+        showToast('Kuantiti maksimum mesti sama atau lebih besar daripada kuantiti minimum', 'warning');
+        return;
+      }
+      if (maxQty > stockQty) {
+        showToast('Kuantiti maksimum tidak boleh melebihi jumlah stok semasa', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn-v2');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sedang memproses...';
+      }
+
+      try {
+        const imageUrls = [];
+        for (const image of uploadedImages) {
+          const url = await uploadImageToFirebase(image);
+          imageUrls.push(url);
+        }
+
+        const createdAt = new Date().toISOString();
+        const payload = {
+          type: 'product',
+          productName: document.getElementById('prod-name')?.value || '',
+          price: parseFloat(document.getElementById('prod-price')?.value || '0'),
+          category: document.getElementById('prod-category')?.value || 'Lain-lain',
+          description: document.getElementById('prod-desc')?.value || '',
+          image_url: imageUrls[0] || '',
+          image_urls: imageUrls,
+          sellerId: currentUser.email,
+          sellerName: currentUser.name,
+          rating: 5,
+          stockQuantity: stockQty,
+          stockAvailable: stockQty,
+          availabilityStatus: stockQty > 0 ? 'available' : 'sold',
+          productCondition: document.getElementById('prod-condition')?.value || 'Baharu',
+          preferredCodLocation: document.getElementById('prod-cod-location')?.value || '',
+          preferredCodTime: document.getElementById('prod-cod-time')?.value || '',
+          minOrderQty: minQty,
+          maxOrderQty: maxQty,
+          createdAt
+        };
+
+        const productId = await saveToFirebase('products', payload);
+        allData.push({ ...payload, __firebaseId: productId, id: productId, __collection: 'products' });
+        closeModal();
+        showToast('Produk berjaya diterbitkan', 'success');
+        uploadedImages = [];
+        if (typeof renderUI === 'function') renderUI();
+      } catch (error) {
+        showToast('Ralat semasa menerbitkan produk: ' + error.message, 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i>Terbitkan Produk';
+        }
+      }
+    });
+  };
+
+  const previousNavigateToV2 = window.navigateTo;
+  window.navigateTo = function (page) {
+    if (guardSuspendedActionV2() && ['seller', 'checkout', 'chat'].includes(page)) return;
+    const result = previousNavigateToV2 ? previousNavigateToV2.apply(this, arguments) : undefined;
+    if (page === 'profile') renderBuyerOrdersSectionV2();
+    if (page === 'seller' && typeof renderSellerOffers === 'function') renderSellerOffers();
+    return result;
+  };
+
+  function runFinalEnhancementsV2() {
+    if (currentUser && isCurrentUserSuspendedV2() && !isAdminUserV2(currentUser)) {
+      showToast('Akaun anda sedang digantung oleh admin.', 'error');
+    }
+    if (typeof renderSellerOffers === 'function' && currentPage === 'seller') renderSellerOffers();
+    if (currentPage === 'profile') renderBuyerOrdersSectionV2();
+  }
+
+  document.addEventListener('DOMContentLoaded', runFinalEnhancementsV2);
+  setTimeout(runFinalEnhancementsV2, 200);
+  setTimeout(runFinalEnhancementsV2, 900);
+})();
+</script>
+
+
+<style id="sop-admin-seller-v3-style">
+  .sop-mini-card{border:1px solid rgba(148,163,184,.22);border-radius:20px;padding:16px;background:rgba(255,255,255,.96);box-shadow:0 14px 34px rgba(15,23,42,.06)}
+  .dark .sop-mini-card{background:rgba(15,23,42,.52)}
+  .sop-data-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(15,23,42,.06)}
+  .dark .sop-data-pill{background:rgba(148,163,184,.12)}
+  .sop-list-card{border:1px solid rgba(148,163,184,.18);border-radius:18px;padding:14px;background:rgba(255,255,255,.9)}
+  .dark .sop-list-card{background:rgba(30,41,59,.75)}
+  .sop-soft-input{width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.96)}
+  .dark .sop-soft-input{background:rgba(15,23,42,.72);border-color:rgba(148,163,184,.22);color:#fff}
+  .sop-soft-select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.96)}
+  .dark .sop-soft-select{background:rgba(15,23,42,.72);border-color:rgba(148,163,184,.22);color:#fff}
+  .sop-toolbar{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(180px,.7fr) auto auto;gap:10px;align-items:center}
+  .sop-section-empty{border:1px dashed rgba(148,163,184,.35);border-radius:18px;padding:28px 18px;text-align:center;color:rgb(100 116 139)}
+  .dark .sop-section-empty{color:rgb(203 213 225);border-color:rgba(148,163,184,.25)}
+  .sop-log-dot{width:10px;height:10px;border-radius:999px;display:inline-block;flex-shrink:0}
+  .sop-admin-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
+  .sop-admin-col-7{grid-column:span 7 / span 7}
+  .sop-admin-col-5{grid-column:span 5 / span 5}
+  .sop-admin-col-6{grid-column:span 6 / span 6}
+  .sop-admin-col-12{grid-column:span 12 / span 12}
+  .sop-fixed-list{max-height:360px;overflow:auto;padding-right:4px}
+  .sop-fixed-list-sm{max-height:280px;overflow:auto;padding-right:4px}
+  @media (max-width: 1280px){
+    .sop-admin-col-7,.sop-admin-col-5,.sop-admin-col-6{grid-column:span 12 / span 12}
+  }
+  @media (max-width: 900px){
+    .sop-toolbar{grid-template-columns:1fr}
+  }
+</style>
+<script>
+(function(){
+  const ADMIN_LOG_COLLECTION_V3 = 'admin_logs';
+  const LOCAL_ADMIN_LOG_KEY_V3 = 'sop_admin_logs_local_v3';
+  const adminMonitorStateV3 = {
+    reportQuery: '',
+    reportStatus: 'all',
+    userQuery: '',
+    userStatus: 'all',
+    productQuery: '',
+    productStock: 'all',
+    logQuery: ''
+  };
+
+  function escV3(value){
+    const fn = window.escapeHtmlV2 || window.escapeHtmlSafe || window.escapeHtml;
+    if (typeof fn === 'function') return fn(String(value ?? ''));
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function numV3(value){ return Number(value || 0); }
+  function moneyV3(value){ return `RM ${numV3(value).toFixed(2)}`; }
+  function fmtV3(value){
+    const fn = window.formatDateTimeV2 || window.formatDateTime || window.formatDateSafe;
+    if (typeof fn === 'function') return fn(value);
+    try { return new Date(value).toLocaleString('ms-MY'); } catch { return '-'; }
+  }
+  function normV3(value){ return String(value || '').trim().toLowerCase(); }
+  function includesV3(text, query){ return normV3(text).includes(normV3(query)); }
+  function getUsersSafeV3(){ return typeof window.getUsersV2 === 'function' ? window.getUsersV2() : (typeof window.getUsers === 'function' ? window.getUsers() : []); }
+  function getProductsSafeV3(){ return typeof window.getProductsV2 === 'function' ? window.getProductsV2() : (typeof window.getProducts === 'function' ? window.getProducts() : []); }
+  function getOffersSafeV3(){ return typeof window.getOffersV2 === 'function' ? window.getOffersV2() : (typeof window.getOffers === 'function' ? window.getOffers() : []); }
+  function getReportsSafeV3(){ return typeof window.getReportsV2 === 'function' ? window.getReportsV2() : (Array.isArray(window.allData) ? window.allData.filter(item => item && item.type === 'report') : []); }
+  function getMessagesSafeV3(){ return typeof window.getMessages === 'function' ? window.getMessages() : (Array.isArray(window.allData) ? window.allData.filter(item => item && item.type === 'message') : []); }
+  function getProductStockSafeV3(product){
+    const fn = window.getProductStockV2 || window.getProductStock;
+    return typeof fn === 'function' ? fn(product) : Number(product?.quantity || product?.stock || 0);
+  }
+  function getProductIdSafeV3(product){
+    const fn = window.getProductSafeId || window.getProductIdV2 || window.getProductIdSafe;
+    return typeof fn === 'function' ? fn(product) : (product?.__firebaseId || product?.id || '');
+  }
+  function getSellerReviewSummarySafeV3(email){
+    const fn = window.getSellerReviewSummary;
+    return typeof fn === 'function' ? fn(email) : { average: 0, count: 0 };
+  }
+  function readLocalAdminLogsV3(){
+    try { return JSON.parse(localStorage.getItem(LOCAL_ADMIN_LOG_KEY_V3) || '[]'); } catch { return []; }
+  }
+  function writeLocalAdminLogsV3(logs){
+    try { localStorage.setItem(LOCAL_ADMIN_LOG_KEY_V3, JSON.stringify(logs.slice(0, 50))); } catch {}
+  }
+  function getAdminLogsV3(){
+    const remote = Array.isArray(window.allData) ? window.allData.filter(item => item && (item.__collection === ADMIN_LOG_COLLECTION_V3 || item.type === 'admin_log')) : [];
+    const local = readLocalAdminLogsV3();
+    const merged = [...remote];
+    local.forEach(entry => {
+      const exists = remote.some(item => (item.__firebaseId && item.__firebaseId === entry.__firebaseId) || (item.createdAt === entry.createdAt && item.action === entry.action && item.targetValue === entry.targetValue));
+      if (!exists) merged.push(entry);
+    });
+    return merged.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+  async function saveAdminLogV3(action, targetType, targetValue, details=''){
+    if (!window.currentUser) return;
+    const payload = {
+      type: 'admin_log',
+      action,
+      targetType,
+      targetValue,
+      details,
+      adminEmail: window.currentUser.email || '',
+      adminName: window.currentUser.name || '',
+      createdAt: new Date().toISOString()
+    };
+    try {
+      if (typeof window.saveToFirebase === 'function') {
+        const logId = await window.saveToFirebase(ADMIN_LOG_COLLECTION_V3, payload);
+        if (Array.isArray(window.allData)) {
+          window.allData.push({ ...payload, __firebaseId: logId, id: logId, __collection: ADMIN_LOG_COLLECTION_V3 });
+        }
+      } else {
+        throw new Error('Firebase tidak tersedia');
+      }
+    } catch (error) {
+      const local = readLocalAdminLogsV3();
+      local.unshift({ ...payload, __firebaseId: `local_${Date.now()}` });
+      writeLocalAdminLogsV3(local);
+    }
+  }
+
+  function getLogDotClassV3(action){
+    const key = normV3(action);
+    if (key.includes('padam')) return 'background:#ef4444';
+    if (key.includes('gantung')) return 'background:#f97316';
+    if (key.includes('aktifkan')) return 'background:#22c55e';
+    if (key.includes('aduan') || key.includes('laporan')) return 'background:#3b82f6';
+    return 'background:#64748b';
+  }
+
+  function buildAdminStatsV3(users, products, offers, reports, logs){
+    const pendingOffers = offers.filter(offer => offer.offerStatus === 'pending').length;
+    const completedOffers = offers.filter(offer => offer.offerStatus === 'completed').length;
+    const suspendedUsers = users.filter(user => user.isSuspended).length;
+    const openReports = reports.filter(report => report.status !== 'resolved').length;
+    const lowStock = products.filter(product => {
+      const stock = getProductStockSafeV3(product);
+      return stock > 0 && stock <= 3;
+    }).length;
+    return `
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+        ${[
+          ['Jumlah Pengguna', users.length, 'fas fa-users'],
+          ['Jumlah Produk', products.length, 'fas fa-box-open'],
+          ['Tempahan Menunggu', pendingOffers, 'fas fa-hourglass-half'],
+          ['Tempahan Selesai', completedOffers, 'fas fa-circle-check'],
+          ['Aduan Terbuka', openReports, 'fas fa-flag'],
+          ['Stok Rendah', lowStock, 'fas fa-triangle-exclamation']
+        ].map(([label, value, icon]) => `
+          <div class="sop-mini-card">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-sm text-navy-500 dark:text-navy-300">${label}</p>
+                <p class="text-3xl font-bold mt-2">${value}</p>
+              </div>
+              <div class="w-11 h-11 rounded-2xl bg-navy-100 dark:bg-navy-700 flex items-center justify-center text-accent-orange"><i class="${icon}"></i></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function filterReportsV3(reports){
+    return reports.filter(report => {
+      const q = adminMonitorStateV3.reportQuery;
+      const status = adminMonitorStateV3.reportStatus;
+      const matchesQuery = !q || [report.category, report.note, report.reporterEmail, report.relatedProductName, report.relatedUserEmail, report.reportTargetType].some(value => includesV3(value, q));
+      const matchesStatus = status === 'all' || (status === 'open' ? report.status !== 'resolved' : report.status === 'resolved');
+      return matchesQuery && matchesStatus;
+    }).sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+  function filterUsersV3(users){
+    return users.filter(user => {
+      const q = adminMonitorStateV3.userQuery;
+      const status = adminMonitorStateV3.userStatus;
+      const matchesQuery = !q || [user.name, user.email].some(value => includesV3(value, q));
+      let matchesStatus = true;
+      if (status === 'active') matchesStatus = !user.isSuspended && !(typeof window.isAdminUserV2 === 'function' ? window.isAdminUserV2(user) : false);
+      if (status === 'suspended') matchesStatus = !!user.isSuspended;
+      if (status === 'admin') matchesStatus = typeof window.isAdminUserV2 === 'function' ? window.isAdminUserV2(user) : false;
+      return matchesQuery && matchesStatus;
+    }).sort((a,b) => String(a.name || '').localeCompare(String(b.name || ''), 'ms'));
+  }
+  function filterProductsV3(products){
+    return products.filter(product => {
+      const q = adminMonitorStateV3.productQuery;
+      const stockFilter = adminMonitorStateV3.productStock;
+      const stock = getProductStockSafeV3(product);
+      const matchesQuery = !q || [product.productName, product.category, product.sellerId, product.sellerName].some(value => includesV3(value, q));
+      let matchesStock = true;
+      if (stockFilter === 'low') matchesStock = stock > 0 && stock <= 3;
+      if (stockFilter === 'out') matchesStock = stock <= 0;
+      if (stockFilter === 'normal') matchesStock = stock > 3;
+      return matchesQuery && matchesStock;
+    }).sort((a,b) => String(a.productName || '').localeCompare(String(b.productName || ''), 'ms'));
+  }
+  function filterLogsV3(logs){
+    const q = adminMonitorStateV3.logQuery;
+    return logs.filter(log => !q || [log.action, log.targetType, log.targetValue, log.details, log.adminEmail].some(value => includesV3(value, q)));
+  }
+
+  function buildAdminReportsSectionV3(allReports){
+    const reports = filterReportsV3(allReports);
+    return `
+      <section class="admin-panel-section sop-admin-col-7">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-xl font-semibold">Aduan / Report</h3>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Cari aduan mengikut pelapor, kategori, produk, atau status.</p>
+          </div>
+          <span class="sop-data-pill">${reports.length} / ${allReports.length} laporan</span>
+        </div>
+        <div class="sop-toolbar mb-4">
+          <input id="admin-report-search-v3" class="sop-soft-input" placeholder="Cari aduan, produk, atau pelapor" value="${escV3(adminMonitorStateV3.reportQuery)}">
+          <select id="admin-report-filter-v3" class="sop-soft-select">
+            <option value="all" ${adminMonitorStateV3.reportStatus === 'all' ? 'selected' : ''}>Semua Status</option>
+            <option value="open" ${adminMonitorStateV3.reportStatus === 'open' ? 'selected' : ''}>Terbuka</option>
+            <option value="resolved" ${adminMonitorStateV3.reportStatus === 'resolved' ? 'selected' : ''}>Selesai</option>
+          </select>
+          <button onclick="applyAdminReportFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
+          <button onclick="resetAdminReportFiltersV3()" class="px-4 py-3 rounded-xl bg-navy-100 dark:bg-navy-700 font-semibold">Reset</button>
+        </div>
+        ${reports.length ? `
+          <div class="sop-fixed-list custom-scrollbar space-y-3 text-sm">
+            ${reports.map(report => `
+              <div class="sop-list-card">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                      <p class="font-semibold text-base">${escV3(report.category || 'Aduan')}</p>
+                      <span class="text-xs px-2 py-1 rounded-full ${report.status === 'resolved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}">${report.status === 'resolved' ? 'Selesai' : 'Terbuka'}</span>
+                    </div>
+                    <p class="text-xs text-navy-500 dark:text-navy-300">Pelapor: ${escV3(report.reporterEmail || '-')} • Sasaran: ${escV3(report.reportTargetType || '-')}</p>
+                    ${report.relatedProductName ? `<p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Produk: ${escV3(report.relatedProductName)}</p>` : ''}
+                    ${report.relatedUserEmail ? `<p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Pengguna berkaitan: ${escV3(report.relatedUserEmail)}</p>` : ''}
+                    ${report.note ? `<p class="mt-3 leading-relaxed text-navy-700 dark:text-navy-100">${escV3(report.note)}</p>` : ''}
+                  </div>
+                  <div class="lg:text-right shrink-0">
+                    <p class="text-xs text-navy-400">${fmtV3(report.createdAt)}</p>
+                    ${report.status !== 'resolved' ? `<button onclick="resolveReportV2('${report.__firebaseId}')" class="mt-3 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium">Tanda Selesai</button>` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="sop-section-empty">Tiada aduan yang sepadan dengan carian anda.</div>`}
+      </section>
+    `;
+  }
+
+  function buildAdminUsersSectionV3(allUsers){
+    const users = filterUsersV3(allUsers);
+    return `
+      <section class="admin-panel-section sop-admin-col-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-xl font-semibold">Kawalan Pengguna</h3>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Cari pengguna dan tapis ikut status akaun.</p>
+          </div>
+          <span class="sop-data-pill">${users.length} / ${allUsers.length} pengguna</span>
+        </div>
+        <div class="sop-toolbar mb-4">
+          <input id="admin-user-search-v3" class="sop-soft-input" placeholder="Cari nama atau e-mel pengguna" value="${escV3(adminMonitorStateV3.userQuery)}">
+          <select id="admin-user-filter-v3" class="sop-soft-select">
+            <option value="all" ${adminMonitorStateV3.userStatus === 'all' ? 'selected' : ''}>Semua Pengguna</option>
+            <option value="active" ${adminMonitorStateV3.userStatus === 'active' ? 'selected' : ''}>Aktif</option>
+            <option value="suspended" ${adminMonitorStateV3.userStatus === 'suspended' ? 'selected' : ''}>Digantung</option>
+            <option value="admin" ${adminMonitorStateV3.userStatus === 'admin' ? 'selected' : ''}>Admin</option>
+          </select>
+          <button onclick="applyAdminUserFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
+          <button onclick="resetAdminUserFiltersV3()" class="px-4 py-3 rounded-xl bg-navy-100 dark:bg-navy-700 font-semibold">Reset</button>
+        </div>
+        ${users.length ? `
+          <div class="sop-fixed-list custom-scrollbar space-y-3 text-sm">
+            ${users.map(user => `
+              <div class="sop-list-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="font-semibold truncate">${escV3(user.name || '-')}</p>
+                  <p class="text-xs text-navy-500 dark:text-navy-300 break-all mt-1">${escV3(user.email || '-')}</p>
+                </div>
+                ${(typeof window.isAdminUserV2 === 'function' ? window.isAdminUserV2(user) : false)
+                  ? `<span class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">Admin</span>`
+                  : `<button onclick="toggleSuspendUserV2('${escV3(user.email || '')}')" class="shrink-0 px-4 py-2 rounded-xl ${user.isSuspended ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30'} text-xs font-medium">${user.isSuspended ? 'Aktifkan' : 'Gantung'}</button>`}
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="sop-section-empty">Tiada pengguna yang sepadan dengan carian anda.</div>`}
+      </section>
+    `;
+  }
+
+  function buildAdminProductsSectionV3(allProducts){
+    const products = filterProductsV3(allProducts);
+    return `
+      <section class="admin-panel-section sop-admin-col-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-xl font-semibold">Moderasi Produk</h3>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Cari produk dan tapis ikut status stok.</p>
+          </div>
+          <span class="sop-data-pill">${products.length} / ${allProducts.length} produk</span>
+        </div>
+        <div class="sop-toolbar mb-4">
+          <input id="admin-product-search-v3" class="sop-soft-input" placeholder="Cari nama produk, kategori, atau penjual" value="${escV3(adminMonitorStateV3.productQuery)}">
+          <select id="admin-product-filter-v3" class="sop-soft-select">
+            <option value="all" ${adminMonitorStateV3.productStock === 'all' ? 'selected' : ''}>Semua Stok</option>
+            <option value="low" ${adminMonitorStateV3.productStock === 'low' ? 'selected' : ''}>Stok Rendah</option>
+            <option value="out" ${adminMonitorStateV3.productStock === 'out' ? 'selected' : ''}>Stok Habis</option>
+            <option value="normal" ${adminMonitorStateV3.productStock === 'normal' ? 'selected' : ''}>Stok Normal</option>
+          </select>
+          <button onclick="applyAdminProductFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Tapis</button>
+          <button onclick="resetAdminProductFiltersV3()" class="px-4 py-3 rounded-xl bg-navy-100 dark:bg-navy-700 font-semibold">Reset</button>
+        </div>
+        ${products.length ? `
+          <div class="sop-fixed-list custom-scrollbar space-y-3 text-sm">
+            ${products.map(product => `
+              <div class="sop-list-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="font-semibold">${escV3(product.productName || '-')}</p>
+                  <p class="text-xs text-navy-500 dark:text-navy-300 break-all mt-1">Penjual: ${escV3(product.sellerId || product.sellerName || '-')}</p>
+                  <p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Stok semasa: ${getProductStockSafeV3(product)}</p>
+                </div>
+                <button onclick="deleteProductByAdminV2('${product.__firebaseId}')" class="shrink-0 px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30 text-xs font-medium">Padam</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="sop-section-empty">Tiada produk yang sepadan dengan carian anda.</div>`}
+      </section>
+    `;
+  }
+
+  function buildAdminLogsSectionV3(logs){
+    const filteredLogs = filterLogsV3(logs);
+    return `
+      <section class="admin-panel-section sop-admin-col-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-xl font-semibold">Log Aktiviti Admin</h3>
+            <p class="text-sm text-navy-500 dark:text-navy-300 mt-1">Rekod tindakan seperti gantung pengguna, padam produk, dan selesaikan aduan.</p>
+          </div>
+          <span class="sop-data-pill">${filteredLogs.length} / ${logs.length} aktiviti</span>
+        </div>
+        <div class="sop-toolbar mb-4" style="grid-template-columns:minmax(0,1fr) auto auto;">
+          <input id="admin-log-search-v3" class="sop-soft-input" placeholder="Cari tindakan, sasaran, atau admin" value="${escV3(adminMonitorStateV3.logQuery)}">
+          <button onclick="applyAdminLogFiltersV3()" class="px-4 py-3 rounded-xl bg-accent-orange hover:bg-accent-orangeHover text-white font-semibold">Cari</button>
+          <button onclick="resetAdminLogFiltersV3()" class="px-4 py-3 rounded-xl bg-navy-100 dark:bg-navy-700 font-semibold">Reset</button>
+        </div>
+        ${filteredLogs.length ? `
+          <div class="sop-fixed-list custom-scrollbar space-y-3 text-sm">
+            ${filteredLogs.map(log => `
+              <div class="sop-list-card">
+                <div class="flex items-start gap-3">
+                  <span class="sop-log-dot mt-1" style="${getLogDotClassV3(log.action)}"></span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <p class="font-semibold">${escV3(log.action || 'Aktiviti Admin')}</p>
+                      <span class="text-xs px-2 py-1 rounded-full bg-navy-100 dark:bg-navy-700">${escV3(log.targetType || 'sistem')}</span>
+                    </div>
+                    <p class="text-xs text-navy-500 dark:text-navy-300 mt-1">Sasaran: ${escV3(log.targetValue || '-')}</p>
+                    ${log.details ? `<p class="text-sm mt-2 text-navy-700 dark:text-navy-100 leading-relaxed">${escV3(log.details)}</p>` : ''}
+                    <p class="text-xs text-navy-400 mt-2">${fmtV3(log.createdAt)} • ${escV3(log.adminEmail || log.adminName || 'admin')}</p>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : `<div class="sop-section-empty">Tiada aktiviti yang sepadan dengan carian anda.</div>`}
+      </section>
+    `;
+  }
+
+  function buildAdminQuickSectionV3(users, products, offers, reports){
+    const lowStock = products.filter(product => { const s = getProductStockSafeV3(product); return s > 0 && s <= 3; });
+    const outOfStock = products.filter(product => getProductStockSafeV3(product) <= 0);
+    const suspendedUsers = users.filter(user => user.isSuspended);
+    const lastCompleted = offers.filter(offer => offer.offerStatus === 'completed').sort((a,b) => new Date(b.completedAt || b.createdAt || 0) - new Date(a.completedAt || a.createdAt || 0)).slice(0,4);
+    return `
+      <section class="admin-panel-section sop-admin-col-12">
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+          <div class="sop-list-card">
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Stok Rendah</h4><span class="sop-data-pill">${lowStock.length}</span></div>
+            <div class="space-y-2 text-sm ${lowStock.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
+              ${lowStock.length ? lowStock.slice(0,8).map(product => `<div class="flex items-center justify-between gap-3"><span class="truncate">${escV3(product.productName)}</span><span class="font-semibold text-orange-500">${getProductStockSafeV3(product)}</span></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
+            </div>
+          </div>
+          <div class="sop-list-card">
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Stok Habis</h4><span class="sop-data-pill">${outOfStock.length}</span></div>
+            <div class="space-y-2 text-sm ${outOfStock.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
+              ${outOfStock.length ? outOfStock.slice(0,8).map(product => `<div class="flex items-center justify-between gap-3"><span class="truncate">${escV3(product.productName)}</span><span class="font-semibold text-red-500">Habis</span></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
+            </div>
+          </div>
+          <div class="sop-list-card">
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Akaun Digantung</h4><span class="sop-data-pill">${suspendedUsers.length}</span></div>
+            <div class="space-y-2 text-sm ${suspendedUsers.length ? 'sop-fixed-list-sm custom-scrollbar' : ''}">
+              ${suspendedUsers.length ? suspendedUsers.slice(0,8).map(user => `<div><p class="font-medium truncate">${escV3(user.name || '-')}</p><p class="text-xs text-navy-500 dark:text-navy-300 break-all">${escV3(user.email || '-')}</p></div>`).join('') : '<div class="sop-section-empty !p-4">Tiada</div>'}
+            </div>
+          </div>
+          <div class="sop-list-card">
+            <div class="flex items-center justify-between gap-3 mb-3"><h4 class="font-semibold">Bantuan Pantas</h4><span class="sop-data-pill">Admin</span></div>
+            <div class="space-y-3 text-sm">
+              <a href="https://wa.me/60195402353" target="_blank" rel="noopener noreferrer" class="block px-4 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-medium text-center"><i class="fab fa-whatsapp mr-2"></i>WhatsApp Admin</a>
+              <button type="button" onclick="closeModal(); navigateTo('seller')" class="w-full px-4 py-3 rounded-xl bg-navy-100 dark:bg-navy-700 hover:bg-navy-200 dark:hover:bg-navy-600 font-medium text-center"><i class="fas fa-chart-line mr-2"></i>Dashboard Penjual</button>
+              ${lastCompleted.length ? `<div class="pt-1 border-t border-navy-200 dark:border-navy-700"><p class="text-xs uppercase tracking-wide text-navy-400 mb-2">Jualan selesai terkini</p>${lastCompleted.map(offer => `<div class="mb-2"><p class="font-medium truncate">${escV3(offer.items?.[0]?.productName || offer.offerId || 'Tempahan')}</p><p class="text-xs text-navy-500 dark:text-navy-300">${fmtV3(offer.completedAt || offer.createdAt)}</p></div>`).join('')}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function getAdminMonitorHtmlV3(){
+    const users = getUsersSafeV3();
+    const products = getProductsSafeV3();
+    const offers = getOffersSafeV3();
+    const reports = getReportsSafeV3();
+    const logs = getAdminLogsV3();
+    return `
+      <div class="admin-panel-shell custom-scrollbar space-y-6">
+        ${buildAdminStatsV3(users, products, offers, reports, logs)}
+        <div class="sop-admin-grid">
+          ${buildAdminReportsSectionV3(reports)}
+          ${buildAdminLogsSectionV3(logs)}
+          ${buildAdminUsersSectionV3(users)}
+          ${buildAdminProductsSectionV3(products)}
+          ${buildAdminQuickSectionV3(users, products, offers, reports)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAdminMonitorBodyV3(){
+    const body = document.querySelector('#modal-container .modal-content .modal-body');
+    if (body) body.innerHTML = getAdminMonitorHtmlV3();
+  }
+  window.applyAdminReportFiltersV3 = function(){
+    adminMonitorStateV3.reportQuery = document.getElementById('admin-report-search-v3')?.value || '';
+    adminMonitorStateV3.reportStatus = document.getElementById('admin-report-filter-v3')?.value || 'all';
+    renderAdminMonitorBodyV3();
+  };
+  window.resetAdminReportFiltersV3 = function(){ adminMonitorStateV3.reportQuery=''; adminMonitorStateV3.reportStatus='all'; renderAdminMonitorBodyV3(); };
+  window.applyAdminUserFiltersV3 = function(){
+    adminMonitorStateV3.userQuery = document.getElementById('admin-user-search-v3')?.value || '';
+    adminMonitorStateV3.userStatus = document.getElementById('admin-user-filter-v3')?.value || 'all';
+    renderAdminMonitorBodyV3();
+  };
+  window.resetAdminUserFiltersV3 = function(){ adminMonitorStateV3.userQuery=''; adminMonitorStateV3.userStatus='all'; renderAdminMonitorBodyV3(); };
+  window.applyAdminProductFiltersV3 = function(){
+    adminMonitorStateV3.productQuery = document.getElementById('admin-product-search-v3')?.value || '';
+    adminMonitorStateV3.productStock = document.getElementById('admin-product-filter-v3')?.value || 'all';
+    renderAdminMonitorBodyV3();
+  };
+  window.resetAdminProductFiltersV3 = function(){ adminMonitorStateV3.productQuery=''; adminMonitorStateV3.productStock='all'; renderAdminMonitorBodyV3(); };
+  window.applyAdminLogFiltersV3 = function(){ adminMonitorStateV3.logQuery = document.getElementById('admin-log-search-v3')?.value || ''; renderAdminMonitorBodyV3(); };
+  window.resetAdminLogFiltersV3 = function(){ adminMonitorStateV3.logQuery=''; renderAdminMonitorBodyV3(); };
+
+  window.openAdminMonitor = function(){
+    const adminCheckFn = window.isAdminUserV2 || window.isAdminUser;
+    if (!window.currentUser || !(typeof adminCheckFn === 'function' ? adminCheckFn(window.currentUser) : false)) {
+      if (typeof window.showToast === 'function') window.showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      return;
+    }
+    if (typeof window.showModal === 'function') {
+      window.showModal('Panel Pemantauan Admin', getAdminMonitorHtmlV3(), { modalClass: 'modal-fullscreen', bodyClass: 'custom-scrollbar' });
+    }
+  };
+
+  const prevResolveReportV3 = window.resolveReportV2;
+  if (typeof prevResolveReportV3 === 'function') {
+    window.resolveReportV2 = async function(reportId){
+      const before = Array.isArray(window.allData) ? window.allData.find(item => item.type === 'report' && item.__firebaseId === reportId) : null;
+      const prevStatus = before?.status;
+      await prevResolveReportV3.apply(this, arguments);
+      const after = Array.isArray(window.allData) ? window.allData.find(item => item.type === 'report' && item.__firebaseId === reportId) : null;
+      if (prevStatus !== 'resolved' && after?.status === 'resolved') {
+        await saveAdminLogV3('Selesaikan aduan', 'report', after.category || reportId, `Pelapor: ${after.reporterEmail || '-'} • Sasaran: ${after.relatedUserEmail || after.relatedProductName || after.reportTargetType || '-'}`);
+        renderAdminMonitorBodyV3();
+      }
+    };
+  }
+
+  const prevToggleSuspendV3 = window.toggleSuspendUserV2;
+  if (typeof prevToggleSuspendV3 === 'function') {
+    window.toggleSuspendUserV2 = async function(email){
+      const getUserFn = window.getUserByEmailV2 || window.getUserByEmail;
+      const before = typeof getUserFn === 'function' ? getUserFn(email) : null;
+      const prevState = !!before?.isSuspended;
+      await prevToggleSuspendV3.apply(this, arguments);
+      const after = typeof getUserFn === 'function' ? getUserFn(email) : null;
+      const nextState = !!after?.isSuspended;
+      if (prevState !== nextState) {
+        await saveAdminLogV3(nextState ? 'Gantung pengguna' : 'Aktifkan pengguna', 'user', email, `Nama pengguna: ${after?.name || before?.name || '-'}`);
+        renderAdminMonitorBodyV3();
+      }
+    };
+  }
+
+  const prevDeleteProductAdminV3 = window.deleteProductByAdminV2;
+  if (typeof prevDeleteProductAdminV3 === 'function') {
+    window.deleteProductByAdminV2 = async function(productId){
+      const getProductFn = window.getProductByIdV2 || window.getProductByIdSafe || window.getProductById;
+      const before = typeof getProductFn === 'function' ? getProductFn(productId) : null;
+      await prevDeleteProductAdminV3.apply(this, arguments);
+      const after = typeof getProductFn === 'function' ? getProductFn(productId) : null;
+      if (before && !after) {
+        await saveAdminLogV3('Padam produk', 'product', before.productName || productId, `Penjual: ${before.sellerId || before.sellerName || '-'}`);
+        renderAdminMonitorBodyV3();
+      }
+    };
+  }
+
+  function ensureSellerEnhancementsV3(){
+    const productGrid = document.getElementById('seller-products');
+    if (!productGrid) return;
+    const productSection = productGrid.parentElement;
+    if (!productSection || document.getElementById('seller-insights-v3')) return;
+    const block = document.createElement('div');
+    block.id = 'seller-insights-v3';
+    block.className = 'space-y-6 mb-6';
+    block.innerHTML = `
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Menunggu</p><p id="seller-pending-count-v3" class="text-2xl font-bold mt-2">0</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Selesai</p><p id="seller-completed-count-v3" class="text-2xl font-bold mt-2">0</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Tempahan Dibatalkan</p><p id="seller-cancelled-count-v3" class="text-2xl font-bold mt-2">0</p></div>
+        <div class="sop-mini-card"><p class="text-sm text-navy-500 dark:text-navy-300">Jualan Berjaya</p><p id="seller-revenue-v3" class="text-2xl font-bold mt-2">RM 0.00</p></div>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
+          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Prestasi Produk</h2><span id="seller-performance-badge-v3" class="sop-data-pill">0 produk</span></div>
+          <div id="seller-performance-v3" class="p-4 space-y-3"></div>
+        </div>
+        <div class="bg-white dark:bg-navy-800 rounded-2xl shadow-lg overflow-hidden">
+          <div class="p-4 bg-navy-100 dark:bg-navy-700 flex items-center justify-between gap-3"><h2 class="font-semibold">Aktiviti Terkini</h2><span class="sop-data-pill">Ringkas</span></div>
+          <div id="seller-activity-v3" class="p-4 space-y-3"></div>
+        </div>
+      </div>
+    `;
+    productSection.parentElement.insertBefore(block, productSection);
+  }
+
+  function buildSellerActivityV3(myProducts, myOffers){
+    const activities = [];
+    myProducts.forEach(product => {
+      if (product.createdAt) activities.push({
+        when: product.createdAt,
+        title: 'Produk diterbitkan',
+        detail: `${product.productName || 'Produk'} berjaya dimuat naik.`
+      });
+    });
+    myOffers.forEach(offer => {
+      const productNames = (offer.items || []).filter(item => normV3(item.sellerId) === normV3(window.currentUser?.email)).map(item => item.productName).filter(Boolean).join(', ') || offer.offerId || 'Tempahan';
+      const statusLabel = ({ pending:'Tempahan baharu', accepted:'Tempahan diterima', rejected:'Tempahan ditolak', cancelled:'Tempahan dibatalkan', completed:'Tempahan selesai' })[offer.offerStatus] || 'Kemaskini tempahan';
+      const statusTime = offer.completedAt || offer.cancelledAt || offer.rejectedAt || offer.acceptedAt || offer.createdAt;
+      activities.push({ when: statusTime, title: statusLabel, detail: `${productNames} • Pembeli: ${offer.buyerName || offer.buyerEmail || '-'}` });
+    });
+    return activities.sort((a,b) => new Date(b.when || 0) - new Date(a.when || 0)).slice(0, 8);
+  }
+
+  function renderSellerEnhancementsV3(){
+    if (!window.currentUser) return;
+    ensureSellerEnhancementsV3();
+    const myProducts = getProductsSafeV3().filter(product => normV3(product.sellerId) === normV3(window.currentUser.email));
+    const myOffers = getOffersSafeV3().filter(offer => Array.isArray(offer.items) && offer.items.some(item => normV3(item.sellerId) === normV3(window.currentUser.email)));
+    const pendingCount = myOffers.filter(offer => offer.offerStatus === 'pending').length;
+    const completedOffers = myOffers.filter(offer => offer.offerStatus === 'completed');
+    const cancelledCount = myOffers.filter(offer => ['cancelled','rejected'].includes(offer.offerStatus)).length;
+    const completedCount = completedOffers.length;
+    const revenue = completedOffers.reduce((sum, offer) => {
+      const itemTotal = (offer.items || []).filter(item => normV3(item.sellerId) === normV3(window.currentUser.email)).reduce((sub, item) => sub + (numV3(item.originalPrice) * numV3(item.quantity || 1)), 0);
+      return sum + itemTotal;
+    }, 0);
+
+    const performanceMap = {};
+    myOffers.forEach(offer => {
+      (offer.items || []).filter(item => normV3(item.sellerId) === normV3(window.currentUser.email)).forEach(item => {
+        const key = item.productId || item.productName || 'unknown';
+        if (!performanceMap[key]) performanceMap[key] = { name: item.productName || 'Produk', orders: 0, completed: 0, qty: 0, revenue: 0 };
+        performanceMap[key].orders += 1;
+        performanceMap[key].qty += numV3(item.quantity || 1);
+        if (offer.offerStatus === 'completed') {
+          performanceMap[key].completed += 1;
+          performanceMap[key].revenue += numV3(item.originalPrice) * numV3(item.quantity || 1);
+        }
+      });
+    });
+    const performance = Object.values(performanceMap).sort((a,b) => (b.revenue - a.revenue) || (b.completed - a.completed) || (b.orders - a.orders)).slice(0, 6);
+    const reviewSummary = getSellerReviewSummarySafeV3(window.currentUser.email);
+    document.getElementById('seller-pending-count-v3') && (document.getElementById('seller-pending-count-v3').textContent = pendingCount);
+    document.getElementById('seller-completed-count-v3') && (document.getElementById('seller-completed-count-v3').textContent = completedCount);
+    document.getElementById('seller-cancelled-count-v3') && (document.getElementById('seller-cancelled-count-v3').textContent = cancelledCount);
+    document.getElementById('seller-revenue-v3') && (document.getElementById('seller-revenue-v3').textContent = moneyV3(revenue));
+    const badge = document.getElementById('seller-performance-badge-v3');
+    if (badge) badge.textContent = `${performance.length} produk`;
+    const perfBox = document.getElementById('seller-performance-v3');
+    if (perfBox) {
+      perfBox.innerHTML = performance.length ? performance.map(item => `
+        <div class="sop-list-card">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-semibold truncate">${escV3(item.name)}</p>
+              <p class="text-xs text-navy-500 dark:text-navy-300 mt-1">${item.orders} tempahan • ${item.qty} unit</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="font-semibold text-accent-orange">${moneyV3(item.revenue)}</p>
+              <p class="text-xs text-navy-500 dark:text-navy-300 mt-1">${item.completed} selesai</p>
+            </div>
+          </div>
+        </div>
+      `).join('') : `<div class="sop-section-empty">Belum ada prestasi produk untuk dipaparkan.</div>`;
+    }
+    const activityBox = document.getElementById('seller-activity-v3');
+    if (activityBox) {
+      const activities = buildSellerActivityV3(myProducts, myOffers);
+      activityBox.innerHTML = activities.length ? activities.map(activity => `
+        <div class="sop-list-card">
+          <div class="flex items-start gap-3">
+            <span class="sop-log-dot mt-1" style="background:#f97316"></span>
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold">${escV3(activity.title)}</p>
+              <p class="text-sm text-navy-700 dark:text-navy-100 mt-1 leading-relaxed">${escV3(activity.detail)}</p>
+              <p class="text-xs text-navy-400 mt-2">${fmtV3(activity.when)}</p>
+            </div>
+          </div>
+        </div>
+      `).join('') : `<div class="sop-section-empty">Belum ada aktiviti jualan untuk dipaparkan.</div>`;
+    }
+    const ratingCountEl = document.getElementById('seller-rating-count');
+    const ratingScoreEl = document.getElementById('seller-rating-score');
+    if (ratingScoreEl && reviewSummary.count) ratingScoreEl.textContent = `⭐ ${reviewSummary.average.toFixed(1)}`;
+    if (ratingCountEl) ratingCountEl.textContent = reviewSummary.count ? `${reviewSummary.count} ulasan pengguna` : 'Belum ada ulasan';
+  }
+
+  const prevRenderSellerV3 = window.renderSellerDashboard;
+  window.renderSellerDashboard = function(){
+    const result = typeof prevRenderSellerV3 === 'function' ? prevRenderSellerV3.apply(this, arguments) : undefined;
+    renderSellerEnhancementsV3();
+    return result;
+  };
+
+  const prevNavigateV3 = window.navigateTo;
+  if (typeof prevNavigateV3 === 'function') {
+    window.navigateTo = function(page){
+      const result = prevNavigateV3.apply(this, arguments);
+      if (page === 'seller') setTimeout(renderSellerEnhancementsV3, 30);
+      return result;
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      ensureSellerEnhancementsV3();
+      if (window.currentPage === 'seller') renderSellerEnhancementsV3();
+    }, 120);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const FORCE_ADMIN_EMAILS = [
+    'admin@polinilai.edu.my',
+    'daiyandarwish05@polinilai.edu.my',
+    'daiyandarwish05@gmail.com'
+  ];
+
+  function norm(email){
+    return String(email || '').trim().toLowerCase();
+  }
+
+  function isForcedAdmin(userOrEmail){
+    const email = norm(typeof userOrEmail === 'string' ? userOrEmail : userOrEmail?.email);
+    return !!email && FORCE_ADMIN_EMAILS.includes(email);
+  }
+
+  function getAllDataRef(){
+    try {
+      if (typeof allData !== 'undefined' && Array.isArray(allData)) return allData;
+    } catch (e) {}
+    return Array.isArray(window.allData) ? window.allData : [];
+  }
+
+  function getLiveUserByEmail(email){
+    const target = norm(email);
+    const data = getAllDataRef();
+    if (!target || !Array.isArray(data)) return null;
+    return data.find(item => item && item.type === 'user' && norm(item.email) === target) || null;
+  }
+
+  async function forceAdminInDatabase(){
+    const data = getAllDataRef();
+    if (!Array.isArray(data)) return;
+    for (const email of FORCE_ADMIN_EMAILS){
+      const user = getLiveUserByEmail(email);
+      if (!user) continue;
+      user.role = 'admin';
+      user.isSuspended = false;
+      if (typeof window.updateInFirebase === 'function' && user.__firebaseId && user.__collection === 'users') {
+        try {
+          await window.updateInFirebase('users', user.__firebaseId, {
+            role: 'admin',
+            isSuspended: false,
+            updatedAt: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('Tidak dapat paksa role admin di database:', e);
+        }
+      }
+    }
+  }
+
+  function promoteCurrentUser(){
+    let user = window.currentUser;
+    if (!user) {
+      try {
+        const saved = localStorage.getItem('sop_user');
+        if (saved) user = JSON.parse(saved);
+      } catch (e) {}
+    }
+    if (!user || !user.email) return null;
+
+    const liveUser = getLiveUserByEmail(user.email);
+    const shouldBeAdmin = isForcedAdmin(user) || norm(liveUser?.role) === 'admin';
+    const merged = {
+      ...(liveUser || {}),
+      ...user,
+      email: norm(user.email),
+      name: user.name || liveUser?.name || 'Admin',
+      role: shouldBeAdmin ? 'admin' : (liveUser?.role || user.role || 'user'),
+      isSuspended: shouldBeAdmin ? false : !!(liveUser?.isSuspended || user.isSuspended)
+    };
+
+    window.currentUser = merged;
+    try {
+      localStorage.setItem('sop_user', JSON.stringify(merged));
+    } catch (e) {}
+    return merged;
+  }
+
+  const prevIsAdminUser = window.isAdminUser;
+  window.isAdminUser = function(userOrEmail){
+    if (isForcedAdmin(userOrEmail)) return true;
+    if (typeof prevIsAdminUser === 'function') {
+      try { if (prevIsAdminUser(userOrEmail)) return true; } catch (e) {}
+    }
+    const email = norm(typeof userOrEmail === 'string' ? userOrEmail : userOrEmail?.email);
+    const liveUser = getLiveUserByEmail(email);
+    return norm(liveUser?.role) === 'admin';
+  };
+
+  const prevIsAdminUserV2 = window.isAdminUserV2;
+  window.isAdminUserV2 = function(userOrEmail){
+    if (isForcedAdmin(userOrEmail)) return true;
+    if (typeof prevIsAdminUserV2 === 'function') {
+      try { if (prevIsAdminUserV2(userOrEmail)) return true; } catch (e) {}
+    }
+    return window.isAdminUser(userOrEmail);
+  };
+
+  const prevOpenAdminMonitor = window.openAdminMonitor;
+  window.openAdminMonitor = function(){
+    const promoted = promoteCurrentUser();
+    const isAdmin = !!promoted && (window.isAdminUserV2(promoted) || window.isAdminUser(promoted));
+    if (!isAdmin) {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Akses panel admin hanya untuk pentadbir.', 'warning');
+      }
+      return;
+    }
+    if (typeof prevOpenAdminMonitor === 'function') {
+      return prevOpenAdminMonitor.apply(this, arguments);
+    }
+  };
+
+  const prevUpdateAuthNav = window.updateAuthNav;
+  window.updateAuthNav = function(){
+    promoteCurrentUser();
+    return typeof prevUpdateAuthNav === 'function' ? prevUpdateAuthNav.apply(this, arguments) : undefined;
+  };
+
+  async function bootForceAdmin(){
+    promoteCurrentUser();
+    await forceAdminInDatabase();
+    promoteCurrentUser();
+    if (typeof window.updateAuthNav === 'function') window.updateAuthNav();
+  }
+
+  window.forceAdminRefresh = bootForceAdmin;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(bootForceAdmin, 100);
+    setTimeout(bootForceAdmin, 800);
+    setTimeout(bootForceAdmin, 1800);
+  });
+
+  window.addEventListener('load', function(){
+    setTimeout(bootForceAdmin, 300);
   });
 })();
 </script>
